@@ -1,0 +1,11 @@
+Django==1.11.2
+django-environ==0.4.3
+psycopg2==2.7.1
+
+flake8==3.3.0
+flake8-blind-except==0.1.1
+flake8-debugger==1.4.0
+flake8-import-order==0.12
+flake8-print==2.0.2
+flake8-quotes==0.11.0
+isort==4.2.15
