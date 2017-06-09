@@ -158,7 +158,7 @@ SAML_CONFIG = {
     'xmlsec_binary': shutil.which('xmlsec1'),
 
     # note not a real url, just a global identifier per SAML recommendations
-    'entityid': 'https://sso.datahub.service.trade.gov.uk/sp',
+    'entityid': 'https://sso.staff.service.trade.gov.uk/sp',
 
     # directory with attribute mapping
     'attribute_map_dir': os.path.join(SAML_CONFIG_DIR, 'attribute_maps'),
