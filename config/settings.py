@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'djangosaml2',
+    'oauth2_provider',
 
     'sso.user',
     'sso.samlauth'
