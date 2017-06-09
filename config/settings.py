@@ -9,7 +9,9 @@ import saml2.saml
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Set up .env
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+ENV_FILE = os.path.join(BASE_DIR, '.env')
+if os.path.exists(ENV_FILE):
+    environ.Env.read_env(ENV_FILE)
 env = environ.Env()
 
 
@@ -17,7 +19,7 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG', default=False)
 ENV_NAME = env('ENV_NAME', default='test')  # 'test', 'staging' or 'prod' (maches config/saml/x/)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env('ALLOWED_HOSTS', default='localhost').split(',')
 
 
 # Application definition

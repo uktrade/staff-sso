@@ -13,3 +13,5 @@ flake8-import-order==0.12
 flake8-print==2.0.2
 flake8-quotes==0.11.0
 isort==4.2.15
+gunicorn==19.7.1
+whitenoise==3.3.0
