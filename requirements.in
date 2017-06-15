@@ -1,0 +1,17 @@
+Django
+django-environ
+psycopg2
+
+djangosaml2
+
+django-oauth-toolkit
+
+flake8
+flake8-blind-except
+flake8-debugger
+flake8-import-order
+flake8-print
+flake8-quotes
+isort
+gunicorn
+whitenoise
