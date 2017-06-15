@@ -9,7 +9,9 @@ import saml2.saml
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Set up .env
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+ENV_FILE = os.path.join(BASE_DIR, '.env')
+if os.path.exists(ENV_FILE):
+    environ.Env.read_env(ENV_FILE)
 env = environ.Env()
 
 
@@ -17,7 +19,7 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG', default=False)
 ENV_NAME = env('ENV_NAME', default='test')  # 'test', 'staging' or 'prod' (maches config/saml/x/)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env('ALLOWED_HOSTS', default='localhost').split(',')
 
 
 # Application definition
@@ -107,6 +109,7 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
 
 # Auth / SAML
@@ -156,7 +159,7 @@ SAML_CONFIG = {
     'xmlsec_binary': shutil.which('xmlsec1'),
 
     # note not a real url, just a global identifier per SAML recommendations
-    'entityid': 'https://sso.datahub.service.trade.gov.uk/sp',
+    'entityid': 'https://sso.staff.service.trade.gov.uk/sp',
 
     # directory with attribute mapping
     'attribute_map_dir': os.path.join(SAML_CONFIG_DIR, 'attribute_maps'),
