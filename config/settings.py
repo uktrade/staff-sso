@@ -12,7 +12,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ENV_FILE = os.path.join(BASE_DIR, '.env')
 if os.path.exists(ENV_FILE):
     environ.Env.read_env(ENV_FILE)
-env = environ.Env()
+env = environ.Env(
+    DEBUG=(bool, False),
+)
 
 
 SECRET_KEY = env('SECRET_KEY')

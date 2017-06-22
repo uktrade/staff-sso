@@ -137,7 +137,8 @@ def login(request,
             try:
                 session_id, result = client.prepare_for_authenticate(
                     entityid=selected_idp, relay_state=came_from,
-                    binding=binding)
+                    binding=binding,
+                    sign_alg=SIG_RSA_SHA256)
             except TypeError as e:
                 logger.error('Unable to know which IdP to use')
                 return HttpResponse(text_type(e))
@@ -152,7 +153,8 @@ def login(request,
                 return HttpResponse(text_type(e))
             session_id, request_xml = client.create_authn_request(
                 location,
-                binding=binding)
+                binding=binding,
+                sign_alg=SIG_RSA_SHA256)
             http_response = render(request, post_binding_form_template, {
                 'target_url': location,
                 'params': {
