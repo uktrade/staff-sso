@@ -15,3 +15,11 @@ flake8-quotes
 isort
 gunicorn
 whitenoise
+
+pytest
+pytest-django
+pytest-sugar
+pytest-mock
+pytest-env
+pytest-cov
+freezegun

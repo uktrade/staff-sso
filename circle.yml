@@ -1,0 +1,13 @@
+machine:
+  python:
+    version: 3.6.1
+  environment:
+    DATABASE_URL: postgres://ubuntu:@127.0.0.1:5432/circle_test
+
+dependencies:
+  pre:
+    - sudo apt-get update; sudo apt-get install xmlsec1
+
+test:
+  override:
+     - py.test

@@ -16,7 +16,6 @@ env = environ.Env(
     DEBUG=(bool, False),
 )
 
-
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG', default=False)
 ENV_NAME = env('ENV_NAME', default='test')  # 'test', 'staging' or 'prod' (maches config/saml/x/)
@@ -152,6 +151,7 @@ SAML_PUBLIC_CERT_PATH = os.path.join(SAML_CONFIG_DIR, 'sp.public.crt')
 
 # domain the metadata will refer to
 SAML_REDIRECT_RETURN_HOST = env('SAML_REDIRECT_RETURN_HOST')
+SAML_ACS_URL = SAML_REDIRECT_RETURN_HOST + '/saml2/acs/'
 
 SAML_CONFIG = {
     # full path to the xmlsec1 binary, latter is where it ends up in Heroku
@@ -174,7 +174,7 @@ SAML_CONFIG = {
             'name': 'DIT SP',
             'endpoints': {
                 'assertion_consumer_service': [
-                    (SAML_REDIRECT_RETURN_HOST + '/saml2/acs/', saml2.BINDING_HTTP_POST),
+                    (SAML_ACS_URL, saml2.BINDING_HTTP_POST),
                 ],
                 'single_logout_service': [
                     (SAML_REDIRECT_RETURN_HOST + '/saml2/ls/post/', saml2.BINDING_HTTP_POST),
