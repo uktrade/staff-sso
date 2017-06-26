@@ -106,7 +106,7 @@ class TestSAMLLogin:
         assert f'AssertionConsumerServiceURL="{settings.SAML_ACS_URL}"' in saml_request
 
     @freeze_time('2017-06-22 15:50:00.000000+00:00')
-    def test_saml_login_generates_oauth_code(self, client, mocker):
+    def test_generates_oauth_code_after_logging_in(self, client, mocker):
         """
         Test that after successfully logging into the IdP, the app redirects to the oauth authorize url
         which generates the auth code.
@@ -147,7 +147,7 @@ class TestSAMLLogin:
         assert 'code' in authorize_qs
 
     @freeze_time('2017-06-22 15:50:00.000000+00:00')
-    def test_saml_login_fails_if_signature_invalid(self, client, mocker):
+    def test_cannot_login_if_signature_invalid(self, client, mocker):
         """
         Test that if the saml signature is invalid, the login fails.
         """
@@ -166,6 +166,29 @@ class TestSAMLLogin:
 
         with pytest.raises(SignatureError):
             client.post(SAML_ACS_URL, data)
+
+    @freeze_time('2017-06-22 15:50:00.000000+00:00')
+    def test_cannot_login_if_user_is_not_active(self, client, mocker):
+        """
+        Test that if user.is_active = False, the user cannot log in.
+        """
+        User.objects.create(email='user1@example.com', is_active=False)
+        application, authorize_params = create_oauth_application()
+        response = client.get(OAUTH_AUTHORIZE_URL, data=authorize_params)
+
+        data = {
+            'SAMLResponse': [base64.b64encode(get_saml_response())],
+            'RelayState': f'{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}'
+        }
+
+        MockOutstandingQueriesCache = mocker.patch('djangosaml2.views.OutstandingQueriesCache')
+        MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
+
+        MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
+        MockCryptoBackendXmlSec1().validate_signature.return_value = True
+
+        response = client.post(SAML_ACS_URL, data)
+        assert response.status_code == 403
 
 
 class TestOAuthToken:

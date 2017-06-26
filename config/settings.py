@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     'oauth2_provider',
 
     'sso.user',
-    'sso.samlauth'
+    'sso.samlauth',
 ]
 
 MIDDLEWARE = [
@@ -123,7 +123,7 @@ SAML_USER_MODEL = 'user.user'
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'djangosaml2.backends.Saml2Backend',
+    'sso.samlauth.backends.Saml2Backend',
 )
 
 SAML_DJANGO_USER_MAIN_ATTRIBUTE = 'email'
