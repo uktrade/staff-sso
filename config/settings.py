@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'djangosaml2',
     'oauth2_provider',
+    'rest_framework',
 
     'sso.user',
     'sso.samlauth'
@@ -206,4 +207,16 @@ SAML_CONFIG = {
 
 SAML_ATTRIBUTE_MAPPING = {
     'email': ('email', ),
+}
+
+
+# DRF
+REST_FRAMEWORK = {
+    'UNAUTHENTICATED_USER': None,
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication'
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated'
+    ],
 }

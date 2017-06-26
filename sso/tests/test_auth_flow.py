@@ -8,10 +8,12 @@ import pytest
 from django.conf import settings
 from django.urls import reverse_lazy
 from freezegun import freeze_time
-from oauth2_provider.models import Application
 from saml2.sigver import SignatureError
 
 from sso.user.models import User
+
+from .factories.oauth import ApplicationFactory
+from .factories.user import UserFactory
 
 
 @lru_cache()
@@ -48,12 +50,8 @@ def create_oauth_application():
         oauth params as dict for the authorize request
     )
     """
-    application, _ = Application.objects.get_or_create(
-        client_type=Application.CLIENT_CONFIDENTIAL,
-        authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
-        skip_authorization=True,
-        redirect_uris=OAUTH_REDIRECT_URL,
-        name='Test oauth app'
+    application = ApplicationFactory(
+        redirect_uris=OAUTH_REDIRECT_URL
     )
 
     oauth_params = {
@@ -170,7 +168,7 @@ class TestSAMLLogin:
 
 class TestOAuthToken:
     def _log_user_in(self, client):
-        User.objects.create(email='user1@example.com')
+        UserFactory(email='user1@example.com')
         session_info = {
             'ava': {
                 'email': ['user1@example.com']
