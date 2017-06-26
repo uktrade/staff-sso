@@ -13,25 +13,16 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(
         _('email'), unique=True
     )
-
-    is_staff = models.BooleanField(
-        _('staff status'),
-        default=False,
-        help_text=_(
-            'Designates whether the user can log into this admin site.'
-        ),
-    )
-    is_active = models.BooleanField(
-        _('active'),
-        default=True,
-        help_text=_(
-            'Designates whether this user should be treated as active. '
-            'Unselect this instead of deleting accounts.'
-        ),
-    )
     date_joined = models.DateTimeField(
         _('date joined'),
         default=timezone.now,
+    )
+    is_superuser = models.BooleanField(
+        _('superuser status'),
+        default=False,
+        help_text=_(
+            'Designates that this user can log into the admin area and assign users to groups.'
+        ),
     )
 
     objects = UserManager()
@@ -41,6 +32,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+    @property
+    def is_staff(self):
+        return self.is_superuser
 
     def get_full_name(self):
         # django method that must be implemented
