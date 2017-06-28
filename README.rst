@@ -25,11 +25,10 @@ Installation
 
     virtualenv --python=python3 env
     source env/bin/activate
-    pip install -U pip pip-tools
 
 #. Install the dependencies::
 
-    pip-sync
+    pip install -r requirements/dev.txt
 
 #. Install `xmlsec1 <https://www.aleksey.com/xmlsec/>`_, its installation is platform specific
 
