@@ -1,0 +1,9 @@
+Django
+django-environ
+psycopg2
+djangosaml2
+django-oauth-toolkit
+djangorestframework
+
+gunicorn
+whitenoise
