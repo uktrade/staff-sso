@@ -15,7 +15,10 @@ defusedxml==0.4.1         # via djangosaml2
 django-environ==0.4.3
 django-oauth-toolkit==1.0.0
 django==1.11.2
+djangorestframework==3.6.3
 djangosaml2==0.16.0
+factory-boy==2.8.1
+faker==0.7.17             # via factory-boy
 flake8-blind-except==0.1.1
 flake8-debugger==1.4.0
 flake8-import-order==0.12
@@ -44,11 +47,11 @@ pytest-env==0.6.2
 pytest-mock==1.6.0
 pytest-sugar==0.8.0
 pytest==3.1.2
-python-dateutil==2.6.0    # via freezegun, pysaml2
+python-dateutil==2.6.0    # via faker, freezegun, pysaml2
 pytz==2017.2              # via django, pysaml2
 repoze.who==2.3           # via pysaml2
 requests==2.18.1          # via django-oauth-toolkit, pysaml2
-six==1.10.0               # via cryptography, django-environ, freezegun, paste, pyopenssl, pysaml2, python-dateutil
+six==1.10.0               # via cryptography, django-environ, faker, freezegun, paste, pyopenssl, pysaml2, python-dateutil
 termcolor==1.1.0          # via pytest-sugar
 urllib3==1.21.1           # via requests
 webob==1.7.2              # via repoze.who
