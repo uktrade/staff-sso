@@ -9,4 +9,5 @@ urlpatterns = [
     url(r'^logout/$', djangosaml2_views.logout, name='saml2_logout'),
     url(r'^ls/post/$', djangosaml2_views.logout_service_post, name='saml2_ls_post'),
     url(r'^metadata/$', djangosaml2_views.metadata, name='saml2_metadata'),
+    url(r'^logged-in/$', views.loggedin, name='saml2_loggedin'),
 ]

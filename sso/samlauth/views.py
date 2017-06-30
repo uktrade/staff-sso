@@ -2,6 +2,7 @@ import base64
 import logging
 
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.encoding import force_bytes
@@ -170,3 +171,11 @@ def login(request,
     oq_cache = OutstandingQueriesCache(request.session)
     oq_cache.set(session_id, came_from)
     return http_response
+
+
+@login_required
+def loggedin(request):
+    """
+    Fallback view after logging in if no redirect url is specified.
+    """
+    return HttpResponse('You are logged in')

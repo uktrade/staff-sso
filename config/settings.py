@@ -4,6 +4,7 @@ import shutil
 import environ
 import saml2
 import saml2.saml
+from django.urls import reverse_lazy
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -118,6 +119,7 @@ STATIC_URL = '/static/'
 AUTH_USER_MODEL = 'user.user'
 LOGIN_URL = 'saml2_login'
 LOGOUT_REDIRECT_URL = 'saml2_login'
+LOGIN_REDIRECT_URL = reverse_lazy('saml2_loggedin')
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 SAML_USER_MODEL = 'user.user'
