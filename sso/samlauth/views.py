@@ -3,16 +3,21 @@ import logging
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import (
+    HttpResponse, HttpResponseBadRequest, HttpResponseRedirect,
+    HttpResponseServerError
+)
 from django.shortcuts import render
+from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import is_safe_url
 from django.utils.six import text_type
-from djangosaml2.cache import OutstandingQueriesCache
+from djangosaml2.cache import IdentityCache, OutstandingQueriesCache, StateCache
 from djangosaml2.conf import get_config
 from djangosaml2.utils import (
     available_idps, get_idp_sso_supported_bindings, get_location
 )
+from djangosaml2.views import _get_subject_id, finish_logout
 from saml2 import BINDING_HTTP_POST, BINDING_HTTP_REDIRECT
 from saml2.client import Saml2Client
 from saml2.s_utils import UnsupportedBinding
@@ -174,8 +179,68 @@ def login(request,
 
 
 @login_required
-def loggedin(request):
+def logged_in(request):
     """
     Fallback view after logging in if no redirect url is specified.
     """
     return HttpResponse('You are logged in')
+
+
+@login_required
+def logout(request, config_loader_path=None):
+    """SAML Logout Request initiator
+
+    This view initiates the SAML2 Logout request
+    using the pysaml2 library to create the LogoutRequest.
+    """
+    logger.debug('Logout process started')
+    state = StateCache(request.session)
+    conf = get_config(config_loader_path, request)
+
+    client = Saml2Client(conf, state_cache=state,
+                         identity_cache=IdentityCache(request.session))
+    subject_id = _get_subject_id(request.session)
+    if subject_id is None:
+        logger.warning(
+            'The session does not contains the subject id for user %s',
+            request.user)
+
+    result = client.global_logout(subject_id, sign=True, sign_alg=SIG_RSA_SHA256)
+
+    state.sync()
+
+    if not result:
+        logger.error('Looks like the user %s is not logged in any IdP/AA', subject_id)
+        return HttpResponseBadRequest('You are not logged in any IdP/AA')
+
+    if len(result) > 1:
+        logger.error('Sorry, I do not know how to logout from several sources. I will logout just from the first one')
+
+    for entityid, logout_info in result.items():
+        if isinstance(logout_info, tuple):
+            binding, http_info = logout_info
+            if binding == BINDING_HTTP_POST:
+                logger.debug('Returning form to the IdP to continue the logout process')
+                body = ''.join(http_info['data'])
+                return HttpResponse(body)
+            elif binding == BINDING_HTTP_REDIRECT:
+                logger.debug('Redirecting to the IdP to continue the logout process')
+                return HttpResponseRedirect(get_location(http_info))
+            else:
+                logger.error('Unknown binding: %s', binding)
+                return HttpResponseServerError('Failed to log out')
+        else:
+            # We must have had a soap logout
+            return finish_logout(request, logout_info)
+
+    logger.error('Could not logout because there only the HTTP_REDIRECT is supported')
+    return HttpResponseServerError('Logout Binding not supported')
+
+
+def logged_out(request):
+    """
+    Fallback view after logging out if no redirect url is specified.
+    """
+    if request.user.is_authenticated():
+        return HttpResponseRedirect(reverse('saml2_logged_in'))
+    return HttpResponse('You have been logged out')
