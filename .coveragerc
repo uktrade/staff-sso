@@ -1,0 +1,6 @@
+[run]
+omit = */apps.py
+include = sso/*
+
+[report]
+show_missing = True
