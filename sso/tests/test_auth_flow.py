@@ -6,7 +6,7 @@ from urllib.parse import parse_qs, urlencode
 
 import pytest
 from django.conf import settings
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from freezegun import freeze_time
 from saml2.sigver import SignatureError
 
@@ -143,6 +143,26 @@ class TestSAMLLogin:
 
         authorize_qs = parse_qs(response['location'].split('?')[1])
         assert 'code' in authorize_qs
+
+    @freeze_time('2017-06-22 15:50:00.000000+00:00')
+    def test_saml_login_with_default_redirect_url(self, client, mocker):
+        """
+        Test that if no redirect url is specified, it redirects to the default
+        saml2_loggedin view.
+        """
+        data = {
+            'SAMLResponse': [base64.b64encode(get_saml_response())],
+        }
+
+        MockOutstandingQueriesCache = mocker.patch('djangosaml2.views.OutstandingQueriesCache')
+        MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
+
+        MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
+        MockCryptoBackendXmlSec1().validate_signature.return_value = True
+
+        response = client.post(SAML_ACS_URL, data)
+        assert response.status_code == 302
+        assert response['location'] == reverse('saml2_loggedin')
 
     @freeze_time('2017-06-22 15:50:00.000000+00:00')
     def test_saml_login_fails_if_signature_invalid(self, client, mocker):
