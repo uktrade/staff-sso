@@ -29,7 +29,7 @@ Installation
 
 #. Install the dependencies::
 
-    pip-sync
+    pip-sync requirements-dev.txt
 
 #. Install `xmlsec1 <https://www.aleksey.com/xmlsec/>`_, its installation is platform specific
 
@@ -70,3 +70,21 @@ Installation
     -e SIMPLESAMLPHP_SP_ENTITY_ID=https://sso.staff.service.trade.gov.uk/sp \
     -e SIMPLESAMLPHP_SECRET_SALT=secret-salt \
     tsi
+
+
+Requirements
+------------
+
+If you need to add/change a production library::
+
+    add/change the lib in requirements.in
+    pip-compile requirements.in
+    pip-compile -o requirements-dev.txt requirements-dev.in
+    pip-sync requirements-dev.txt
+
+
+If we have to add/change a dev library::
+
+    add/change the lib in requirements-dev.in
+    pip-compile -o requirements-dev.txt requirements-dev.in
+    pip-sync requirements-dev.txt

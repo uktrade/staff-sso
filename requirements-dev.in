@@ -1,0 +1,19 @@
+-r requirements.txt
+
+pytest
+pytest-django
+pytest-sugar
+pytest-mock
+pytest-env
+pytest-cov
+factory-boy
+freezegun
+
+flake8
+flake8-blind-except
+flake8-debugger
+flake8-import-order
+flake8-print
+flake8-quotes
+
+isort
