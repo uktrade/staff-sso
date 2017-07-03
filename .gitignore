@@ -5,3 +5,6 @@ config/saml/prod/*.key
 config/saml/prod/*.crt
 .cache/
 .coverage
+__py_cache__/
+*.py[cod]
+.idea/
