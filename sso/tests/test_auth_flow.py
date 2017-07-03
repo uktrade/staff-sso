@@ -2,7 +2,7 @@ import base64
 import os
 import re
 from functools import lru_cache
-from urllib.parse import parse_qs, urlencode
+from urllib.parse import parse_qs, quote, urlencode
 
 import pytest
 from django.conf import settings
@@ -17,20 +17,24 @@ from .factories.user import UserFactory
 
 
 @lru_cache()
-def get_saml_response():
+def get_saml_response(action='login'):
     file_path = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
         'data',
-        'saml_response.xml'
+        f'saml_{action}_response.xml'
     )
     with open(file_path, 'rb') as f:
         return f.read()
 
 
 SAML_SSO_SERVICE = 'http://localhost:8080/simplesaml/saml2/idp/SSOService.php'
+SAML_LOGOUT_SERVICE = 'http://localhost:8080/simplesaml/saml2/idp/SingleLogoutService.php'
+SAML_METADATA_URL = 'http://localhost:8080/simplesaml/saml2/idp/metadata.php'
 
 SAML_LOGIN_URL = reverse_lazy('saml2_login')
+SAML_LOGOUT_URL = reverse_lazy('saml2_logout')
 SAML_ACS_URL = reverse_lazy('saml2_acs')
+SAML_LS_POST_URL = reverse_lazy('saml2_ls_post')  # for logout
 
 OAUTH_AUTHORIZE_URL = reverse_lazy('oauth2_provider:authorize')
 OAUTH_REDIRECT_URL = 'http://localhost/authorized'
@@ -60,6 +64,23 @@ def create_oauth_application():
         'client_id': application.client_id
     }
     return application, oauth_params
+
+
+def log_user_in(client):
+    UserFactory(email='user1@example.com')
+    session_info = {
+        'ava': {
+            'email': ['user1@example.com']
+        },
+        'name_id': 'NameId',
+        'came_from': '/accounts/profile/',
+        'issuer': SAML_SSO_SERVICE,
+    }
+    logged_in = client.login(
+        session_info=session_info,
+        attribute_mapping={'email': ('email',)}
+    )
+    assert logged_in
 
 
 class TestOAuthAuthorize:
@@ -113,7 +134,7 @@ class TestSAMLLogin:
         response = client.get(OAUTH_AUTHORIZE_URL, data=authorize_params)
 
         data = {
-            'SAMLResponse': [base64.b64encode(get_saml_response())],
+            'SAMLResponse': [base64.b64encode(get_saml_response(action='login'))],
             'RelayState': f'{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}'
         }
 
@@ -148,10 +169,10 @@ class TestSAMLLogin:
     def test_saml_login_with_default_redirect_url(self, client, mocker):
         """
         Test that if no redirect url is specified, it redirects to the default
-        saml2_loggedin view.
+        saml2_logged_in view.
         """
         data = {
-            'SAMLResponse': [base64.b64encode(get_saml_response())],
+            'SAMLResponse': [base64.b64encode(get_saml_response(action='login'))],
         }
 
         MockOutstandingQueriesCache = mocker.patch('djangosaml2.views.OutstandingQueriesCache')
@@ -162,7 +183,7 @@ class TestSAMLLogin:
 
         response = client.post(SAML_ACS_URL, data)
         assert response.status_code == 302
-        assert response['location'] == reverse('saml2_loggedin')
+        assert response['location'] == reverse('saml2_logged_in')
 
     @freeze_time('2017-06-22 15:50:00.000000+00:00')
     def test_saml_login_fails_if_signature_invalid(self, client, mocker):
@@ -172,7 +193,7 @@ class TestSAMLLogin:
         application, authorize_params = create_oauth_application()
 
         data = {
-            'SAMLResponse': [base64.b64encode(get_saml_response())],
+            'SAMLResponse': [base64.b64encode(get_saml_response(action='login'))],
             'RelayState': f'{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}'
         }
 
@@ -187,22 +208,6 @@ class TestSAMLLogin:
 
 
 class TestOAuthToken:
-    def _log_user_in(self, client):
-        UserFactory(email='user1@example.com')
-        session_info = {
-            'ava': {
-                'email': ['user1@example.com']
-            },
-            'name_id': 'NameId',
-            'came_from': '/accounts/profile/',
-            'issuer': SAML_SSO_SERVICE,
-        }
-        logged_in = client.login(
-            session_info=session_info,
-            attribute_mapping={'email': ('email',)}
-        )
-        assert logged_in
-
     def _obtain_auth_code(self, client, authorize_params):
         authorize_url = f'{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}'
 
@@ -219,7 +224,7 @@ class TestOAuthToken:
         """
         application, authorize_params = create_oauth_application()
 
-        self._log_user_in(client)
+        log_user_in(client)
         auth_code = self._obtain_auth_code(client, authorize_params)
 
         # exchange for token
@@ -245,7 +250,7 @@ class TestOAuthToken:
         """
         application, authorize_params = create_oauth_application()
 
-        self._log_user_in(client)
+        log_user_in(client)
         self._obtain_auth_code(client, authorize_params)
 
         # exchange for token
@@ -271,7 +276,7 @@ class TestOAuthToken:
         """
         application, authorize_params = create_oauth_application()
 
-        self._log_user_in(client)
+        log_user_in(client)
         auth_code = self._obtain_auth_code(client, authorize_params)
 
         # exchange for token
@@ -297,7 +302,7 @@ class TestOAuthToken:
         """
         application, authorize_params = create_oauth_application()
 
-        self._log_user_in(client)
+        log_user_in(client)
         auth_code = self._obtain_auth_code(client, authorize_params)
 
         # exchange for token
@@ -316,3 +321,81 @@ class TestOAuthToken:
         assert response.json() == {
             'error': 'invalid_client'
         }
+
+
+class TestSAMLLogout:
+    def test_valid_saml_logout_form(self, client):
+        """
+        Test that the saml logout form includes the appropriate hidden values.
+        """
+        log_user_in(client)
+
+        session_id = '_e257887eff90fde0f9ebda09c2d0825683969096d5'
+        subject_id = '1={entity_id},2={name_id_format},4={ref}'.format(
+            entity_id=quote(settings.SAML_CONFIG['entityid']),
+            name_id_format=quote(settings.SAML_CONFIG['service']['sp']['name_id_format']),
+            ref='c1e915bbc0586c0483a8f5654ed25d7afcdc315f'
+        )
+
+        s = client.session
+        s['_saml2_identities'] = {
+            subject_id: {
+                SAML_METADATA_URL: [
+                    None,
+                    {
+                        'session_index': session_id
+                    }
+                ]
+            }
+        }
+        s['_saml2_subject_id'] = subject_id
+        s.save()
+
+        response = client.get(SAML_LOGOUT_URL)
+
+        # check form
+        content = response.content.decode('utf-8')
+        assert response.status_code == 200
+        assert f'<form method="post" action="{SAML_LOGOUT_SERVICE}">' in content
+        assert '<input type="hidden" name="SAMLRequest"' in content
+        assert '<input type="hidden" name="RelayState"' in content
+        assert '<input type="submit" value="Submit" />' in content
+
+        # check saml request
+        saml_request_search = re.search('<input type="hidden" name="SAMLRequest" value="(.*)" />', content)
+        saml_request = base64.b64decode(saml_request_search.group(1)).decode('utf-8')
+
+        assert '<ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>' in saml_request
+        assert f'Destination="{SAML_LOGOUT_SERVICE}"' in saml_request
+        assert f'<samlp:SessionIndex>{session_id}</samlp:SessionIndex>' in saml_request
+
+    @freeze_time('2017-06-30 16:24:00.000000+00:00')
+    def test_saml_logout_with_default_redirect_url(self, client, mocker):
+        """
+        Test that if no redirect url is specified, it redirects to the default
+        saml2_logged_out view.
+        """
+        log_user_in(client)
+
+        data = {
+            'SAMLResponse': [base64.b64encode(get_saml_response(action='logout'))],
+        }
+
+        assert dict(client.session) != {}
+
+        response = client.post(SAML_LS_POST_URL, data)
+
+        assert response.status_code == 302
+        assert response['location'] == reverse('saml2_logged_out')
+        assert dict(client.session) == {}
+
+    def test_logged_out_result_view_redirects_if_user_logged_in(self, client):
+        """
+        If the user is logged in, the 'logged out' default result view redirects
+        to the default result 'logged in' view.
+        """
+        log_user_in(client)
+
+        response = client.get(reverse('saml2_logged_out'))
+        assert response.status_code == 302
+        assert response['location'] == reverse('saml2_logged_in')

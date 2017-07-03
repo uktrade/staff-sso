@@ -117,7 +117,7 @@ STATIC_URL = '/static/'
 # Auth / SAML
 AUTH_USER_MODEL = 'user.user'
 LOGIN_URL = 'saml2_login'
-LOGOUT_REDIRECT_URL = 'saml2_login'
+LOGOUT_REDIRECT_URL = '/saml2/logged-out/'
 LOGIN_REDIRECT_URL = '/saml2/logged-in/'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
