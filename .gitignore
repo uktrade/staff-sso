@@ -1,7 +1,13 @@
+*.pyc
+venv
+env
+__py_cache__/
+
 .env
+.cache/
+.coverage
+
 config/saml/staging/*.key
 config/saml/staging/*.crt
 config/saml/prod/*.key
 config/saml/prod/*.crt
-.cache/
-.coverage

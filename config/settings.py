@@ -1,6 +1,7 @@
 import os
 import shutil
 
+import dj_database_url
 import environ
 import saml2
 import saml2.saml
@@ -74,8 +75,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 
 # Database
+
 DATABASES = {
-    'default': env.db()
+    'default': dj_database_url.config()
 }
 
 
