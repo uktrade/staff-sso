@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+set -e
+
+XML_SEC_BUILD_DIR="."
+ZIP_PATH=https://github.com/uktrade/heroku-buildpack-xmlsec/raw/master/xmlsec.tar.gz
+# Create the install directory
+
+INSTALL_PATH="${XML_SEC_BUILD_DIR}/xmlsec1"
+
+mkdir -p $INSTALL_PATH
+
+# copy binary
+wget -q $ZIP_PATH
+tar -zxf xmlsec.tar.gz -C $INSTALL_PATH
+
+# export path
+
+echo "-----> Exporting path"
+
+PROFILE_PATH="$XML_SEC_BUILD_DIR/.profile.d/xmlsec1.sh"
+mkdir -p $(dirname $PROFILE_PATH)
+echo 'export PATH="$PATH:'${INSTALL_PATH}'/bin"' >> $PROFILE_PATH
+echo 'export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:'${INSTALL_PATH}'/lib"' >> $PROFILE_PATH
+
+echo "-----> Exporting flags"
+
+export LIBXMLSEC1=${INSTALL_PATH}
+export CFLAGS="-I${INSTALL_PATH}/include/xmlsec1"
+
+# finish
+
+echo "-----> Installed xmlsec1"
