@@ -157,6 +157,8 @@ class TestSAMLLogin:
         assert User.objects.count() == 1
         user = User.objects.first()
         assert user.email == 'user1@example.com'
+        assert user.first_name == 'John'
+        assert user.last_name == 'Doe'
 
         # check token
         response = client.get(authorize_url)
