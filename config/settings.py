@@ -1,3 +1,4 @@
+import base64
 import os
 import shutil
 
@@ -144,11 +145,11 @@ SAML_PUBLIC_CERT_PATH = os.path.join(SAML_CONFIG_DIR, 'sp.public.crt')
 
 if env('SAML_PRIVATE_KEY', default=None) and env('SAML_PUBLIC_CERT', default=None):
     # if the key/crt are passed in as env vars => save it to a file
-    with open(SAML_PRIVATE_KEY_PATH, 'w') as f:
-        f.write(env('SAML_PRIVATE_KEY'))
+    with open(SAML_PRIVATE_KEY_PATH, 'wb') as f:
+        f.write(base64.b64decode(env('SAML_PRIVATE_KEY')))
 
-    with open(SAML_PUBLIC_CERT_PATH, 'w') as f:
-        f.write(env('SAML_PUBLIC_CERT'))
+    with open(SAML_PUBLIC_CERT_PATH, 'wb') as f:
+        f.write(base64.b64decode(env('SAML_PUBLIC_CERT')))
 
 SAML_PRIVATE_KEY_PATH = os.path.join(SAML_CONFIG_DIR, 'sp.private.key')
 SAML_PUBLIC_CERT_PATH = os.path.join(SAML_CONFIG_DIR, 'sp.public.crt')
