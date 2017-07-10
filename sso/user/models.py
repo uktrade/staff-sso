@@ -13,6 +13,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(
         _('email'), unique=True
     )
+    first_name = models.CharField(
+        _('first name'), max_length=50, blank=True
+    )
+    last_name = models.CharField(
+        _('last name'), max_length=50, blank=True
+    )
+
     date_joined = models.DateTimeField(
         _('date joined'),
         default=timezone.now,
@@ -38,9 +45,16 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.is_superuser
 
     def get_full_name(self):
-        # django method that must be implemented
+        """
+        Django method that must be implemented
+
+        Return first name / last name if not empty or email otherwise
+        """
+        names = [name for name in [self.first_name, self.last_name] if name]
+        if names:
+            return ' '.join(names)
         return self.email
 
     def get_short_name(self):
-        # django method that must be implemented
-        return self.email
+        """Django method that must be implemented"""
+        return self.get_full_name()

@@ -13,7 +13,11 @@ pytestmark = [
 
 
 def get_oauth_token(expires=None):
-    user = UserFactory(email='user1@example.com')
+    user = UserFactory(
+        email='user1@example.com',
+        first_name='John',
+        last_name='Doe'
+    )
     user.groups.add(GroupFactory.create_batch(2)[1])  # create 2 groups but only assign the 2nd
 
     access_token = AccessTokenFactory(
@@ -39,6 +43,8 @@ class TestAPIGetUserMe:
         assert response.status_code == 200
         assert response.json() == {
             'email': 'user1@example.com',
+            'first_name': 'John',
+            'last_name': 'Doe',
             'groups': [{
                 'name': 'Group 2'
             }]
