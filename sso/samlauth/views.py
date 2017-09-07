@@ -26,7 +26,7 @@ from saml2.xmldsig import SIG_RSA_SHA256
 logger = logging.getLogger('sso.samlauth')
 
 
-def login(request,
+def login(request,  # noqa: C901
           config_loader_path=None,
           wayf_template='djangosaml2/wayf.html',
           authorization_error_template='djangosaml2/auth_error.html',

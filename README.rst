@@ -71,6 +71,13 @@ Installation
     -e SIMPLESAMLPHP_SECRET_SALT=secret-salt \
     tsi
 
+Cache
+-----
+
+Currently the *cache-control* header for all the responses is set by default to *no-cache*.
+
+This is enforced by the ``sso.core.middleware.NeverCacheMiddleware``.
+
 
 Requirements
 ------------
