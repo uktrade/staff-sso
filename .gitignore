@@ -2,6 +2,7 @@
 venv
 env
 __py_cache__/
+.git/
 
 .env
 .cache/
