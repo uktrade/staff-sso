@@ -9,4 +9,5 @@ urlpatterns = [
     url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 
     url(r'^api/v1/', include((api_urls, 'api'), namespace='api-v1')),
+    url(r'^', include('sso.localauth.urls', namespace='localauth')),
 ]

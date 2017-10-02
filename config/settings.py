@@ -37,9 +37,11 @@ INSTALLED_APPS = [
     'djangosaml2',
     'oauth2_provider',
     'rest_framework',
+    'axes',
 
     'sso.user',
-    'sso.samlauth'
+    'sso.samlauth',
+    'sso.localauth',
 ]
 
 MIDDLEWARE = [
