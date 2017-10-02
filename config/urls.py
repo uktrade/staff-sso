@@ -1,5 +1,6 @@
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.conf import settings
 
 from . import api_urls
 
@@ -10,3 +11,7 @@ urlpatterns = [
 
     url(r'^api/v1/', include((api_urls, 'api'), namespace='api-v1')),
 ]
+
+if getattr(settings, "LOCAL_AUTH_PAGE"):
+    urlpatterns += [
+        url(r'^', include('sso.localauth.urls', namespace='localauth'))]

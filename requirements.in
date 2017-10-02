@@ -8,3 +8,4 @@ djangorestframework
 waitress
 whitenoise
 dj-database-url
+django-axes

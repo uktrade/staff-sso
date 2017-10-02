@@ -37,9 +37,11 @@ INSTALLED_APPS = [
     'djangosaml2',
     'oauth2_provider',
     'rest_framework',
+    'axes',
 
     'sso.user',
-    'sso.samlauth'
+    'sso.samlauth',
+    'sso.localauth',
 ]
 
 MIDDLEWARE = [
@@ -227,3 +229,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated'
     ],
 }
+
+# Include the local auth page?
+LOCAL_AUTH_PAGE = env('LOCAL_AUTH_PAGE', default=False)
