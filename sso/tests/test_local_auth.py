@@ -8,8 +8,7 @@ pytestmark = [
     pytest.mark.django_db
 ]
 
-
-@pytest.fixture(scope='module')
+@pytest.fixture
 def user():
     user = UserFactory(email='user1@example.com')
 

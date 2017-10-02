@@ -229,3 +229,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated'
     ],
 }
+
+# Include the local auth page?
+LOCAL_AUTH_PAGE = env('LOCAL_AUTH_PAGE', default=False)
