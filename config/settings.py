@@ -202,7 +202,9 @@ SAML_CONFIG = {
     # remote metadata
     'metadata': {
         'local': [
-            os.path.join(SAML_CONFIG_DIR, 'idp_metadata.xml')
+            os.path.join(SAML_CONFIG_DIR, 'idp_metadata.xml'),
+            os.path.join(SAML_CONFIG_DIR, 'idp_metadata_okta.xml'),
+            os.path.join(SAML_CONFIG_DIR, 'idp_metadata_okta_test.xml')
         ],
     },
 }
