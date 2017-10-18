@@ -71,6 +71,17 @@ Installation
     -e SIMPLESAMLPHP_SECRET_SALT=secret-salt \
     tsi
 
+Minimal Installation
+--------------------
+
+To run all of the above (if you are developing an app against ABC, instead of developing on ABC itself) then::
+
+ docker-compose up -d
+ docker-compose run web python ./manage.py
+
+This will start postgres, Django and the sample idp. You can then follow the instructions above.
+
+
 Cache
 -----
 
