@@ -32,6 +32,15 @@ class User(AbstractBaseUser, PermissionsMixin):
         ),
     )
 
+    permitted_applications = models.ManyToManyField(
+        'oauth2_provider.Application',
+        related_name='users',
+        help_text=_(
+            'Applications that this user is permitted to access'
+        ),
+        blank=True
+    )
+
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
@@ -58,3 +67,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_short_name(self):
         """Django method that must be implemented"""
         return self.get_full_name()
+
+    def can_access(self, application):
+        """Can this user access the application?"""
+        return application in self.permitted_applications.all()

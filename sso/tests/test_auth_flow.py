@@ -46,7 +46,7 @@ pytestmark = [
 ]
 
 
-def create_oauth_application():
+def create_oauth_application(users=None):
     """
     Create an oauth application and returns a tuple
     (
@@ -55,7 +55,8 @@ def create_oauth_application():
     )
     """
     application = ApplicationFactory(
-        redirect_uris=OAUTH_REDIRECT_URL
+        redirect_uris=OAUTH_REDIRECT_URL,
+        users=users
     )
 
     oauth_params = {
@@ -67,7 +68,7 @@ def create_oauth_application():
 
 
 def log_user_in(client):
-    UserFactory(email='user1@example.com')
+    user = UserFactory(email='user1@example.com')
     session_info = {
         'ava': {
             'email': ['user1@example.com']
@@ -81,6 +82,7 @@ def log_user_in(client):
         attribute_mapping={'email': ('email',)}
     )
     assert logged_in
+    return user
 
 
 class TestOAuthAuthorize:
@@ -130,6 +132,53 @@ class TestSAMLLogin:
         Test that after successfully logging into the IdP, the app redirects to the oauth authorize url
         which generates the auth code.
         """
+
+        # we require an existing user with permissions to access the application
+        user = UserFactory(email='user1@example.com')
+
+        application, authorize_params = create_oauth_application(users=[user])
+        response = client.get(OAUTH_AUTHORIZE_URL, data=authorize_params)
+
+        data = {
+            'SAMLResponse': [base64.b64encode(get_saml_response(action='login'))],
+            'RelayState': f'{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}'
+        }
+
+        assert User.objects.count() == 1
+
+        MockOutstandingQueriesCache = mocker.patch('djangosaml2.views.OutstandingQueriesCache')
+        MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
+
+        MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
+        MockCryptoBackendXmlSec1().validate_signature.return_value = True
+
+        response = client.post(SAML_ACS_URL, data)
+
+        # check saml login
+        assert response.status_code == 302
+        authorize_url = response['location']
+        assert authorize_url == data['RelayState']
+
+        # check user in db
+        assert User.objects.count() == 1
+        user = User.objects.first()
+        assert user.email == 'user1@example.com'
+        assert user.first_name == 'John'
+        assert user.last_name == 'Doe'
+
+        # check token
+        response = client.get(authorize_url)
+        assert response.status_code == 302
+
+        authorize_qs = parse_qs(response['location'].split('?')[1])
+        assert 'code' in authorize_qs
+
+    @freeze_time('2017-06-22 15:50:00.000000+00:00')
+    def test_saml_login_generates_without_permissions_results_in_access_denied(self, client, mocker):
+        """
+        Test that after successfully logging into the IdP, the app redirects to the oauth authorize url
+        which generates the auth code.
+        """
         application, authorize_params = create_oauth_application()
         response = client.get(OAUTH_AUTHORIZE_URL, data=authorize_params)
 
@@ -164,8 +213,7 @@ class TestSAMLLogin:
         response = client.get(authorize_url)
         assert response.status_code == 302
 
-        authorize_qs = parse_qs(response['location'].split('?')[1])
-        assert 'code' in authorize_qs
+        assert response['location'] == 'http://localhost/authorized?error=access_denied'
 
     @freeze_time('2017-06-22 15:50:00.000000+00:00')
     def test_saml_login_with_default_redirect_url(self, client, mocker):
@@ -224,9 +272,9 @@ class TestOAuthToken:
         """
         Test that a valid oauth token can be obtained from a valid auth code.
         """
-        application, authorize_params = create_oauth_application()
+        user = log_user_in(client)
+        application, authorize_params = create_oauth_application(users=[user])
 
-        log_user_in(client)
         auth_code = self._obtain_auth_code(client, authorize_params)
 
         # exchange for token
@@ -250,9 +298,9 @@ class TestOAuthToken:
         """
         Test that without a valid auth code you cannot obtain an oauth token.
         """
-        application, authorize_params = create_oauth_application()
+        user = log_user_in(client)
+        application, authorize_params = create_oauth_application(users=[user])
 
-        log_user_in(client)
         self._obtain_auth_code(client, authorize_params)
 
         # exchange for token
@@ -276,9 +324,9 @@ class TestOAuthToken:
         """
         Test that without a valid client_id you cannot obtain an oauth token.
         """
-        application, authorize_params = create_oauth_application()
+        user = log_user_in(client)
+        application, authorize_params = create_oauth_application(users=[user])
 
-        log_user_in(client)
         auth_code = self._obtain_auth_code(client, authorize_params)
 
         # exchange for token
@@ -302,9 +350,9 @@ class TestOAuthToken:
         """
         Test that without a valid client_secret you cannot obtain an oauth token.
         """
-        application, authorize_params = create_oauth_application()
+        user = log_user_in(client)
+        application, authorize_params = create_oauth_application(users=[user])
 
-        log_user_in(client)
         auth_code = self._obtain_auth_code(client, authorize_params)
 
         # exchange for token

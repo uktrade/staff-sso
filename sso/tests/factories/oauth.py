@@ -16,6 +16,16 @@ class ApplicationFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Application
 
+    @factory.post_generation
+    def users(self, create, extracted, **kwargs):
+        """Allow a list of users to be passed in"""
+        if not create:
+            return
+
+        if extracted:
+            for user in extracted:
+                self.users.add(user)
+
 
 class AccessTokenFactory(factory.django.DjangoModelFactory):
     application = factory.SubFactory(ApplicationFactory)
