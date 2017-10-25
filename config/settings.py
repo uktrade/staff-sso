@@ -24,7 +24,6 @@ ENV_NAME = env('ENV_NAME', default='test')  # 'test', 'staging' or 'prod' (mache
 
 ALLOWED_HOSTS = env('ALLOWED_HOSTS', default='localhost').split(',')
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -77,13 +76,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
 # Database
 
 DATABASES = {
     'default': dj_database_url.config()
 }
-
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -101,7 +98,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
@@ -114,7 +110,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -213,11 +208,10 @@ SAML_CONFIG = {
 }
 
 SAML_ATTRIBUTE_MAPPING = {
-    'email': ('email', ),
-    'first_name': ('first_name', ),
-    'last_name': ('last_name', ),
+    'email': ('email',),
+    'first_name': ('first_name',),
+    'last_name': ('last_name',),
 }
-
 
 # DRF
 REST_FRAMEWORK = {
@@ -228,6 +222,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated'
     ],
+    'SCOPES': {
+        'read': 'Read scope',
+        'write': 'Write scope',
+        'introspection': 'Introspect token scope'
+    }
 }
 
 # Include the local auth page?
