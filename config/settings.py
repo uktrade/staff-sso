@@ -221,13 +221,17 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated'
-    ],
-    'SCOPES': {
-        'read': 'Read scope',
-        'write': 'Write scope',
-        'introspection': 'Introspect token scope'
-    }
+    ]
 }
 
 # Include the local auth page?
 LOCAL_AUTH_PAGE = env('LOCAL_AUTH_PAGE', default=False)
+
+OAUTH2_PROVIDER = {
+    'SCOPES': {
+        'read': 'Read scope',
+        'write': 'Write scope',
+        'introspection': 'introspect scope'
+    }
+}
+
