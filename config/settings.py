@@ -1,6 +1,7 @@
 import base64
 import os
 import shutil
+import sys
 
 import dj_database_url
 import environ
@@ -204,7 +205,8 @@ SAML_CONFIG = {
         'local': [
             os.path.join(SAML_CONFIG_DIR, 'idp_metadata.xml'),
             os.path.join(SAML_CONFIG_DIR, 'idp_metadata_okta.xml'),
-            os.path.join(SAML_CONFIG_DIR, 'idp_metadata_okta_test.xml')
+            os.path.join(SAML_CONFIG_DIR, 'idp_metadata_okta_test.xml'),
+            os.path.join(SAML_CONFIG_DIR, 'idp_metadata_ukef_staging.xml')
         ],
     },
 }
@@ -240,3 +242,18 @@ OAUTH2_PROVIDER = {
 
 OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2_provider.Application'
 
+SAML_USE_NAME_ID_AS_USERNAME = True
+
+LOGGING = {
+    'version': 1,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+        }
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO'
+    }
+}
