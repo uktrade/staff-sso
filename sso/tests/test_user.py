@@ -3,6 +3,8 @@ from unittest import mock
 import pytest
 
 from sso.user.models import User
+from .factories.oauth import ApplicationFactory
+from .factories.user import UserFactory
 
 EMAIL = 'test@example.com'
 
@@ -115,3 +117,25 @@ class TestUser:
 
             mock_get_full_name.return_value = EMAIL
             assert user.get_short_name() == EMAIL
+
+    @pytest.mark.django_db
+    def test_can_access_with_perms(self):
+        """
+        Test that `can_access()` returns True when user assigned to app
+        """
+
+        user = UserFactory()
+        app = ApplicationFactory(users=[user])
+
+        assert user.can_access(app)
+
+    @pytest.mark.django_db
+    def test_can_access_without_perms(self):
+        """
+        Test that `can_access()` returns False when user is not assigned to app
+        """
+
+        app = ApplicationFactory()
+        user = UserFactory()
+
+        assert not user.can_access(app)

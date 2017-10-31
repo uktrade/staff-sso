@@ -14,3 +14,4 @@ config/saml/prod/*.key
 config/saml/prod/*.crt
 
 *.iml
+.idea

@@ -4,7 +4,6 @@ import shutil
 
 import dj_database_url
 import environ
-import saml2
 import saml2.saml
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -41,6 +40,7 @@ INSTALLED_APPS = [
     'sso.user',
     'sso.samlauth',
     'sso.localauth',
+    'sso.oauth2',
 ]
 
 MIDDLEWARE = [
@@ -234,4 +234,6 @@ OAUTH2_PROVIDER = {
         'introspection': 'introspect scope'
     }
 }
+
+OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2_provider.Application'
 
