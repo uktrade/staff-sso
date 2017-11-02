@@ -203,13 +203,26 @@ SAML_CONFIG = {
     # remote metadata
     'metadata': {
         'local': [
-            os.path.join(SAML_CONFIG_DIR, 'idp_metadata.xml'),
-            os.path.join(SAML_CONFIG_DIR, 'idp_metadata_okta.xml'),
-            os.path.join(SAML_CONFIG_DIR, 'idp_metadata_okta_test.xml'),
-            os.path.join(SAML_CONFIG_DIR, 'idp_metadata_ukef_staging.xml')
+            os.path.join(SAML_CONFIG_DIR, 'idp_metadata.xml')
         ],
     },
 }
+
+
+if ENV_NAME == 'staging':
+    SAML_CONFIG['metadata']['local'] = [
+        os.path.join(SAML_CONFIG_DIR, 'idp_metadata.xml'),
+        os.path.join(SAML_CONFIG_DIR, 'idp_metadata_okta.xml'),
+        os.path.join(SAML_CONFIG_DIR, 'idp_metadata_okta_test.xml'),
+        os.path.join(SAML_CONFIG_DIR, 'idp_metadata_ukef.xml')
+    ]
+
+elif ENV_NAME == 'prod':
+    SAML_CONFIG['metadata']['local'] = [
+        os.path.join(SAML_CONFIG_DIR, 'idp_metadata.xml'),
+        os.path.join(SAML_CONFIG_DIR, 'idp_metadata_ukef.xml')
+    ]
+
 
 SAML_ATTRIBUTE_MAPPING = {
     'email': ('email',),
@@ -254,6 +267,6 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console'],
-        'level': 'INFO'
+        'level': 'WARN'
     }
 }
