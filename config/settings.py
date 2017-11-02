@@ -231,7 +231,8 @@ OAUTH2_PROVIDER = {
     'SCOPES': {
         'read': 'Read scope',
         'write': 'Write scope',
-        'introspection': 'introspect scope'
+        'introspection': 'introspect scope',
+        'data-hub:internal-front-end': 'A datahub specific scope'
     }
 }
 
