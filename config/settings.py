@@ -255,8 +255,6 @@ OAUTH2_PROVIDER = {
 
 OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2_provider.Application'
 
-SAML_USE_NAME_ID_AS_USERNAME = True
-
 LOGGING = {
     'version': 1,
     'handlers': {
