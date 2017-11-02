@@ -1,5 +1,4 @@
 import pytest
-from django.conf import settings
 from django.urls import reverse
 
 from .factories.user import UserFactory
@@ -7,6 +6,7 @@ from .factories.user import UserFactory
 pytestmark = [
     pytest.mark.django_db
 ]
+
 
 @pytest.fixture
 def user():
@@ -27,3 +27,4 @@ class TestLogin:
 
         assert response.status_code == 302
         assert response.url == reverse('saml2_logged_in')
+

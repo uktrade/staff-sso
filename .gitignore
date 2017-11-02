@@ -12,8 +12,6 @@ config/saml/staging/*.key
 config/saml/staging/*.crt
 config/saml/prod/*.key
 config/saml/prod/*.crt
-config/saml/test/*.key
-config/saml/test/*.crt
 
 *.iml
 .idea
