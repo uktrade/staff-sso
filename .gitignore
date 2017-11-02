@@ -15,3 +15,4 @@ config/saml/prod/*.crt
 
 *.iml
 .idea
+.DS_Store
