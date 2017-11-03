@@ -1,6 +1,7 @@
 import base64
 import os
 import shutil
+import sys
 
 import dj_database_url
 import environ
@@ -207,6 +208,21 @@ SAML_CONFIG = {
     },
 }
 
+
+if ENV_NAME == 'staging':
+    SAML_CONFIG['metadata']['local'] = [
+        os.path.join(SAML_CONFIG_DIR, 'idp_metadata.xml'),
+        os.path.join(SAML_CONFIG_DIR, 'idp_metadata_okta.xml'),
+        os.path.join(SAML_CONFIG_DIR, 'idp_metadata_ukef.xml')
+    ]
+
+elif ENV_NAME == 'prod':
+    SAML_CONFIG['metadata']['local'] = [
+        os.path.join(SAML_CONFIG_DIR, 'idp_metadata.xml'),
+        os.path.join(SAML_CONFIG_DIR, 'idp_metadata_ukef.xml')
+    ]
+
+
 SAML_ATTRIBUTE_MAPPING = {
     'email': ('email',),
     'first_name': ('first_name',),
@@ -238,3 +254,16 @@ OAUTH2_PROVIDER = {
 
 OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2_provider.Application'
 
+LOGGING = {
+    'version': 1,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+        }
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARN'
+    }
+}
