@@ -252,7 +252,7 @@ OAUTH2_PROVIDER = {
     }
 }
 
-OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2_provider.Application'
+OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2.Application'
 
 LOGGING = {
     'version': 1,

@@ -139,3 +139,26 @@ class TestUser:
         user = UserFactory()
 
         assert not user.can_access(app)
+
+    @pytest.mark.django_db
+    def test_can_access_with_app_default_access(self):
+        """
+        Test that `can_access()` returns True when user is not assigned to an app but the app allows default access
+        """
+
+        app = ApplicationFactory(default_access=True)
+        user = UserFactory()
+
+        assert user.can_access(app)
+
+    @pytest.mark.django_db
+    def test_can_access_without_app_default_access(self):
+        """
+        Test that `can_access()` returns False when user is not assigned to app and the app does not allow default
+        access
+        """
+
+        app = ApplicationFactory(default_access=False)
+        user = UserFactory()
+
+        assert not user.can_access(app)
