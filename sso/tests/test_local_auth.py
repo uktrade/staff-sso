@@ -27,4 +27,3 @@ class TestLogin:
 
         assert response.status_code == 302
         assert response.url == reverse('saml2_logged_in')
-

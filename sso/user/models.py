@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
@@ -31,9 +32,8 @@ class User(AbstractBaseUser, PermissionsMixin):
             'Designates that this user can log into the admin area and assign users to groups.'
         ),
     )
-
     permitted_applications = models.ManyToManyField(
-        'oauth2_provider.Application',
+        settings.OAUTH2_PROVIDER_APPLICATION_MODEL,
         related_name='users',
         help_text=_(
             'Applications that this user is permitted to access'
@@ -70,4 +70,4 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def can_access(self, application):
         """Can this user access the application?"""
-        return application in self.permitted_applications.all()
+        return application.default_access_allowed or application in self.permitted_applications.all()
