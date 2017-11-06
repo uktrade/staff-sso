@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                 ('skip_authorization', models.BooleanField(default=False)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('default_access', models.BooleanField(default=False, help_text='Allow all authenticated users to access this application', verbose_name='default access')),
+                ('default_access_allowed', models.BooleanField(default=False, help_text='Allow all authenticated users to access this application', verbose_name='default access')),
                 ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='oauth2_application', to='user.User')),
             ],
             options={

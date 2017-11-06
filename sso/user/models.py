@@ -70,4 +70,4 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def can_access(self, application):
         """Can this user access the application?"""
-        return application.default_access or application in self.permitted_applications.all()
+        return application.default_access_allowed or application in self.permitted_applications.all()

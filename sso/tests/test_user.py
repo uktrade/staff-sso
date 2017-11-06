@@ -146,7 +146,7 @@ class TestUser:
         Test that `can_access()` returns True when user is not assigned to an app but the app allows default access
         """
 
-        app = ApplicationFactory(default_access=True)
+        app = ApplicationFactory(default_access_allowed=True)
         user = UserFactory()
 
         assert user.can_access(app)
@@ -158,7 +158,7 @@ class TestUser:
         access
         """
 
-        app = ApplicationFactory(default_access=False)
+        app = ApplicationFactory(default_access_allowed=False)
         user = UserFactory()
 
         assert not user.can_access(app)
