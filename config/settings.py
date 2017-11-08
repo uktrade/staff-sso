@@ -16,6 +16,7 @@ if os.path.exists(ENV_FILE):
     environ.Env.read_env(ENV_FILE)
 env = environ.Env(
     DEBUG=(bool, False),
+    RESTRICT_ADMIN_BY_IPS=(bool, False),
 )
 
 SECRET_KEY = env('SECRET_KEY')
@@ -53,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'sso.core.middleware.NeverCacheMiddleware',
+    'ip_restriction.IpWhitelister',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -267,3 +269,8 @@ LOGGING = {
         'level': 'WARN'
     }
 }
+
+# admin ip restriction
+
+RESTRICT_ADMIN_BY_IPS = env('RESTRICT_ADMIN_BY_IPS')
+
