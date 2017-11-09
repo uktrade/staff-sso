@@ -46,6 +46,7 @@ def login(request,  # noqa: C901
     If set to None or nonexistent template, default form from the saml2 library
     will be rendered.
     """
+
     logger.debug('Login process started')
 
     came_from = request.GET.get('next', settings.LOGIN_REDIRECT_URL)
