@@ -40,7 +40,7 @@ Installation
 #. Create the db::
 
     psql -p5432
-    create database staff-sso;
+    create database "staff-sso";
 
 #. Configure and populate the db::
 
@@ -51,12 +51,12 @@ Installation
 
     ./manage.py runserver
 
-
 #. You will now need to `create an OAuth application <http://localhost:8000/admin/oauth2_provider/application/add/>`_ with::
 
     Client type: Confidential
     Grant type: Authorization code
     Skip authorization: checked
+    Redirect urls: <values you want to be able to redirect to>
 
 #. To run the SAML IdP test server, open a new tab and::
 
