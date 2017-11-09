@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'djangosaml2',
+    'govuk_template',
     'oauth2_provider',
     'rest_framework',
     'axes',
@@ -81,7 +82,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
-
 DATABASES = {
     'default': dj_database_url.config()
 }
