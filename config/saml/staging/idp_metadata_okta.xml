@@ -30,9 +30,9 @@ lRN9tqhlITvNYT9k4Lf+wqHoi8hGpzvQhTI295zPgv0tcVkraeEcAlztiwYcPqCYUG3HhlYbXybz
       <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://referencebuild.oktapreview.com/app/cirrusreferencebuildsandboxpreview_abcauthbrokercomponent_1/exkcdhwy5vXryw6aD0h7/sso/saml" />
    </md:IDPSSODescriptor>
     <md:Organization>
-        <md:OrganizationName xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">dev-793132
+        <md:OrganizationName xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">cirrus
         </md:OrganizationName>
-        <md:OrganizationDisplayName xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">Cirrus (Okta)
+        <md:OrganizationDisplayName xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">@trade.gov.uk
         </md:OrganizationDisplayName>
         <md:OrganizationURL xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">
             https://digital.trade.gov.uk
