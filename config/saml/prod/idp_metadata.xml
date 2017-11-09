@@ -466,7 +466,7 @@
     </IDPSSODescriptor>
     <ContactPerson contactType="support"/>
     <Organization>
-        <OrganizationName xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">
+        <OrganizationName xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">core
         </OrganizationName>
         <OrganizationDisplayName xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">Core/Evolve
         </OrganizationDisplayName>

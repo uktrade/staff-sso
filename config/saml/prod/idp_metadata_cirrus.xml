@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="http://www.okta.com/exk1emefirxUCDPun0i7">
+   <md:IDPSSODescriptor WantAuthnRequestsSigned="false" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+      <md:KeyDescriptor use="signing">
+         <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+            <ds:X509Data>
+               <ds:X509Certificate>MIIDmjCCAoKgAwIBAgIGAVw6hnd+MA0GCSqGSIb3DQEBBQUAMIGNMQswCQYDVQQGEwJVUzETMBEG
+A1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNU2FuIEZyYW5jaXNjbzENMAsGA1UECgwET2t0YTEU
+MBIGA1UECwwLU1NPUHJvdmlkZXIxDjAMBgNVBAMMBXRyYWRlMRwwGgYJKoZIhvcNAQkBFg1pbmZv
+QG9rdGEuY29tMB4XDTE3MDUyNDEyNTQwOVoXDTI3MDUyNDEyNTUwOVowgY0xCzAJBgNVBAYTAlVT
+MRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYDVQQHDA1TYW4gRnJhbmNpc2NvMQ0wCwYDVQQKDARP
+a3RhMRQwEgYDVQQLDAtTU09Qcm92aWRlcjEOMAwGA1UEAwwFdHJhZGUxHDAaBgkqhkiG9w0BCQEW
+DWluZm9Ab2t0YS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCk19NuMl/cSViQ
+yfPfPtWq6o/+zUT+H4c8jjQzmPR66Tw3cbpf8f8CNmXhGrFgeNEtGMYaOzRYJQuEsqEfGR351uuj
+U1XTaE3Vh6ciz2+ATNYBIB04I8wzoTbg9eDFT3SKeu2npVvFDuUeq7p3QWoiSlPozFNFrhGKa+a8
+UrHS5hdgnbQUg+2YDn+a2E0d3zDRcYFmbpC5IfT6Py77vJfNg3+VILOdU24p6560Jo8c6Xvp7QWL
+amc6JhDWskoTCpRz0EUds3+j8WjGcnFe4gIF3CGmtec6URj95b6x6ddYdXtcdTQVFMJzDKM3/AtE
+MOpvk81piHQ0bV/bb9dI9PbBAgMBAAEwDQYJKoZIhvcNAQEFBQADggEBAG8eJfgUEkbSswrgfcOI
+reQ942LMF32VMQJGc/eGpQFzuIU/KP8TVsYgv6lCCGWdri4EYLxclJ/gMd+teV/mP0FmqxkEHjQX
+B1EVpxz/4IR+d4UEQzbZdZxjdIec0AUuxCwuySXtu1r95XD/pOr5ln9LY9P0XjcQe/vZbAxKu45A
+jfqg/zx1ACUNss7CbCBodmQ2+NJ4D8ebwdZCKiRl75QLpvfRQGCAoi35SE0Wj2TPefKkfGlJ9Pob
+3EaCWhbkmtBtu/hF4Y9H+h7E1L7bF0jGp9g5BYIjXKgRaX7XZMv1TLdkzoQKM0g2lE7Jwemrsoik
+17dzyfo9M29caZgMeg0=</ds:X509Certificate>
+            </ds:X509Data>
+         </ds:KeyInfo>
+      </md:KeyDescriptor>
+      <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat>
+      <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat>
+      <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://trade.okta-emea.com/app/departmentforinternationaltrade_abcauthbrokercomponent_1/exk1emefirxUCDPun0i7/sso/saml" />
+      <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://trade.okta-emea.com/app/departmentforinternationaltrade_abcauthbrokercomponent_1/exk1emefirxUCDPun0i7/sso/saml" />
+   </md:IDPSSODescriptor>
+    <md:Organization>
+        <md:OrganizationName xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">cirrus
+        </md:OrganizationName>
+        <md:OrganizationDisplayName xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">Cirrus
+        </md:OrganizationDisplayName>
+        <md:OrganizationURL xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">
+            https://digital.trade.gov.uk
+        </md:OrganizationURL>
+    </md:Organization>
+</md:EntityDescriptor>
