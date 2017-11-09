@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'oauth2_provider',
     'rest_framework',
     'axes',
+    'raven.contrib.django.raven_compat',
 
     'sso.user',
     'sso.samlauth',
@@ -271,6 +272,9 @@ LOGGING = {
 }
 
 # admin ip restriction
-
 RESTRICT_ADMIN_BY_IPS = env('RESTRICT_ADMIN_BY_IPS')
 
+# sentry config
+RAVEN_CONFIG = {
+    'dsn': env('SENTRY_DSN', default=None)
+}

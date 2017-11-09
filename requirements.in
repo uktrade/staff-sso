@@ -10,3 +10,4 @@ whitenoise
 dj-database-url
 django-axes
 -e git+https://github.com/uktrade/dit-ip@v1.1.0#egg=django-ip-restriction
+raven
