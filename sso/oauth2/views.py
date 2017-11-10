@@ -5,6 +5,7 @@ from django.shortcuts import redirect
 from oauth2_provider.exceptions import OAuthToolkitError
 from oauth2_provider.models import get_application_model
 from oauth2_provider.scopes import get_scopes_backend
+from oauthlib.oauth2.rfc6749.errors import AccessDeniedError
 
 from oauth2_provider.views.base import AuthorizationView
 
@@ -52,4 +53,7 @@ class CustomAuthorizationView(AuthorizationView):
             return redirect(uri)
 
         except OAuthToolkitError as error:
-            return self.error_response(error)
+            if isinstance(error.oauthlib_error, AccessDeniedError):
+                return redirect('access-denied')
+            else:
+                return self.error_response(error)
