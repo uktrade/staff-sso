@@ -91,9 +91,11 @@ def login(request,  # noqa: C901
     idps = available_idps(conf)
     if selected_idp is None and len(idps) > 1:
         logger.debug('A discovery process is needed')
+
+        idps = sorted(idps.items(), key=lambda x: x[1])
         return render(
             request, wayf_template, {
-                'available_idps': idps.items(),
+                'available_idps': idps,
                 'came_from': came_from,
             }
         )
