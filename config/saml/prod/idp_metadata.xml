@@ -468,7 +468,7 @@
     <Organization>
         <OrganizationName xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">core
         </OrganizationName>
-        <OrganizationDisplayName xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">@mobile.ukti.gov.uk, @mobile.trade.gov.uk, @extranet.ukti.gov.uk
+        <OrganizationDisplayName xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">core
         </OrganizationDisplayName>
         <OrganizationURL xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">
             https://digital.trade.gov.uk

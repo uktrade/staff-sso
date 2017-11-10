@@ -214,16 +214,16 @@ SAML_CONFIG = {
 
 if ENV_NAME == 'staging':
     SAML_CONFIG['metadata']['local'] = [
-        os.path.join(SAML_CONFIG_DIR, 'idp_metadata.xml'),
         os.path.join(SAML_CONFIG_DIR, 'idp_metadata_okta.xml'),
-        os.path.join(SAML_CONFIG_DIR, 'idp_metadata_ukef.xml')
+        os.path.join(SAML_CONFIG_DIR, 'idp_metadata_ukef.xml'),
+        os.path.join(SAML_CONFIG_DIR, 'idp_metadata.xml')
     ]
 
 elif ENV_NAME == 'prod':
     SAML_CONFIG['metadata']['local'] = [
-        os.path.join(SAML_CONFIG_DIR, 'idp_metadata.xml'),
         os.path.join(SAML_CONFIG_DIR, 'idp_metadata_cirrus.xml'),
-        os.path.join(SAML_CONFIG_DIR, 'idp_metadata_ukef.xml')
+        os.path.join(SAML_CONFIG_DIR, 'idp_metadata_ukef.xml'),
+        os.path.join(SAML_CONFIG_DIR, 'idp_metadata.xml')
     ]
 
 
