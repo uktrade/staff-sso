@@ -77,6 +77,52 @@ class TestUserManager:
 
         assert user.email == email.lower()
 
+    @pytest.mark.django_db
+    def test_get_or_create_user_emails_are_lower_cased(self):
+        """
+        Test that `get_or_create()` lower cases emails
+        """
+        assert User.objects.count() == 0
+
+        email = 'ITATest1@example.com'
+
+        user, created = User.objects.get_or_create(
+            email=email,
+            first_name='',
+            last_name=''
+        )
+
+        assert created
+
+        assert user.email == email.lower()
+
+    @pytest.mark.django_db
+    def test_get_or_create_user_email_no_duplicates(self):
+        """
+        Test that `get_or_create()` lower cases emails
+        """
+        assert User.objects.count() == 0
+
+        email = 'ITATest1@example.com'
+
+        user, created = User.objects.get_or_create(
+            email=email,
+            first_name='',
+            last_name=''
+        )
+
+        assert created
+
+        user, created = User.objects.get_or_create(
+            email=email,
+            first_name='',
+            last_name=''
+        )
+
+        assert not created
+
+        assert user.email == email.lower()
+
 
 class TestUser:
     def test_is_staff_as_is_superuser(self):
