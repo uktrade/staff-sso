@@ -53,6 +53,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     def is_staff(self):
         return self.is_superuser
 
+    def save(self, *args, **kwargs):
+        """
+        Ensure that emails are lower cased
+        """
+        self.email = self.email.lower()
+        return super().save(*args, **kwargs)
+
     def get_full_name(self):
         """
         Django method that must be implemented
