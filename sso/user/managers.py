@@ -18,3 +18,12 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
 
         return self._create_user(email, password, **extra_fields)
+
+    def get_or_create(self, *args, **kwargs):
+        """
+        Ensure that incoming emails are lowercased
+        """
+
+        kwargs['email'] = kwargs['email'].lower()
+
+        return super().get_or_create(*args, **kwargs)
