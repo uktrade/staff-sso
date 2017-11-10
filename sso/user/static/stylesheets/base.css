@@ -25,3 +25,7 @@ main {
     margin-top: 40px;
     margin-bottom: 40px;
 }
+
+ul li {
+    margin-bottom: 20px;
+}
