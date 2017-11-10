@@ -60,6 +60,23 @@ class TestUserManager:
         with pytest.raises(ValueError):
             User.objects.create_superuser(email='', password='password')
 
+    @pytest.mark.django_db
+    def test_user_emails_are_lower_cased(self):
+        """
+        Test that `save()` lower cases emails
+        """
+        assert User.objects.count() == 0
+
+        email = 'ITATest1@example.com'
+
+        user = User.objects.create(
+            email=email,
+            first_name='',
+            last_name=''
+        )
+
+        assert user.email == email.lower()
+
 
 class TestUser:
     def test_is_staff_as_is_superuser(self):
