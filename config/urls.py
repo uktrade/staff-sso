@@ -18,6 +18,7 @@ urlpatterns = [
     url(r'^api/v1/', include((api_urls, 'api'), namespace='api-v1')),
 
     url(r'^access-denied/$', TemplateView.as_view(template_name='sso/access-denied.html'), name='access-denied')
+    url(r'^email/', include('sso.emailauth.urls'))
 ]
 
 if getattr(settings, 'LOCAL_AUTH_PAGE'):

@@ -1,0 +1,9 @@
+
+Hi,
+
+Click this link to complete your sign in.
+
+{{ auth_url }}
+
+Regards,
+DIT

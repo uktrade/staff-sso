@@ -24,6 +24,7 @@
                 </li>
             {% endspaceless %}
       {% endfor %}
+        <li><a href="{% url 'email-auth-initiate' %}{% if came_from %}?next={{ came_from|urlencode }}{% endif %}">Email token authentication</a></li>
     </ul>
     <p class="secondary-text">If you are having problems email us at <a href="mailto:login.support@uktrade.zendesk.com">login.support@uktrade.zendesk.com</a></p>
 </div>
