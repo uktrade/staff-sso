@@ -1,6 +1,6 @@
 from django.shortcuts import redirect
 from django.views.generic.edit import FormView
-from django.views.generic.base import RedirectView, TemplateView
+from django.views.generic.base import RedirectView
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.contrib.auth import login
 
@@ -27,14 +27,11 @@ class EmailTokenView(FormView):
         return super().form_valid(form)
 
 
-class EmailAuthView(TemplateView):
+class EmailAuthView(RedirectView):
     permanent = False
     query_string = True
 
-    template_name = 'emailauth/initiate.html'
-
-    def get(self, request, *args, **kwargs):
-    #def get_redirect_url(self, *args, **kwargs):
+    def get_redirect_url(self, *args, **kwargs):
         try:
             token_obj = EmailToken.objects.get(token=kwargs['token'], used=False)
         except EmailToken.DoesNotExist:
@@ -50,8 +47,6 @@ class EmailAuthView(TemplateView):
 
         next_url = self.request.GET.get('next')
         token_obj.mark_used()
-
-        return super().get(request, *args, **kwargs)
 
         if next_url not in ['None', None]:
             return next_url
