@@ -284,7 +284,11 @@ RAVEN_CONFIG = {
 
 # email auth
 EMAIL_TOKEN_DOMAIN_WHITELIST = [
-    ('@digital.trade.gov.uk', '@digital.trade.gov.uk')
+    ('@digital.trade.gov.uk', '@digital.trade.gov.uk'),
+    ('@trade.gsi.gov.uk', '@trade.gsi.gov.uk'),
+    ('@fco.gov.uk', '@fco.gov.uk'),
+    ('@fco.gsi.gov.uk', '@fco.gsi.gov.uk'),
+    ('@trade.gov.uk', '@trade.gov.uk')
 ]
 
 EMAIL_TOKEN_TTL = 3600
