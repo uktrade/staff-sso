@@ -6,6 +6,11 @@
     <h1>Complete your sign in</h1>
 
     <p>We've sent you an email. Check your inbox and click the link to complete your sign in.</p>
+    <br>
+    <h2>Didn't receive an email?</h2>
+    <p>Check your junk folder</p>
+    <br>
+    <a href="{% url 'localauth:login' %}">Try again</a>
 </div>
 
 {% endblock %}

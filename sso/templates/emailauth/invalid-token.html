@@ -5,7 +5,8 @@
 <div class="container">
     <h1>Error</h1>
 
-    <p>The token is expired or is invalid.</p>
+    <p>The link has expired or is invalid.</p>
+    <p><a href="{% url 'localauth:login' %}">Enter your details again to receive another email.</a></p>
 </div>
 
 {% endblock %}

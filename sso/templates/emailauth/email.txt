@@ -1,9 +1,10 @@
 
 Hi,
 
-Click this link to complete your sign in.
+Click this link to complete your sign in. You can only use this link once.
 
 {{ auth_url }}
 
 Regards,
+
 DIT
