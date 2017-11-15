@@ -5,7 +5,7 @@
     <h1>Which type of account do you have?</h1>
     <p class="secondary-text">This should be the one you use to sign in to DIT Connect Intranet, CDMS or DIT investment portal</p>
     <p>Choose one of the following.</p>
-    <ul>
+    <ul id="available_idps">
       {% for url, name in available_idps %}
             {% spaceless %}
                 <li>
