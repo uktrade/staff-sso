@@ -3,20 +3,19 @@
 {% block inner_content %}
 <div class="container">
     <h1>Which type of account do you have?</h1>
-    <p class="secondary-text">This should be the one you use to sign in to DIT Connect Intranet, CDMS or DIT investment portal</p>
     <p>Choose one of the following.</p>
     <ul id="available_idps">
       {% for url, name in available_idps %}
             {% spaceless %}
                 <li>
                 {% if name == 'a-core' %}
-                    <a href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Evolve, CTP, Mobile Office</a><br>
+                    <a href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Evolve, Mobile Office</a><br>
                     username ends with @mobile.ukti.gov.uk or @extranet.ukti.gov.uk 
                 {% elif name == 'b-ukef' %}
                     <a href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">UKEF</a><br>
                     username ends with @ukexportfinance.gov.uk 
                 {% elif name == 'cirrus' %}
-                    <a href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Cirrus</a><br>
+                    <a href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Cirrus, CTP</a><br>
                     username ends with @trade.gov.uk
                 {% else %}
                     <a href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">{{ name }}</a>
@@ -25,6 +24,8 @@
             {% endspaceless %}
       {% endfor %}
     </ul>
-    <p class="secondary-text">If you are having problems email us at <a href="mailto:login.support@uktrade.zendesk.com">login.support@uktrade.zendesk.com</a></p>
+    <br>
+    <h2>Don't use one of these to sign in?</h2>
+    <p><a href="{% url 'email-auth-initiate' %}{% if came_from %}?next={{ came_from|urlencode }}{% endif %}">Get a secure sign in link</a></p>
 </div>
 {% endblock %}

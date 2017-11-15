@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'sso.samlauth',
     'sso.localauth',
     'sso.oauth2',
+    'sso.emailauth'
 ]
 
 MIDDLEWARE = [
@@ -279,3 +280,22 @@ RESTRICT_ADMIN_BY_IPS = env('RESTRICT_ADMIN_BY_IPS')
 RAVEN_CONFIG = {
     'dsn': env('SENTRY_DSN', default=None)
 }
+
+# email auth
+EMAIL_TOKEN_DOMAIN_WHITELIST = [
+    ('@digital.trade.gov.uk', '@digital.trade.gov.uk'),
+    ('@trade.gsi.gov.uk', '@trade.gsi.gov.uk'),
+    ('@fco.gov.uk', '@fco.gov.uk'),
+    ('@fco.gsi.gov.uk', '@fco.gsi.gov.uk'),
+    ('@trade.gov.uk', '@trade.gov.uk')
+]
+
+EMAIL_TOKEN_TTL = 3600
+
+# email settings
+EMAIL_USE_TLS = env('EMAIL_USE_TLS', default=True)
+EMAIL_HOST = env('EMAIL_HOST', default='localhost')
+EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
+EMAIL_PORT = env('EMAIL_PORT', default=587)
+EMAIL_FROM = env('EMAIL_FROM', default='test@example.com')

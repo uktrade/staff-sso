@@ -213,7 +213,7 @@ class TestSAMLLogin:
         response = client.get(authorize_url)
         assert response.status_code == 302
 
-        assert response['location'] == 'http://localhost/authorized?error=access_denied'
+        assert response['location'] == '/access-denied/'
 
     @freeze_time('2017-06-22 15:50:00.000000+00:00')
     def test_saml_login_with_default_redirect_url(self, client, mocker):
