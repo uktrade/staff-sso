@@ -1,5 +1,3 @@
-
-
 from sso.emailauth.models import EmailToken
 from sso.emailauth.forms import EmailForm
 

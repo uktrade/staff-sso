@@ -295,7 +295,7 @@ EMAIL_TOKEN_TTL = 3600
 
 # email settings
 EMAIL_USE_TLS = env('EMAIL_USE_TLS', default=True)
-EMAIL_HOST = env('EMAIL_HOST')
+EMAIL_HOST = env('EMAIL_HOST', default='localhost')
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 EMAIL_PORT = env('EMAIL_PORT', default=587)
