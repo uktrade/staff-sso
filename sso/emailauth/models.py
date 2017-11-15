@@ -53,7 +53,7 @@ class EmailToken(models.Model):
             'last_name': self.last_name
         }
 
-        user, created = User.objects.get_or_create(email=self.email, defaults=defaults)
+        user, _ = User.objects.get_or_create(email=self.email, defaults=defaults)
 
         return user
 

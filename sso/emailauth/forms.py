@@ -35,7 +35,10 @@ class EmailForm(forms.Form):
 
         return redirect_url
 
-    def send_email(self, request):
+    def send_signin_email(self, request):
+        """
+        Generate an EmailToken and send a sign in email to the user
+        """
         token = EmailToken.objects.create_token(self.email)
         next_url = request.GET.get('next', '')
 
@@ -43,7 +46,7 @@ class EmailForm(forms.Form):
             next_url = self.extract_redirect_url(next_url)
             next_url = quote_plus(next_url)
 
-        path = reverse('email-auth', kwargs=dict(token=token))
+        path = reverse('email-auth-signin', kwargs=dict(token=token))
 
         url = '{scheme}{host}{path}?next={next_url}'.format(
             scheme='https://',

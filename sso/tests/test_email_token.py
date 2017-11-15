@@ -1,5 +1,16 @@
+import datetime as dt
+
+from django.conf import settings
+from django.core.urlresolvers import reverse
+import pytest
+from freezegun import freeze_time
+
 from sso.emailauth.models import EmailToken
 from sso.emailauth.forms import EmailForm
+
+pytestmark = [
+    pytest.mark.django_db
+]
 
 
 class TestEmailTokenModel:
@@ -48,3 +59,77 @@ class TestEmailTokenForm:
 
         assert url == next_url
 
+    def test_email_property(self):
+
+        domain = settings.EMAIL_TOKEN_DOMAIN_WHITELIST[0][0]
+
+        form = EmailForm({
+            'username': 'test.user',
+            'domain': domain
+
+        })
+
+        assert form.is_valid()
+
+        assert form.cleaned_data['username'] == 'test.user'
+        assert form.cleaned_data['domain'] == domain
+
+        assert form.email == form.cleaned_data['username'] + form.cleaned_data['domain']
+
+
+class TestEmailAuthView:
+    def test_invalid_token(self, client):
+
+        token = 'aninvalidtoken'
+
+        url = reverse('email-auth-signin', kwargs=dict(token=token))
+
+        response = client.get(url)
+
+        assert response.status_code == 302
+        assert response.url == '/email/invalid-token/'
+
+    def test_expired_token(self, client):
+
+        initial_datetime = dt.datetime.now()
+        expired_datetime = initial_datetime + dt.timedelta(settings.EMAIL_TOKEN_TTL+1)
+
+        with freeze_time(initial_datetime) as frozen_time:
+
+            token = EmailToken.objects.create_token('test@test.com')
+
+            url = reverse('email-auth-signin', kwargs=dict(token=token))
+
+            frozen_time.move_to(expired_datetime)
+
+            response = client.get(url)
+
+            assert response.status_code == 302
+            assert response.url == '/email/invalid-token/'
+
+    def test_next_url(self, client):
+
+        token = EmailToken.objects.create_token('test@test.com')
+
+        url = "{}?next={}".format(
+            reverse('email-auth-signin', kwargs=dict(token=token)),
+            'https://myapp.com'
+        )
+
+        response = client.get(url)
+
+        assert response.status_code == 302
+        assert response.url == 'https://myapp.com'
+
+    def test_user_is_authenticated(self, client):
+
+        token = EmailToken.objects.create_token('test@test.com')
+
+        url = "{}?next={}".format(
+            reverse('email-auth-signin', kwargs=dict(token=token)),
+            'https://myapp.com'
+        )
+
+        response = client.get(url)
+
+        assert '_auth_user_id' in client.session
