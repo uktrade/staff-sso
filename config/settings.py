@@ -132,7 +132,6 @@ SAML_USER_MODEL = 'user.user'
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'djangosaml2.backends.Saml2Backend',
-    'sso.emailauth.backends.PasswordlessAuthBackend'
 )
 
 SAML_DJANGO_USER_MAIN_ATTRIBUTE = 'email'

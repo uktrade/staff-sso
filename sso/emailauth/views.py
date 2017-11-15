@@ -41,7 +41,7 @@ class EmailAuthView(RedirectView):
             return reverse('email-auth-invalid-token')
 
         user = token_obj.get_user()
-        user.backend = 'sso.emailauth.backends.PasswordlessAuthBackend'
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
 
         login(self.request, user)
 
