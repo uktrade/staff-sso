@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
-
+from django.views.generic.base import TemplateView
 
 from sso.oauth2.views import CustomAuthorizationView
 
@@ -16,6 +16,8 @@ urlpatterns = [
     url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 
     url(r'^api/v1/', include((api_urls, 'api'), namespace='api-v1')),
+
+    url(r'^access-denied/$', TemplateView.as_view(template_name='sso/access-denied.html'), name='access-denied')
 ]
 
 if getattr(settings, 'LOCAL_AUTH_PAGE'):
