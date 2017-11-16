@@ -6,6 +6,7 @@ from sso.healthcheck.views import HealthCheckView
 from sso.user.admin_views import download_user_csv
 
 from . import api_urls
+from sso.user.admin_views import AdminUserImportView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -21,6 +22,9 @@ urlpatterns = [
     url(r'^access-denied/$', TemplateView.as_view(template_name='sso/access-denied.html'), name='access-denied'),
     url(r'^email/', include('sso.emailauth.urls')),
     url(r'^', include('sso.localauth.urls', namespace='localauth')),
+    url(r'^admin_tools/', include('admin_tools.urls')),
+    url(r'^admin/user-import/$', AdminUserImportView.as_view(), name='admin-user-import'),
+    url(r'^admin/', admin.site.urls),
 
     url(r'^check/$', HealthCheckView.as_view(), name='healthcheck'),
 ]

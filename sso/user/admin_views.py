@@ -35,3 +35,4 @@ def download_user_csv(request):
                                      content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=\'user_download.csv\''
     return response
+
