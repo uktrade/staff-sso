@@ -25,7 +25,8 @@
       {% endfor %}
     </ul>
     <br>
-    <h2>Don't use one of these to sign in?</h2>
+    <h2>Don’t know your password?</h2>
+    <p>Login doesn’t work?</p>
     <p><a href="{% url 'email-auth-initiate' %}{% if came_from %}?next={{ came_from|urlencode }}{% endif %}">Get a secure sign in link</a></p>
 </div>
 {% endblock %}
