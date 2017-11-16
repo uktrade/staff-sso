@@ -3,13 +3,22 @@
 {% block inner_content %}
 
 <div class="container">
-    <h1>Enter your email</h1>
-    <form method="post">
-        {% csrf_token %}
+  <h1 class="heading-large">Sign in with your DIT email address</h1>
 
-        <p>{{ form.username }} : {{ form.domain }}</p>
+<form method="post">
+    {% csrf_token %}
 
-        <input type="submit" class="button">
-    </form>
+    <p>Enter your email address and we'll send you the link.</p>
+
+    <p>Click the link to sign in. You won't need to create a password.</p>
+
+    <p class="email-input">
+      <label class="form-label" for="username">Email address</label>
+      {{ form.username }} : {{ form.domain }}
+    </p>
+
+    <p><input type="submit" class="button" value="Get a secure sign-in link"></p>
+</form>
+
 </div>
 {% endblock %}

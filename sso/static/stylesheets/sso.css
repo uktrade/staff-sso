@@ -6,3 +6,10 @@
 .available_idps li {
   padding-bottom: 25px;
 }
+
+.email-input .form-control {
+  display: inline-block;
+}
+.email-input select.form-control {
+  width: auto;
+}
