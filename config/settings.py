@@ -125,7 +125,6 @@ AUTH_USER_MODEL = 'user.user'
 LOGIN_URL = 'saml2_login'
 LOGOUT_REDIRECT_URL = '/saml2/logged-out/'
 LOGIN_REDIRECT_URL = '/saml2/logged-in/'
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 SAML_USER_MODEL = 'user.user'
 
@@ -299,3 +298,7 @@ EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 EMAIL_PORT = env('EMAIL_PORT', default=587)
 EMAIL_FROM = env('EMAIL_FROM', default='test@example.com')
+
+# session settings
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_COOKIE_AGE = 25*24*60*60
