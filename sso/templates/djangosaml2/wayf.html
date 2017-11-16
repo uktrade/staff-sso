@@ -2,9 +2,23 @@
 
 {% block inner_content %}
 <div class="container">
-    <h1>Which type of account do you have?</h1>
-    <p>Choose one of the following.</p>
-    <ul id="available_idps">
+  <h1 class="heading-large">Sign into DIT internal services</h1>
+  <p>You need to sign in to access DIT internal services.</p>
+
+  <section class="one-time-email">
+    <h1 class="heading-medium">Sign in with your DIT email address</h1>
+
+    <p>We will send you a secure link by email. Click the link to sign in – there is no need for a password.</p>
+
+    <p><a class="button" href="{% url 'email-auth-initiate' %}{% if came_from %}?next={{ came_from|urlencode }}{% endif %}">Get a secure sign in link</a></p>
+  </section>
+
+  <section class="idp">
+    <h1 class="heading-medium">If you have a Mobile Office, UKEF, Cirrus or CTP account</h1>
+    <p>You can save time by signing in with your existing account.</p>
+
+    <p>Choose one of the following:</p>
+    <ul class="list list-bullet available_idps">
       {% for url, name in available_idps %}
             {% spaceless %}
                 <li>
@@ -24,9 +38,7 @@
             {% endspaceless %}
       {% endfor %}
     </ul>
-    <br>
-    <h2>Don’t know your password?</h2>
-    <p>Login doesn’t work?</p>
-    <p><a href="{% url 'email-auth-initiate' %}{% if came_from %}?next={{ came_from|urlencode }}{% endif %}">Get a secure sign in link</a></p>
+  </section>
+
 </div>
 {% endblock %}

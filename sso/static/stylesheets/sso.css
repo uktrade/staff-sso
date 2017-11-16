@@ -1,0 +1,8 @@
+.idp {
+  border-top: 1px solid #eee;
+  margin-top: 40px;
+}
+
+.available_idps li {
+  padding-bottom: 25px;
+}
