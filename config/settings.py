@@ -36,11 +36,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'djangosaml2',
     'govuk_template',
+    'govuk_template_base',
     'oauth2_provider',
     'rest_framework',
     'axes',
     'raven.contrib.django.raven_compat',
 
+    'sso',
     'sso.user',
     'sso.samlauth',
     'sso.localauth',
@@ -120,6 +122,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
 
 # Auth / SAML
 AUTH_USER_MODEL = 'user.user'
