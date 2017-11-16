@@ -301,4 +301,4 @@ EMAIL_FROM = env('EMAIL_FROM', default='test@example.com')
 
 # session settings
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-SESSION_COOKIE_AGE = 25*24*60*60
+SESSION_COOKIE_AGE = 90*24*60*60
