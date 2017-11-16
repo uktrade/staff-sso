@@ -11,8 +11,14 @@ from .models import EmailToken
 
 
 class EmailForm(forms.Form):
-    username = forms.CharField(max_length=255)   # TODO: regex restrict to allowed chars
-    domain = forms.ChoiceField(choices=settings.EMAIL_TOKEN_DOMAIN_WHITELIST)
+    username = forms.CharField(
+        max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control form-control-1-4'})
+    )   # TODO: regex restrict to allowed chars
+    domain = forms.ChoiceField(
+        choices=settings.EMAIL_TOKEN_DOMAIN_WHITELIST,
+        widget=forms.Select(attrs={'class': 'form-control form-control-1-4'})
+    )
 
     @property
     def email(self):

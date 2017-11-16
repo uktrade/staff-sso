@@ -4,14 +4,12 @@
 
 <div class="container">
     <h1>Enter your email</h1>
+    <form method="post">
+        {% csrf_token %}
 
-<form method="post">
-    {% csrf_token %}
+        <p>{{ form.username }} : {{ form.domain }}</p>
 
-    <p>{{ form.username }} : {{ form.domain }}</p>
-
-    <input type="submit">
-</form>
-
+        <input type="submit" class="button">
+    </form>
 </div>
 {% endblock %}
