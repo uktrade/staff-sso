@@ -8,16 +8,16 @@
   <section class="one-time-email">
     <h1 class="heading-medium">Sign in with your DIT email address</h1>
 
-    <p>We will send you a secure link by email. Click the link to sign in – there is no need for a password.</p>
+    <p>We'll send you a link by email.</p>
 
-    <p><a class="button" href="{% url 'email-auth-initiate' %}{% if came_from %}?next={{ came_from|urlencode }}{% endif %}">Get a secure sign in link</a></p>
+    <p><a class="button" href="{% url 'email-auth-initiate' %}{% if came_from %}?next={{ came_from|urlencode }}{% endif %}">Enter your email address</a></p>
   </section>
 
   <section class="idp">
-    <h1 class="heading-medium">If you have a Mobile Office, UKEF, Cirrus or CTP account</h1>
-    <p>You can save time by signing in with your existing account.</p>
+    <h1 class="heading-medium">Sign in with your Mobile Office, UKEF, Cirrus or CTP account</h1>
+    <p>You can sign in now with your existing account.</p>
 
-    <p>Choose one of the following:</p>
+    <p>Sign in with:</p>
     <ul class="list list-bullet available_idps">
       {% for url, name in available_idps %}
             {% spaceless %}
