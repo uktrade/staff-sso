@@ -20,5 +20,5 @@ urlpatterns = [
     url(r'^email/', include('sso.emailauth.urls')),
     url(r'^', include('sso.localauth.urls', namespace='localauth')),
 
-    url(r'^check$', HealthCheckView.as_view(), name='healthcheck')
+    url(r'^check/$', HealthCheckView.as_view(), name='healthcheck')
 ]

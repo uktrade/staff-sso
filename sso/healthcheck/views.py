@@ -1,8 +1,9 @@
 import time
 
 from django.views.generic import TemplateView
+from django.contrib.auth import get_user_model
 
-from sso.user.models import User
+from raven.contrib.django.raven_compat.models import client
 
 
 class HealthCheckView(TemplateView):
@@ -11,9 +12,11 @@ class HealthCheckView(TemplateView):
     def _do_check(self):
         """Perform a basic DB test"""
         try:
-            User.objects.all().count()
+            get_user_model().objects.exists()
             return True
+
         except Exception:
+            client.captureException()
             return False
 
     def get_context_data(self, **kwargs):
@@ -25,4 +28,3 @@ class HealthCheckView(TemplateView):
         context['response_time'] = time.time() - self.request.start_time
 
         return context
-
