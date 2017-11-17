@@ -286,7 +286,8 @@ EMAIL_TOKEN_DOMAIN_WHITELIST = [
     ('@trade.gsi.gov.uk', '@trade.gsi.gov.uk'),
     ('@fco.gov.uk', '@fco.gov.uk'),
     ('@fco.gsi.gov.uk', '@fco.gsi.gov.uk'),
-    ('@trade.gov.uk', '@trade.gov.uk')
+    ('@trade.gov.uk', '@trade.gov.uk'),
+    ('@cirrus.beis.gov.uk', '@cirrus.beis.gov.uk')
 ]
 
 EMAIL_TOKEN_TTL = 3600
