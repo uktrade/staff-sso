@@ -8,6 +8,7 @@ pytest-env
 pytest-cov
 factory-boy
 freezegun
+mock
 
 flake8
 flake8-blind-except
@@ -17,3 +18,4 @@ flake8-print
 flake8-quotes
 
 isort
+lxml
