@@ -1,10 +1,9 @@
-from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
 from django.views.generic.base import TemplateView
 
+from sso.healthcheck.views import HealthCheckView
 from sso.oauth2.views import CustomAuthorizationView
-
 from . import api_urls
 
 urlpatterns = [
@@ -20,5 +19,6 @@ urlpatterns = [
     url(r'^access-denied/$', TemplateView.as_view(template_name='sso/access-denied.html'), name='access-denied'),
     url(r'^email/', include('sso.emailauth.urls')),
     url(r'^', include('sso.localauth.urls', namespace='localauth')),
-]
 
+    url(r'^check$', HealthCheckView.as_view(), name='healthcheck')
+]

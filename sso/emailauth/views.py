@@ -75,3 +75,4 @@ class InvalidToken(TemplateView):
         context['next_url'] = self.request.GET.get('next', '')
 
         return context
+

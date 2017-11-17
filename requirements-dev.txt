@@ -6,10 +6,11 @@
 #
 -e git+https://github.com/uktrade/dit-ip@v1.1.0#egg=django-ip-restriction
 asn1crypto==0.22.0
+asttokens==1.1.7          # via flake8-import-order
 certifi==2017.4.17
 cffi==1.10.0
 chardet==3.0.4
-coverage==4.4.1           # via pytest-cov
+coverage==4.4.2           # via pytest-cov
 cryptography==1.9
 decorator==4.0.11
 defusedxml==0.4.1
@@ -20,35 +21,38 @@ django-oauth-toolkit==1.0.0
 django==1.11.2
 djangorestframework==3.6.3
 djangosaml2==0.16.0
-factory-boy==2.8.1
-faker==0.7.17             # via factory-boy
+factory-boy==2.9.2
+faker==0.8.7              # via factory-boy
 flake8-blind-except==0.1.1
-flake8-debugger==1.4.0
-flake8-import-order==0.12
-flake8-print==2.0.2
-flake8-quotes==0.11.0
-flake8==3.3.0
+flake8-debugger==3.0.0
+flake8-import-order==0.15
+flake8-print==3.0.1
+flake8-quotes==0.12.0
+flake8==3.5.0
 freezegun==0.3.9
 future==0.16.0
 idna==2.5
 isort==4.2.15
+lxml==4.1.1
 mccabe==0.6.1             # via flake8
+mock==2.0.0
 oauthlib==2.0.2
 paste==2.0.3
+pbr==3.1.1                # via mock
 psycopg2==2.7.1
-py==1.4.34                # via pytest
-pycodestyle==2.3.1        # via flake8, flake8-import-order
+py==1.5.2                 # via pytest
+pycodestyle==2.3.1        # via flake8, flake8-debugger, flake8-import-order, flake8-print
 pycparser==2.17
 pycryptodomex==3.4.6
-pyflakes==1.5.0           # via flake8
+pyflakes==1.6.0           # via flake8
 pyopenssl==17.0.0
 pysaml2==4.4.0
 pytest-cov==2.5.1
 pytest-django==3.1.2
 pytest-env==0.6.2
-pytest-mock==1.6.0
-pytest-sugar==0.8.0
-pytest==3.1.2
+pytest-mock==1.6.3
+pytest-sugar==0.9.0
+pytest==3.2.5
 python-dateutil==2.6.0
 pytz==2017.2
 raven==6.3.0
@@ -56,6 +60,7 @@ repoze.who==2.3
 requests==2.18.1
 six==1.10.0
 termcolor==1.1.0          # via pytest-sugar
+text-unidecode==1.1       # via faker
 urllib3==1.21.1
 waitress==1.0.2
 webob==1.7.2
