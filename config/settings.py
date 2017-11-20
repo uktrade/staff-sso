@@ -76,6 +76,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'sso.core.context_processors.template_settings',
             ],
         },
     },
@@ -303,3 +304,6 @@ EMAIL_FROM = env('EMAIL_FROM', default='test@example.com')
 # session settings
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_AGE = 90*24*60*60
+
+# google analytics
+GOOGLE_ANALYTICS_CODE = env('GOOGLE_ANALYTICS_CODE', default=None)
