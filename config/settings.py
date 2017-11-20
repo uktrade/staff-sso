@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'axes',
     'raven.contrib.django.raven_compat',
 
-    'sso',
     'sso.user',
     'sso.samlauth',
     'sso.localauth',
