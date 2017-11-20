@@ -90,14 +90,6 @@ Currently the *cache-control* header for all the responses is set by default to 
 This is enforced by the ``sso.core.middleware.NeverCacheMiddleware``.
 
 
-GOV.UK Template
----------------
-
-There should be no need to regenerate the GOV.UK Elements CSS, but if required::
-
-  ./manage.py buildscss
-
-
 Requirements
 ------------
 

@@ -36,7 +36,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'djangosaml2',
     'govuk_template',
-    'govuk_template_base',
     'oauth2_provider',
     'rest_framework',
     'axes',
