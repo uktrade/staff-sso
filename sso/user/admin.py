@@ -1,11 +1,13 @@
 from django.contrib import admin
 
+from .filter import ApplicationFilter
 from .models import User
 
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     search_fields = ('email', )
+    list_filter = (ApplicationFilter, 'is_superuser')
     fields = ('email', 'first_name', 'last_name',  'is_superuser',
               'date_joined', 'last_login', 'permitted_applications')
     readonly_fields = ('date_joined', 'last_login')
