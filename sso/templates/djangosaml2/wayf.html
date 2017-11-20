@@ -3,37 +3,30 @@
 {% block inner_content %}
 <div class="container">
   <h1 class="heading-large">Sign into DIT internal services</h1>
-  <p>You need to sign in to access DIT internal services.</p>
-
-  <section class="one-time-email">
-    <h1 class="heading-medium">Sign in with your DIT email address</h1>
-
-    <p>We'll send you a link by email.</p>
-
-    <p><a class="button" href="{% url 'email-auth-initiate' %}{% if came_from %}?next={{ came_from|urlencode }}{% endif %}">Enter your email address</a></p>
-  </section>
-
+  <p>You need to sign in to access DIT internal services. Sign in with:</p>
   <section class="idp">
-    <h1 class="heading-medium">Sign in with your Mobile Office, UKEF, Cirrus or CTP account</h1>
-    <p>You can sign in now with your existing account.</p>
-
-    <p>Sign in with:</p>
-    <ul class="list list-bullet available_idps">
+    <ul class="list available_idps">
+        <li>
+          <a class="button" href="{% url 'email-auth-initiate' %}{% if came_from %}?next={{ came_from|urlencode }}{% endif %}">Your email address</a>
+          <span>We'll send you a link by email.</span>
+          <hr>
+        </li>
       {% for url, name in available_idps %}
             {% spaceless %}
                 <li>
                 {% if name == 'a-core' %}
-                    <a href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Evolve, Mobile Office</a><br>
-                    username ends with @mobile.ukti.gov.uk or @extranet.ukti.gov.uk 
+                    <a class="button" href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Evolve, Mobile Office</a>
+                    <span>username ends with @mobile.ukti.gov.uk or @extranet.ukti.gov.uk</span>
                 {% elif name == 'b-ukef' %}
-                    <a href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">UKEF</a><br>
-                    username ends with @ukexportfinance.gov.uk 
+                    <a class="button" href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">UKEF</a>
+                    <span>username ends with @ukexportfinance.gov.uk</span>
                 {% elif name == 'cirrus' %}
-                    <a href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Cirrus, CTP</a><br>
-                    username ends with @trade.gov.uk
+                    <a class="button"  href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Cirrus, CTP</a>
+                    <span>username ends with @trade.gov.uk</span>
                 {% else %}
-                    <a href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">{{ name }}</a>
+                    <a class="button" href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">{{ name }}</a>
                 {% endif %}
+                  <hr>
                 </li>
             {% endspaceless %}
       {% endfor %}
