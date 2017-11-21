@@ -186,7 +186,7 @@ def logged_in(request):
     """
     Fallback view after logging in if no redirect url is specified.
     """
-    return HttpResponse('You are logged in')
+    return render(request, 'sso/logged-in.html')
 
 
 @login_required
@@ -246,4 +246,4 @@ def logged_out(request):
     """
     if request.user.is_authenticated():
         return HttpResponseRedirect(reverse('saml2_logged_in'))
-    return HttpResponse('You have been logged out')
+    return render(request, 'sso/logged-out.html')
