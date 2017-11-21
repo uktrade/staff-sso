@@ -2,7 +2,7 @@
 
 {% block inner_content %}
 <div class="container">
-  <h1 class="heading-large">Sign into DIT internal services</h1>
+  <h1 class="heading-large">Sign in to DIT internal services</h1>
   <p>You need to sign in to access DIT internal services. Sign in with:</p>
   <section class="idp">
     <ul class="list available_idps">
@@ -16,13 +16,13 @@
                 <li>
                 {% if name == 'a-core' %}
                     <a class="button" href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Evolve, Mobile Office</a>
-                    <span>username ends with @mobile.ukti.gov.uk or @extranet.ukti.gov.uk</span>
+                    <span>Username ends with @mobile.ukti.gov.uk or @extranet.ukti.gov.uk.</span>
                 {% elif name == 'b-ukef' %}
                     <a class="button" href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">UKEF</a>
-                    <span>username ends with @ukexportfinance.gov.uk</span>
+                    <span>username ends with @ukexportfinance.gov.uk.</span>
                 {% elif name == 'cirrus' %}
                     <a class="button"  href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Cirrus, CTP</a>
-                    <span>username ends with @trade.gov.uk</span>
+                    <span>username ends with @trade.gov.uk.</span>
                 {% else %}
                     <a class="button" href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">{{ name }}</a>
                 {% endif %}
