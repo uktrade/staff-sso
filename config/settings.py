@@ -41,11 +41,12 @@ INSTALLED_APPS = [
     'axes',
     'raven.contrib.django.raven_compat',
 
+    'sso.core',
     'sso.user',
     'sso.samlauth',
     'sso.localauth',
     'sso.oauth2',
-    'sso.emailauth'
+    'sso.emailauth',
 ]
 
 MIDDLEWARE = [

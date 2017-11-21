@@ -1,0 +1,21 @@
+.idp {
+  margin-top: 80px;
+}
+
+.available_idps li {
+  line-height: 2em;
+}
+
+.available_idps li a {
+    min-width: 200px;
+    display: inline-block;
+    text-align: center;
+    margin-right: 20px;
+}
+
+.email-input .form-control {
+  display: inline-block;
+}
+.email-input select.form-control {
+  width: auto;
+}

@@ -1,9 +1,9 @@
 {% extends 'govuk_template.html' %}
+{% load static %}
 
-{% block content %}
-  <main role="main" id="content" tabindex="-1">
-    {% block inner_content %}{% endblock %}
-  </main>
+{% block head %}
+  {{ block.super }}
+  <link href="{% static 'stylesheets/sso.css' %}" media="screen" rel="stylesheet" />
 {% endblock %}
 
 {% block body_end %}

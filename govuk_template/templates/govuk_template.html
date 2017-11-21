@@ -10,12 +10,6 @@
 {% endblock %}
 
 {% block cookie_message %}
-  <p>
-    {% trans 'GOV.UK uses cookies to make the site simpler.' %}
-    <a href="https://www.gov.uk/help/cookies">
-      {% trans 'Find out more about cookies' %}
-    </a>
-  </p>
 {% endblock %}
 
 {% block header_class %}with-proposition{% endblock %}
@@ -23,9 +17,9 @@
   <div class="header-proposition">
     <div class="content">
       <nav id="proposition-menu">
-        <a href="/" id="proposition-name">
-          {% block proposition %}DIT systems access{% endblock %}
-        </a>
+       <span id="proposition-name">
+          {% block proposition %}DIT system access{% endblock %}
+        </span>
       </nav>
     </div>
   </div>

@@ -2,31 +2,36 @@
 
 {% block inner_content %}
 <div class="container">
-    <h1>Which type of account do you have?</h1>
-    <p>Choose one of the following.</p>
-    <ul id="available_idps">
+  <h1 class="heading-large">Sign in to DIT internal services</h1>
+  <p>You need to sign in to access DIT internal services. Sign in with:</p>
+  <section class="idp">
+    <ul class="list available_idps">
+        <li>
+          <a class="button" href="{% url 'email-auth-initiate' %}{% if came_from %}?next={{ came_from|urlencode }}{% endif %}">Your email address</a>
+          <span>We'll send you a link by email.</span>
+          <hr>
+        </li>
       {% for url, name in available_idps %}
             {% spaceless %}
                 <li>
                 {% if name == 'a-core' %}
-                    <a href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Evolve, Mobile Office</a><br>
-                    username ends with @mobile.ukti.gov.uk or @extranet.ukti.gov.uk 
+                    <a class="button" href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Evolve, Mobile Office</a>
+                    <span>Username ends with @mobile.ukti.gov.uk or @extranet.ukti.gov.uk.</span>
                 {% elif name == 'b-ukef' %}
-                    <a href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">UKEF</a><br>
-                    username ends with @ukexportfinance.gov.uk 
+                    <a class="button" href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">UKEF</a>
+                    <span>username ends with @ukexportfinance.gov.uk.</span>
                 {% elif name == 'cirrus' %}
-                    <a href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Cirrus, CTP</a><br>
-                    username ends with @trade.gov.uk
+                    <a class="button"  href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Cirrus, CTP</a>
+                    <span>username ends with @trade.gov.uk.</span>
                 {% else %}
-                    <a href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">{{ name }}</a>
+                    <a class="button" href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">{{ name }}</a>
                 {% endif %}
+                  <hr>
                 </li>
             {% endspaceless %}
       {% endfor %}
     </ul>
-    <br>
-    <h2>Don’t know your password?</h2>
-    <p>Login doesn’t work?</p>
-    <p><a href="{% url 'email-auth-initiate' %}{% if came_from %}?next={{ came_from|urlencode }}{% endif %}">Get a secure sign in link</a></p>
+  </section>
+
 </div>
 {% endblock %}
