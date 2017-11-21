@@ -12,9 +12,14 @@ class ApplicationFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
 
-        return Application.objects.values_list('id', 'name')
+        options = list(Application.objects.values_list('id', 'name'))
+        options.append(
+            ('noperms', 'Users with no permissions')
+        )
+
+        return options
 
     def queryset(self, request, queryset):
-
         if self.value():
-            return queryset.filter(permitted_applications__id=self.value())
+            query = None if self.value() == 'noperms' else self.value()
+            return queryset.filter(permitted_applications=query)
