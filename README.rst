@@ -37,10 +37,14 @@ Installation
 
     cp sample.env .env
 
-#. Create the db::
+#. Create the db (variant: local postgres installed)::
 
     psql -p5432
     create database "staff-sso";
+
+#. Create the db (variant: docker based)::
+
+    docker run -p 5432:5432 -e POSTGRES_USER=`whoami` -e POSTGRES_DB=staff-sso postgres
 
 #. Configure and populate the db::
 
