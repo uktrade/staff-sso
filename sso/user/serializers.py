@@ -16,9 +16,16 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
 
-        fields = (
-            'email',
-            'first_name',
-            'last_name',
-            'groups'
-        )
+    def to_representation(self, obj):
+        app = self.context['request'].auth.application
+
+        primary_email, related_emails = obj.get_emails_for_application(app)
+
+        return {
+            'email': primary_email,
+            'first_name': obj.first_name,
+            'last_name': obj.last_name,
+            'related_emails': related_emails,
+            'groups': [],
+        }
+

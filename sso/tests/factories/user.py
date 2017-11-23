@@ -15,3 +15,13 @@ class UserFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = 'user.User'
+
+    @factory.post_generation
+    def email_list(self, create, extracted, **kwargs):
+        """Add in a list of emails to build related user.emails"""
+        if not create:
+            return
+
+        if extracted:
+            for email in extracted:
+                self.emails.create(email=email)

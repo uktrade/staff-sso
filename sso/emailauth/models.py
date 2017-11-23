@@ -60,5 +60,3 @@ class EmailToken(models.Model):
     def mark_used(self):
         self.used = True
         self.save()
-
-
