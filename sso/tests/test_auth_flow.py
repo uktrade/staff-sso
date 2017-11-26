@@ -497,8 +497,20 @@ class TestSessionLogout:
     Whilst the saml2 logout is broken due to Core's logout url not killing the ADFS session we're
     using an alternative logout view that destroys the session
     """
-    def test_logout_removes_auth_and_saml2_keys(self):
-        pass
+    def test_logout_removes_all_keys(self, client):
 
-    def test_logout_redirects_to_logged_out_url(self):
-        pass
+        log_user_in(client)
+
+        assert '_auth_user_id' in client.session
+        client.session['_saml2_stuff'] = dict(saml='stuff')
+
+        client.get(reverse('session-logout'))
+
+        assert list(client.session.keys()) == []
+
+    def test_logout_redirects_to_logged_out_url(self, client):
+        log_user_in(client)
+
+        response = client.get(reverse('session-logout'))
+        assert response.status_code == 302
+        assert response.url == settings.LOGOUT_REDIRECT_URL

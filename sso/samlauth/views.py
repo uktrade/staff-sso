@@ -7,7 +7,7 @@ from django.http import (
     HttpResponse, HttpResponseBadRequest, HttpResponseRedirect,
     HttpResponseServerError
 )
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import is_safe_url
@@ -249,11 +249,17 @@ def logged_out(request):
     return render(request, 'sso/logged-out.html')
 
 
+@login_required
 def session_logout(request):
-
+    """
+    Basic logout that destroys session to  logout the user and remove any saml2
+    remnants.
+    """
     request.session.flush()
 
-    came_from = request.GET.get('next', settings.LOGIN_REDIRECT_URL)
+    came_from = request.GET.get('next', settings.LOGOUT_REDIRECT_URL)
     if not came_from:
         logger.warning('The next parameter exists but is empty')
         came_from = settings.LOGIN_REDIRECT_URL
+
+    return redirect(came_from)

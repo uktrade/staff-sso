@@ -10,10 +10,5 @@ class FeatureFlaggedMixin:
         return super().dispatch(*args, **kwargs)
 
 
-
 class LoginView(FeatureFlaggedMixin, views.LoginView):
-    pass
-
-
-class LogoutView(FeatureFlaggedMixin, views.LogoutView):
     pass
