@@ -28,4 +28,3 @@ class UserSerializer(serializers.ModelSerializer):
             'related_emails': related_emails,
             'groups': [],
         }
-

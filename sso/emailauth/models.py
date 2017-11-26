@@ -1,8 +1,8 @@
 import datetime as dt
 import secrets
 
-from django.db import models
 from django.conf import settings
+from django.db import models
 from django.utils import timezone
 
 from sso.user.models import User
@@ -44,7 +44,7 @@ class EmailToken(models.Model):
         username = email.split('@')[0]
         parts = username.split('.')
         self.first_name = parts[0]
-        self.last_name = " ".join(parts[1:])
+        self.last_name = ' '.join(parts[1:])
 
     def get_user(self):
 

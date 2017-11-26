@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from .filter import ApplicationFilter
-from .models import User, EmailAddress
+from .models import EmailAddress, User
 
 
 class EmailInline(admin.TabularInline):

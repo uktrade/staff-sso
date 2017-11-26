@@ -1,8 +1,7 @@
 import time
 
-from django.views.generic import TemplateView
 from django.contrib.auth import get_user_model
-
+from django.views.generic import TemplateView
 from raven.contrib.django.raven_compat.models import client
 
 

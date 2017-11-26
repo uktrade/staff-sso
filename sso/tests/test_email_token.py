@@ -1,13 +1,13 @@
 import datetime as dt
 
+import pytest
 from django.conf import settings
 from django.core.urlresolvers import reverse
-import pytest
 from freezegun import freeze_time
-from .factories.user import UserFactory
 
-from sso.emailauth.models import EmailToken
 from sso.emailauth.forms import EmailForm
+from sso.emailauth.models import EmailToken
+from .factories.user import UserFactory
 
 pytestmark = [
     pytest.mark.django_db
@@ -112,7 +112,7 @@ class TestEmailAuthView:
 
         token = EmailToken.objects.create_token('test@test.com')
 
-        url = "{}?next={}".format(
+        url = '{}?next={}'.format(
             reverse('email-auth-signin', kwargs=dict(token=token)),
             'https://myapp.com'
         )
@@ -126,7 +126,7 @@ class TestEmailAuthView:
 
         token = EmailToken.objects.create_token('test@test.com')
 
-        url = "{}?next={}".format(
+        url = '{}?next={}'.format(
             reverse('email-auth-signin', kwargs=dict(token=token)),
             'https://myapp.com'
         )
@@ -143,7 +143,7 @@ class TestEmailAuthView:
 
         token = EmailToken.objects.create_token('test@test.com')
 
-        url = "{}?next={}".format(
+        url = '{}?next={}'.format(
             reverse('email-auth-signin', kwargs=dict(token=token)),
             'https://myapp.com'
         )

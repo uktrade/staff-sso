@@ -11,7 +11,6 @@ from freezegun import freeze_time
 from saml2.sigver import SignatureError
 
 from sso.user.models import User
-
 from .factories.oauth import ApplicationFactory
 from .factories.user import UserFactory
 

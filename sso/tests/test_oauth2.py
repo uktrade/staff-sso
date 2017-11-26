@@ -2,7 +2,6 @@ import pytest
 
 from .factories.oauth import ApplicationFactory
 
-
 pytestmark = [
     pytest.mark.django_db
 ]
@@ -49,4 +48,3 @@ class TestApplication:
         app = ApplicationFactory()
 
         assert app.get_email_order() == []
-

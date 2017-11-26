@@ -5,7 +5,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.core.urlresolvers import reverse
 
-
 pytestmark = [
     pytest.mark.django_db
 ]

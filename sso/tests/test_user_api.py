@@ -4,9 +4,9 @@ import pytest
 from django.urls import reverse_lazy
 from django.utils import timezone
 
+from sso.oauth2.models import Application
 from .factories.oauth import AccessTokenFactory
 from .factories.user import GroupFactory, UserFactory
-from sso.oauth2.models import Application
 
 pytestmark = [
     pytest.mark.django_db

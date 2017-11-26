@@ -1,10 +1,8 @@
 import logging
 
 from django.core.exceptions import MultipleObjectsReturned
-
-from djangosaml2.backends import get_model, get_saml_user_model, Saml2Backend
-
 from djangosaml2 import settings as saml_settings
+from djangosaml2.backends import get_saml_user_model, Saml2Backend
 
 try:
     from django.contrib.auth.models import SiteProfileNotAvailable
@@ -32,7 +30,7 @@ class MultiEmailSaml2Backend(Saml2Backend):
             logger.error('The user "%s" does not exist', main_attribute)
             return None
         except MultipleObjectsReturned:
-            logger.error("There are more than one user with %s = %s",
+            logger.error('There are more than one user with %s = %s',
                          django_user_main_attribute, main_attribute)
             return None
         return user

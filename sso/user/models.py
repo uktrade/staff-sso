@@ -92,7 +92,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         Get all emails for current Oauth2 application and return a tuple (primary_email, related_emails)
         """
 
-        _remove_username = lambda email: email.split('@')[1]
+        def _remove_username(email):
+            return email.split('@')[1]
 
         emails = {
             _remove_username(email): email for email in self.emails.all().values_list('email', flat=True)
@@ -114,7 +115,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class EmailAddress(models.Model):
-    user = models.ForeignKey(User, related_name="emails")
+    user = models.ForeignKey(User, related_name='emails')
     email = models.EmailField(unique=True)
 
     class Meta:
