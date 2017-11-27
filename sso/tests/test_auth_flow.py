@@ -503,13 +503,13 @@ class TestSessionLogout:
         assert '_auth_user_id' in client.session
         client.session['_saml2_stuff'] = dict(saml='stuff')
 
-        client.get(reverse('session-logout'))
+        client.get(reverse('localauth:session-logout'))
 
         assert list(client.session.keys()) == []
 
     def test_logout_redirects_to_logged_out_url(self, client):
         log_user_in(client)
 
-        response = client.get(reverse('session-logout'))
+        response = client.get(reverse('localauth:session-logout'))
         assert response.status_code == 302
         assert response.url == settings.LOGOUT_REDIRECT_URL

@@ -2,7 +2,7 @@
 MAP = {
     'identifier': 'urn:oasis:names:tc:SAML:2.0:attrname-format:uri',
     'fro': {
-        'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/email': 'email',
+        'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress': 'email',
         'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/first_name': 'first_name',
         'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/last_name': 'last_name',
         'http://schemas.xmlsoap.org/claims/Group': 'group',

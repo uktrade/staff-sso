@@ -247,19 +247,3 @@ def logged_out(request):
     if request.user.is_authenticated():
         return HttpResponseRedirect(reverse('saml2_logged_in'))
     return render(request, 'sso/logged-out.html')
-
-
-@login_required
-def session_logout(request):
-    """
-    Basic logout that destroys session to  logout the user and remove any saml2
-    remnants.
-    """
-    request.session.flush()
-
-    came_from = request.GET.get('next', settings.LOGOUT_REDIRECT_URL)
-    if not came_from:
-        logger.warning('The next parameter exists but is empty')
-        came_from = settings.LOGIN_REDIRECT_URL
-
-    return redirect(came_from)

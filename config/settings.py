@@ -310,5 +310,6 @@ SESSION_COOKIE_AGE = 90*24*60*60
 # google analytics
 GOOGLE_ANALYTICS_CODE = env('GOOGLE_ANALYTICS_CODE', default=None)
 
-# the default order applied to user emails
-DEFAULT_EMAIL_ORDER = env('EMAIL_PRORITY_LIST', default=[])
+# This is used to determine a users primary email and should be set to a comma separated list
+# e.g: 'mobile.ukti.gov.uk, digital.trade.gov.uk'
+DEFAULT_EMAIL_ORDER = env('DEFAULT_EMAIL_ORDER', default="")

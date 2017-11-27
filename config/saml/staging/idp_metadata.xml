@@ -358,7 +358,7 @@
             </KeyInfo>
         </KeyDescriptor>
         <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-                             Location="https://adfsmobile.azurecore.com/adfs/ls/"/>
+                             Location="https://adfsmobile.azurecore.com/adfs/ls"/>
         <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
                              Location="https://adfsmobile.azurecore.com/adfs/ls/"/>
         <NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</NameIDFormat>

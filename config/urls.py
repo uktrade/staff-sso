@@ -4,13 +4,12 @@ from django.views.generic.base import TemplateView
 
 from sso.healthcheck.views import HealthCheckView
 from sso.oauth2.views import CustomAuthorizationView
-from sso.samlauth.views import session_logout
+
 from . import api_urls
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^saml2/', include('sso.samlauth.urls')),
-    url(r'^logout/$', session_logout, name='session-logout'),
 
     # override the DOT authorisation view
     url(r'^o/authorize/$', CustomAuthorizationView.as_view(), name='authorize'),
