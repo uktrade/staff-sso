@@ -4,6 +4,7 @@ from django.views.generic.base import TemplateView
 
 from sso.healthcheck.views import HealthCheckView
 from sso.oauth2.views import CustomAuthorizationView
+
 from . import api_urls
 
 urlpatterns = [
@@ -20,5 +21,5 @@ urlpatterns = [
     url(r'^email/', include('sso.emailauth.urls')),
     url(r'^', include('sso.localauth.urls', namespace='localauth')),
 
-    url(r'^check/$', HealthCheckView.as_view(), name='healthcheck')
+    url(r'^check/$', HealthCheckView.as_view(), name='healthcheck'),
 ]

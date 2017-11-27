@@ -11,7 +11,6 @@ from freezegun import freeze_time
 from saml2.sigver import SignatureError
 
 from sso.user.models import User
-
 from .factories.oauth import ApplicationFactory
 from .factories.user import UserFactory
 
@@ -174,7 +173,7 @@ class TestSAMLLogin:
         assert 'code' in authorize_qs
 
     @freeze_time('2017-06-22 15:50:00.000000+00:00')
-    def test_saml_login_generates_without_permissions_results_in_access_denied(self, client, mocker):
+    def test_saml_login_without_permissions_results_in_access_denied(self, client, mocker):
         """
         Test that after successfully logging into the IdP, the app redirects to the oauth authorize url
         which generates the auth code.
@@ -214,6 +213,47 @@ class TestSAMLLogin:
         assert response.status_code == 302
 
         assert response['location'] == '/access-denied/'
+
+    @freeze_time('2017-06-22 15:50:00.000000+00:00')
+    def test_saml_login_with_alternative_email(self, client, mocker):
+        """
+         Test that after successfully logging into the IdP, the app redirects to the oauth authorize url
+         which generates the auth code.
+         """
+
+        user = UserFactory(email='hello@testing.com', email_list=['user1@example.com', 'test@bbb.com', 'test@ccc.com'])
+
+        application, authorize_params = create_oauth_application(users=[user])
+        response = client.get(OAUTH_AUTHORIZE_URL, data=authorize_params)
+
+        data = {
+            'SAMLResponse': [base64.b64encode(get_saml_response(action='login'))],
+            'RelayState': f'{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}'
+        }
+
+        assert User.objects.count() == 1
+
+        MockOutstandingQueriesCache = mocker.patch('djangosaml2.views.OutstandingQueriesCache')
+        MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
+
+        MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
+        MockCryptoBackendXmlSec1().validate_signature.return_value = True
+
+        response = client.post(SAML_ACS_URL, data)
+
+        # check saml login
+        assert response.status_code == 302
+        authorize_url = response['location']
+        assert authorize_url == data['RelayState']
+
+        # check user in db
+        assert User.objects.count() == 1
+        user = User.objects.first()
+        assert user.emails.filter(email='user1@example.com').exists()
+
+        # check token
+        response = client.get(authorize_url)
+        assert response.status_code == 302
 
     @freeze_time('2017-06-22 15:50:00.000000+00:00')
     def test_saml_login_with_default_redirect_url(self, client, mocker):
@@ -449,3 +489,27 @@ class TestSAMLLogout:
         response = client.get(reverse('saml2_logged_out'))
         assert response.status_code == 302
         assert response['location'] == reverse('saml2_logged_in')
+
+
+class TestSessionLogout:
+    """
+    Whilst the saml2 logout is broken due to Core's logout url not killing the ADFS session we're
+    using an alternative logout view that destroys the session
+    """
+    def test_logout_removes_all_keys(self, client):
+
+        log_user_in(client)
+
+        assert '_auth_user_id' in client.session
+        client.session['_saml2_stuff'] = dict(saml='stuff')
+
+        client.get(reverse('localauth:session-logout'))
+
+        assert list(client.session.keys()) == []
+
+    def test_logout_redirects_to_logged_out_url(self, client):
+        log_user_in(client)
+
+        response = client.get(reverse('localauth:session-logout'))
+        assert response.status_code == 302
+        assert response.url == settings.LOGOUT_REDIRECT_URL

@@ -123,6 +123,28 @@ class TestUserManager:
 
         assert user.email == email.lower()
 
+    @pytest.mark.django_db
+    def test_get_or_create_existing_user_queries_email_list(self):
+        user = UserFactory(email='test@test.com')
+
+        assert user.emails.count() == 1
+        assert user.emails.first().email == 'test@test.com'
+
+        user, created = User.objects.get_or_create(email='test@test.com')
+
+        assert not created
+        assert user.emails.count() == 1
+        assert user.emails.first().email == 'test@test.com'
+
+    @pytest.mark.django_db
+    def test_get_or_create_new_user_adds_to_email_list(self):
+
+        user, created = User.objects.get_or_create(email='test@test.com')
+
+        assert created
+        assert user.emails.count() == 1
+        assert user.emails.first().email == 'test@test.com'
+
 
 class TestUser:
     def test_is_staff_as_is_superuser(self):
@@ -225,3 +247,97 @@ class TestUser:
         user = UserFactory()
 
         assert not user.can_access(app)
+
+    @pytest.mark.django_db
+    def test_get_emails_for_application_app_email_ordering(self):
+        app = ApplicationFactory(email_ordering='aaa.com, bbb.com, ccc.com, ddd.com, eee.com')
+
+        emails = ['test@zzz.com', 'test@aaa.com', 'test@bbb.com', 'test@ccc.com']
+
+        user = UserFactory(email=emails[0], email_list=emails[1:])
+
+        primary_email, related_emails = user.get_emails_for_application(app)
+
+        assert primary_email == 'test@aaa.com'
+        emails.pop(emails.index(primary_email))
+        assert set(related_emails) == set(emails)
+
+    @pytest.mark.django_db
+    def test_get_emails_for_application_settings_email_ordering(self, settings):
+        emails = ['test@zzz.com', 'test@aaa.com', 'test@bbb.com', 'test@ccc.com']
+
+        app = ApplicationFactory()
+
+        settings.DEFAULT_EMAIL_ORDER = 'bbb.com, zzz.com'
+
+        user = UserFactory(email=emails[0], email_list=emails[1:])
+
+        primary_email, related_emails = user.get_emails_for_application(app)
+
+        assert primary_email == 'test@bbb.com'
+        emails.pop(emails.index('test@bbb.com'))
+        assert set(related_emails) == set(emails)
+
+    @pytest.mark.django_db
+    def test_get_emails_for_application_settings_no_ordering(self):
+        """Sanity check to confirm that something is returned with no specific ordering applied"""
+        emails = ['test@zzz.com', 'test@aaa.com', 'test@bbb.com', 'test@ccc.com']
+
+        user = UserFactory(email=emails[0], email_list=emails[1:])
+
+        app = ApplicationFactory()
+
+        primary_email, related_emails = user.get_emails_for_application(app)
+
+        assert primary_email in emails
+        emails.pop(emails.index(primary_email))
+        assert set(emails) == set(related_emails)
+
+    @pytest.mark.django_db
+    def test_get_emails_for_application_emails_not_in_priority_list(self):
+        emails = ['test@google.com', 'test@microsoft.com', 'test@yahoo.com']
+
+        user = UserFactory(email=emails[0], email_list=emails[1:])
+
+        app = ApplicationFactory(email_ordering='bbb.com, ccc.com, ddd.com')
+
+        primary_email, related_emails = user.get_emails_for_application(app)
+
+        assert primary_email in emails
+        emails.pop(emails.index(primary_email))
+        assert set(emails) == set(related_emails)
+
+    @pytest.mark.django_db
+    def test_save_adds_to_email_list(self):
+        user = User()
+
+        user.email = 'test@test.com'
+
+        user.save()
+
+        assert user.emails.count() == 1
+        assert user.emails.first().email == 'test@test.com'
+
+    @pytest.mark.django_db
+    def test_save_email_already_in_email_list(self):
+        """Sanity check to confirm `save()` won't try add additional user.emails related objects"""
+        user = UserFactory(email='test@test.com')
+
+        assert user.emails.count() == 1
+
+        user.save()
+
+        assert user.emails.count() == 1
+
+    @pytest.mark.django_db
+    def test_emails_create(self):
+
+        user = UserFactory(email='test@test.com')
+
+        assert user.emails.count() == 1
+        assert user.emails.first().email == 'test@test.com'
+
+        user.emails.create(email='test222@test.com')
+
+        assert user.emails.count() == 2
+        assert user.emails.last().email == 'test222@test.com'

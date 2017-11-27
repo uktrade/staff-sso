@@ -1,12 +1,13 @@
 import datetime as dt
 
+import pytest
 from django.conf import settings
 from django.core.urlresolvers import reverse
-import pytest
 from freezegun import freeze_time
 
-from sso.emailauth.models import EmailToken
 from sso.emailauth.forms import EmailForm
+from sso.emailauth.models import EmailToken
+from .factories.user import UserFactory
 
 pytestmark = [
     pytest.mark.django_db
@@ -111,7 +112,7 @@ class TestEmailAuthView:
 
         token = EmailToken.objects.create_token('test@test.com')
 
-        url = "{}?next={}".format(
+        url = '{}?next={}'.format(
             reverse('email-auth-signin', kwargs=dict(token=token)),
             'https://myapp.com'
         )
@@ -125,11 +126,28 @@ class TestEmailAuthView:
 
         token = EmailToken.objects.create_token('test@test.com')
 
-        url = "{}?next={}".format(
+        url = '{}?next={}'.format(
             reverse('email-auth-signin', kwargs=dict(token=token)),
             'https://myapp.com'
         )
 
-        response = client.get(url)
+        client.get(url)
+
+        assert '_auth_user_id' in client.session
+
+    def test_authentication_with_alternative_email(self, client):
+        """Test user can authenticate with an alternative email"""
+
+        user = UserFactory(email='test@test.com')
+        user.emails.create(email='test@alternative.com')
+
+        token = EmailToken.objects.create_token('test@test.com')
+
+        url = '{}?next={}'.format(
+            reverse('email-auth-signin', kwargs=dict(token=token)),
+            'https://myapp.com'
+        )
+
+        client.get(url)
 
         assert '_auth_user_id' in client.session

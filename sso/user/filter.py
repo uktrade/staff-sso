@@ -12,7 +12,7 @@ class ApplicationFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
 
-        return Application.objects.values_list('id', 'name') 
+        return Application.objects.values_list('id', 'name')
 
     def queryset(self, request, queryset):
 

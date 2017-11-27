@@ -19,11 +19,24 @@ class UserManager(BaseUserManager):
 
         return self._create_user(email, password, **extra_fields)
 
-    def get_or_create(self, *args, **kwargs):
+    def get_or_create(self, defaults=None, **kwargs):
         """
-        Ensure that incoming emails are lowercased
+        Look up an object with the given kwargs, creating one if necessary.
+        Return a tuple of (object, created), where created is a boolean
+        specifying whether an object was created.
         """
+        # The get() needs to be targeted at the write database in order
+        # to avoid potential transaction consistency problems.
+        self._for_write = True
 
-        kwargs['email'] = kwargs['email'].lower()
+        email = kwargs['email'].lower()
 
-        return super().get_or_create(*args, **kwargs)
+        try:
+            return self.get_by_email(email), False
+        except self.model.DoesNotExist:
+            user = self.create(email=email)
+
+            return user, True
+
+    def get_by_email(self, email):
+        return self.get(emails__email=email)

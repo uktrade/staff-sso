@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth import views
-from django.shortcuts import Http404
+from django.shortcuts import Http404, redirect
+from django.contrib.auth.decorators import login_required
 
 
 class FeatureFlaggedMixin:
@@ -10,10 +11,20 @@ class FeatureFlaggedMixin:
         return super().dispatch(*args, **kwargs)
 
 
-
 class LoginView(FeatureFlaggedMixin, views.LoginView):
     pass
 
 
-class LogoutView(FeatureFlaggedMixin, views.LogoutView):
-    pass
+@login_required
+def session_logout(request):
+    """
+    Basic logout that destroys session to logout the user and remove any saml2
+    remnants.
+    """
+    request.session.flush()
+
+    came_from = request.GET.get('next', settings.LOGOUT_REDIRECT_URL)
+    if not came_from:
+        came_from = settings.LOGIN_REDIRECT_URL
+
+    return redirect(came_from)

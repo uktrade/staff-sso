@@ -55,10 +55,18 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def save(self, *args, **kwargs):
         """
-        Ensure that emails are lower cased
+        Ensure that emails are lower cased and that the primary email address
+        exists in the fk'd EmailAddress model
         """
+
         self.email = self.email.lower()
-        return super().save(*args, **kwargs)
+
+        return_value = super().save(*args, **kwargs)
+
+        if not self.emails.filter(email=self.email).exists():
+            self.emails.create(email=self.email)
+
+        return return_value
 
     def get_full_name(self):
         """
@@ -78,3 +86,37 @@ class User(AbstractBaseUser, PermissionsMixin):
     def can_access(self, application):
         """Can this user access the application?"""
         return application.default_access_allowed or application in self.permitted_applications.all()
+
+    def get_emails_for_application(self, application):
+        """
+        Get all emails for current Oauth2 application and return a tuple (primary_email, related_emails)
+        """
+
+        def _remove_username(email):
+            return email.split('@')[1]
+
+        emails = {
+            _remove_username(email): email for email in self.emails.all().values_list('email', flat=True)
+        }
+
+        if not emails:
+            return self.email, []
+
+        for domain in application.get_email_order():
+            if domain in emails:
+                primary_email = emails.pop(domain)
+                break
+        else:
+            # Do we need to be more consistent here? Perhaps returning user.email instead?
+            # or is this an edge case?
+            _, primary_email = emails.popitem()
+
+        return primary_email, emails.values()
+
+
+class EmailAddress(models.Model):
+    user = models.ForeignKey(User, related_name='emails')
+    email = models.EmailField(unique=True)
+
+    class Meta:
+        verbose_name_plural = 'email addresses'

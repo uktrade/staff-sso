@@ -1,11 +1,10 @@
-from urllib.parse import quote_plus, urlparse, parse_qs
+from urllib.parse import parse_qs, quote_plus, urlparse
 
 from django import forms
 from django.conf import settings
 from django.core.mail import send_mail
-from django.template.loader import render_to_string
 from django.core.urlresolvers import reverse
-
+from django.template.loader import render_to_string
 
 from .models import EmailToken
 
