@@ -11,8 +11,8 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^saml2/', include('sso.samlauth.urls')),
 
-    # override the DOT authorisation view
-    url(r'^o/authorize/$', CustomAuthorizationView.as_view(), name='authorize'),
+    # override authorisation and token introspection DOT views
+    url(r'^o/', include('sso.oauth2.urls', namespace='oauth2')),
     url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 
     url(r'^api/v1/', include((api_urls, 'api'), namespace='api-v1')),
