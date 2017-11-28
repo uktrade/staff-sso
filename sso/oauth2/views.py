@@ -1,10 +1,17 @@
+import calendar
 import logging
+import json
 
 from django.shortcuts import redirect
+from django.http import HttpResponse
+
+from django.core.exceptions import ObjectDoesNotExist
+from oauth2_provider.models import get_access_token_model
 from oauth2_provider.exceptions import OAuthToolkitError
 from oauth2_provider.models import get_application_model
 from oauth2_provider.scopes import get_scopes_backend
 from oauth2_provider.views.base import AuthorizationView
+from oauth2_provider.views.introspect import IntrospectTokenView
 from oauthlib.oauth2.rfc6749.errors import AccessDeniedError
 
 log = logging.getLogger('oauth2_provider')
@@ -55,3 +62,37 @@ class CustomAuthorizationView(AuthorizationView):
                 return redirect('access-denied')
             else:
                 return self.error_response(error)
+
+
+class CustomIntrospectTokenView(IntrospectTokenView):
+
+    @staticmethod
+    def get_token_response(token_value=None):
+        try:
+            token = get_access_token_model().objects.get(token=token_value)
+        except ObjectDoesNotExist:
+            return HttpResponse(
+                content=json.dumps({"active": False}),
+                status=401,
+                content_type="application/json"
+            )
+        else:
+            if token.is_valid():
+                data = {
+                    "active": True,
+                    "scope": token.scope,
+                    "exp": int(calendar.timegm(token.expires.timetuple())),
+                }
+                if token.application:
+                    data["client_id"] = token.application.client_id
+                if token.user:
+                    if not token.application:
+                        data['username'] = token.user.get_username()
+                    else:
+                        data["username"], _ = token.user.get_emails_for_application(token.application)
+                return HttpResponse(content=json.dumps(data), status=200, content_type="application/json")
+            else:
+                return HttpResponse(content=json.dumps({
+                    "active": False,
+                }), status=200, content_type="application/json")
+
