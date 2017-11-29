@@ -367,3 +367,20 @@ class TestUser:
 
         assert user.emails.count() == 2
         assert user.emails.last().email == 'test222@test.com'
+
+    @pytest.mark.django_db
+    def test_emails_added_on_save_are_lowercase(self):
+
+        user = User.objects.create(email='TEST@TEST.COM')
+
+        assert user.emails.count() == 1
+        assert user.emails.last().email == 'test@test.com'
+
+    @pytest.mark.django_db
+    def test_emails_added_directly_to_list_are_lower_cased(self):
+        user = UserFactory(email='test@test.com')
+
+        user.emails.create(email='UPPER@CASE.COM')
+
+        assert user.emails.count() == 2
+        assert user.emails.last().email == 'upper@case.com'
