@@ -13,7 +13,7 @@ pytestmark = [
 ]
 
 
-def get_oauth_token(expires=None, user=None):
+def get_oauth_token(expires=None, user=None, scope='read'):
 
     if not user:
         user = UserFactory(
@@ -26,10 +26,11 @@ def get_oauth_token(expires=None, user=None):
 
     access_token = AccessTokenFactory(
         user=user,
-        expires=expires or (timezone.now() + timedelta(days=1))
+        expires=expires or (timezone.now() + timedelta(days=1)),
+        scope=scope
     )
 
-    return access_token.token
+    return user, access_token.token
 
 
 class TestAPIGetUserMe:
@@ -39,7 +40,7 @@ class TestAPIGetUserMe:
         """
         Test that with a valid token you can get the details of the logged in user.
         """
-        token = get_oauth_token()
+        user, token = get_oauth_token()
 
         api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
         response = api_client.get(self.GET_USER_ME_URL)
@@ -47,6 +48,7 @@ class TestAPIGetUserMe:
         assert response.status_code == 200
         assert response.json() == {
             'email': 'user1@example.com',
+            'account_ref': str(user.account_ref),
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': [],
@@ -71,7 +73,7 @@ class TestAPIGetUserMe:
         """
         Test that with an expired token you cannot get the details of the logged in user.
         """
-        token = get_oauth_token(
+        _, token = get_oauth_token(
             expires=timezone.now() - timedelta(minutes=1)
         )
 
@@ -89,7 +91,7 @@ class TestAPIGetUserMe:
 
         user = UserFactory(email=emails[0], email_list=emails[1:])
 
-        token = get_oauth_token(user=user)
+        _, token = get_oauth_token(user=user)
 
         assert Application.objects.count() == 1
 
@@ -107,3 +109,96 @@ class TestAPIGetUserMe:
         emails.pop(emails.index('test@zzz.com'))
 
         assert set(data['related_emails']) == set(emails)
+
+
+class TestApiUserIntrospect:
+    GET_USER_INTROSPECT_URL = reverse_lazy('api-v1:user:user-introspect')
+
+    def test_with_valid_token_and_account_ref(self, api_client):
+
+        user, token = get_oauth_token(scope='introspection')
+
+        ref = str(user.account_ref)
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.get(self.GET_USER_INTROSPECT_URL + f'?ref={ref}')
+
+        assert response.status_code == 200
+        assert response.json() == {
+            'email': 'user1@example.com',
+            'account_ref': ref,
+            'first_name': 'John',
+            'last_name': 'Doe',
+            'related_emails': [],
+            'groups': []
+        }
+
+    def test_with_valid_token_and_email(self, api_client):
+        user, token = get_oauth_token(scope='introspection')
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.get(self.GET_USER_INTROSPECT_URL + '?email=user1@example.com')
+
+        assert response.status_code == 200
+        assert response.json() == {
+            'email': 'user1@example.com',
+            'account_ref': str(user.account_ref),
+            'first_name': 'John',
+            'last_name': 'Doe',
+            'related_emails': [],
+            'groups': []
+        }
+
+    def test_with_valid_token_and_email_alias(self, api_client):
+        user, token = get_oauth_token(scope='introspection')
+
+        user.emails.create(email='test@aaa.com')
+        user.emails.create(email='test@bbb.com')
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.get(self.GET_USER_INTROSPECT_URL + '?email=test@aaa.com')
+
+        assert response.status_code == 200
+        assert response.json() == {
+            'email': 'user1@example.com',
+            'account_ref': str(user.account_ref),
+            'first_name': 'John',
+            'last_name': 'Doe',
+            'related_emails': ['test@bbb.com', 'test@aaa.com'],
+            'groups': []
+        }
+
+    def test_requires_ref_or_email(self, api_client):
+        user, token = get_oauth_token(scope='introspection')
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.get(self.GET_USER_INTROSPECT_URL)
+
+        assert response.status_code == 400
+
+    def test_without_introspect_scope(self, api_client):
+        user, token = get_oauth_token(scope='read')
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.get(self.GET_USER_INTROSPECT_URL + '?email=test@aaa.com')
+
+        assert response.status_code == 403
+
+    def test_honours_user_permissioms(self, api_client):
+        """
+        If an Oauth2 app attempts to introspect a user who does not have permissions to accesss
+        that application then it should not return user info
+        """
+        user, token = get_oauth_token(scope='introspection')
+
+        assert Application.objects.count() == 1
+        app = Application.objects.first()
+        app.default_access_allowed = False
+        app.save()
+
+        introspected_user = UserFactory(email='test@aaa.com')
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.get(self.GET_USER_INTROSPECT_URL + '?email={introspected_user.email}')
+
+        assert response.status_code == 404
