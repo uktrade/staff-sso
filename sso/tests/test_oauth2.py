@@ -102,3 +102,4 @@ class TestIntrospectView:
 
         assert response.status_code == 200
         assert response.json()['username'] == 'test@bbb.com'
+
