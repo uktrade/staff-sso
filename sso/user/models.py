@@ -92,6 +92,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         Get all emails for current Oauth2 application and return a tuple (primary_email, related_emails)
         """
 
+        if not application or application.provide_immutable_email:
+            return self.email, list(self.emails.exclude(email=self.email).values_list('email', flat=True))
+
         def _remove_username(email):
             return email.split('@')[1]
 

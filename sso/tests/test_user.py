@@ -308,6 +308,32 @@ class TestUser:
         assert set(emails) == set(related_emails)
 
     @pytest.mark.django_db
+    def test_get_emails_for_application_emails_no_application(self):
+        ApplicationFactory(email_ordering='bbb.com, ccc.com, ddd.com', provide_immutable_email=False)
+
+        emails = ['test@google.com', 'test@microsoft.com', 'test@yahoo.com']
+
+        user = UserFactory(email=emails[0], email_list=emails[1:])
+
+        primary_email, related_emails = user.get_emails_for_application(None)
+
+        assert primary_email == 'test@google.com'
+        assert set(related_emails) == set(emails[1:])
+
+    @pytest.mark.django_db
+    def test_get_emails_for_application_emails_immutable_email(self):
+        app = ApplicationFactory(email_ordering='bbb.com, ccc.com, ddd.com', provide_immutable_email=True)
+
+        emails = ['test@google.com', 'test@microsoft.com', 'test@yahoo.com']
+
+        user = UserFactory(email=emails[0], email_list=emails[1:])
+
+        primary_email, related_emails = user.get_emails_for_application(app)
+
+        assert primary_email == 'test@google.com'
+        assert set(related_emails) == set(emails[1:])
+
+    @pytest.mark.django_db
     def test_save_adds_to_email_list(self):
         user = User()
 

@@ -1,6 +1,8 @@
 import pytest
 
-from .factories.oauth import ApplicationFactory
+from django.core.urlresolvers import reverse
+
+from .factories.oauth import ApplicationFactory, AccessTokenFactory, UserFactory
 
 pytestmark = [
     pytest.mark.django_db
@@ -48,3 +50,55 @@ class TestApplication:
         app = ApplicationFactory()
 
         assert app.get_email_order() == []
+
+
+class TestIntrospectView:
+    OAUTH2_INTROSPECTION_URL = reverse('oauth2:introspect')
+
+    def test_introspect_view_with_email_priority_list(self, api_client):
+        application = ApplicationFactory(email_ordering='vvv.com, ddd.com, ccc.com, bbb.com')
+
+        introspect_user = UserFactory()
+        user = UserFactory(email='test@bbb.com', email_list=['test@ccc.com', 'test@ddd.com', 'test@vvv.com'])
+
+        intospect_token = AccessTokenFactory(
+            application=application,
+            user=introspect_user,
+            scope='introspection read'
+        )
+
+        token = AccessTokenFactory(
+            application=application,
+            user=user
+        )
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + intospect_token.token)
+        response = api_client.get(self.OAUTH2_INTROSPECTION_URL + f'?token={token.token}')
+
+        assert response.status_code == 200
+        assert response.json()['username'] == 'test@vvv.com'
+
+    def test_introspect_view_with_immutable_email(self, api_client):
+        application = ApplicationFactory(
+            email_ordering='vvv.com, ddd.com, ccc.com, bbb.com',
+            provide_immutable_email=True)
+
+        introspect_user = UserFactory()
+        user = UserFactory(email='test@bbb.com', email_list=['test@ccc.com', 'test@ddd.com', 'test@vvv.com'])
+
+        intospect_token = AccessTokenFactory(
+            application=application,
+            user=introspect_user,
+            scope='introspection read'
+        )
+
+        token = AccessTokenFactory(
+            application=application,
+            user=user
+        )
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + intospect_token.token)
+        response = api_client.get(self.OAUTH2_INTROSPECTION_URL + f'?token={token.token}')
+
+        assert response.status_code == 200
+        assert response.json()['username'] == 'test@bbb.com'

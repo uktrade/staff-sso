@@ -65,7 +65,6 @@ class CustomAuthorizationView(AuthorizationView):
 
 
 class CustomIntrospectTokenView(IntrospectTokenView):
-
     @staticmethod
     def get_token_response(token_value=None):
         try:

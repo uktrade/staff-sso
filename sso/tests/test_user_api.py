@@ -83,7 +83,7 @@ class TestAPIGetUserMe:
             'detail': 'Authentication credentials were not provided.'
         }
 
-    def test_primary_and_related_emails(self, api_client):
+    def test_primary_and_related_emails_using_priority_list(self, api_client):
         """Test email and related_emails keys are populated correctly given the app.email_ordering field"""
         emails = ['test@qqq.com', 'test@bbb.com', 'test@zzz.com', 'test@iii.com']
 
@@ -105,5 +105,31 @@ class TestAPIGetUserMe:
 
         assert data['email'] == 'test@zzz.com'
         emails.pop(emails.index('test@zzz.com'))
+
+        assert set(data['related_emails']) == set(emails)
+
+    def test_primary_and_related_emails_using_with_immutable_email(self, api_client):
+        """Test email and related_emails keys are populated correctly given the app.email_ordering field"""
+        emails = ['test@qqq.com', 'test@bbb.com', 'test@zzz.com', 'test@iii.com']
+
+        user = UserFactory(email=emails[0], email_list=emails[1:])
+
+        token = get_oauth_token(user=user)
+
+        assert Application.objects.count() == 1
+
+        app = Application.objects.first()
+        app.email_ordering = 'zzz.com, aaa.com, bbb.com'
+        app.provide_immutable_email = True
+        app.save()
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.get(self.GET_USER_ME_URL)
+
+        assert response.status_code == 200
+        data = response.json()
+
+        assert data['email'] == 'test@qqq.com'
+        emails.pop(emails.index('test@qqq.com'))
 
         assert set(data['related_emails']) == set(emails)

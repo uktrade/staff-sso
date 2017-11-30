@@ -24,6 +24,15 @@ class Application(AbstractApplication):
         )
     )
 
+    provide_immutable_email = models.BooleanField(
+        _('provide immutable primary email to the application'),
+        default=False,
+        help_text=_(
+            ('Always provide the same primary email to the application, instead of selecting the primary email '
+             'user\'s list of emails')
+        )
+    )
+
     def get_email_order(self):
         ordering = self.email_ordering or getattr(settings, 'DEFAULT_EMAIL_ORDER', '')
 
