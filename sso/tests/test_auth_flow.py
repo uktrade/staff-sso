@@ -313,6 +313,7 @@ class TestOAuthToken:
         """
         Test that a valid oauth token can be obtained from a valid auth code.
         """
+
         user = log_user_in(client)
         application, authorize_params = create_oauth_application(users=[user])
 
@@ -334,6 +335,42 @@ class TestOAuthToken:
         content = response.json()
         assert 'access_token' in content
         assert 'refresh_token' in content
+
+    @pytest.mark.parametrize('client_ip,expiry', [
+        ('208.181.0.100', 24*60*60),
+        ('208.181.0.1', 30*24*60*60)
+    ])
+    def test_oauth_token_expiry(self, client, settings, client_ip, expiry):
+        """
+        Test that a valid oauth token can be obtained from a valid auth code.
+        """
+
+        settings.TRUSTED_IPS = '208.181.0.1/32'
+
+        user = log_user_in(client)
+        application, authorize_params = create_oauth_application(users=[user])
+
+        auth_code = self._obtain_auth_code(client, authorize_params)
+
+        # exchange for token
+        response = client.post(
+            OAUTH_TOKEN_URL,
+            data={
+                'grant_type': 'authorization_code',
+                'code': auth_code,
+                'client_id': application.client_id,
+                'client_secret': application.client_secret,
+                'redirect_uri': OAUTH_REDIRECT_URL,
+            },
+            REMOTE_ADDR=client_ip
+        )
+
+        assert response.status_code == 200
+        content = response.json()
+        assert 'access_token' in content
+        assert 'refresh_token' in content
+
+        assert content['expires_in'] == expiry
 
     def test_obtain_oauth_token_fails_if_auth_code_invalid(self, client):
         """
