@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib.auth import views
-from django.shortcuts import Http404, redirect
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import Http404, redirect
 
 
 class FeatureFlaggedMixin:

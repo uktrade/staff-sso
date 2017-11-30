@@ -12,7 +12,7 @@ from .models import EmailToken
 class EmailForm(forms.Form):
     username = forms.CharField(
         max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control form-control-1-4', 'placeholder':'i.e. john.smith5'})
+        widget=forms.TextInput(attrs={'class': 'form-control form-control-1-4', 'placeholder': 'i.e. john.smith5'})
     )   # TODO: regex restrict to allowed chars
     domain = forms.ChoiceField(
         choices=settings.EMAIL_TOKEN_DOMAIN_WHITELIST,

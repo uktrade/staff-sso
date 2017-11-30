@@ -4,12 +4,12 @@ from io import StringIO
 from django.contrib.auth import get_user_model
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http.response import StreamingHttpResponse
-from django.views.generic import FormView
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
+from django.views.generic import FormView
 
-from .forms import AdminUserUploadForm
 from .data_import import UserImport
+from .forms import AdminUserUploadForm
 
 
 class Echo(object):
@@ -69,4 +69,3 @@ class AdminUserImportView(FormView):
                 'form': self.get_form()
             }
         )
-

@@ -7,6 +7,7 @@ from sso.user.admin_views import download_user_csv
 
 from . import api_urls
 from sso.user.admin_views import AdminUserImportView
+from . import api_urls
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),

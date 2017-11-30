@@ -323,4 +323,4 @@ GOOGLE_ANALYTICS_CODE = env('GOOGLE_ANALYTICS_CODE', default=None)
 
 # This is used to determine a users primary email and should be set to a comma separated list
 # e.g: 'mobile.ukti.gov.uk, digital.trade.gov.uk'
-DEFAULT_EMAIL_ORDER = env('DEFAULT_EMAIL_ORDER', default="")
+DEFAULT_EMAIL_ORDER = env('DEFAULT_EMAIL_ORDER', default='')

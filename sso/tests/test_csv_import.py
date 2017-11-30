@@ -3,9 +3,8 @@ from django.core.exceptions import ValidationError
 
 from sso.user.data_import import UserImport
 from sso.user.models import User
-from .factories.user import UserFactory
 from .factories.oauth import ApplicationFactory
-
+from .factories.user import UserFactory
 
 pytestmark = [
     pytest.mark.django_db
@@ -88,7 +87,7 @@ class TestUserImport:
 
     def test_find_associated_users(self):
         user1 = UserFactory(email='test@aaa.com', email_list=['test@bbb.com'])
-        user2 = UserFactory(email='test@ccc.com')
+        user2 = UserFactory(email='test@ccc.com')  # noqa: F841
         user3 = UserFactory(email='test@ddd.com')
         user4 = UserFactory(email='test@eee.com', email_list=['test@fff.com', 'test@ggg.com'])
 
@@ -108,7 +107,7 @@ class TestUserImport:
         )
 
         app1 = ApplicationFactory()
-        app2 = ApplicationFactory(users=[user])
+        app2 = ApplicationFactory(users=[user])  # noqa: F841
 
         UserImport(None, [app1.id])._update_user(
             user,
@@ -124,7 +123,8 @@ class TestUserImport:
         assert user.last_name == 'Smith'
         assert user.email == 'primary@email.com'
         assert user.emails.count() == 4
-        assert set(user.emails.all().values_list('email', flat=True)) == set(['test@aaa.com', 'test@bbb.com', 'test@ccc.com', 'primary@email.com'])
+        assert set(user.emails.all().values_list('email', flat=True)) == \
+            set(['test@aaa.com', 'test@bbb.com', 'test@ccc.com', 'primary@email.com'])
         assert user.permitted_applications.count() == 1
         assert user.permitted_applications.first().id == app1.id
 
@@ -160,12 +160,10 @@ class TestUserImport:
         assert user_import.get_stats()['rows_imported'] == 1
         assert user_import.get_stats()['users_created'] == 1
         assert user.email == 'test@ccc.com'
-        assert set(user.emails.all().values_list('email', flat=True)) == set(['test@zzz.com', 'test@nnn.com', 'test@ccc.com'])
+        assert set(user.emails.all().values_list('email', flat=True)) == \
+            set(['test@zzz.com', 'test@nnn.com', 'test@ccc.com'])
         assert user.first_name == 'first'
         assert user.last_name == 'last'
-
-    def test_process_existing_user(self):
-        pass
 
     def test_process_dry_run_is_none_destructive(self, settings):
         settings.DEFAULT_EMAIL_ORDER = 'aaa.com, bbb.com, ccc.com'
@@ -189,10 +187,10 @@ class TestUserImport:
             ['first', 'last', '', 'test@bbb.com', '', 'test@ccc.com', '', 'test@ddd.com']
         ]
 
-        user1 = UserFactory(email='test@nnn.com', email_list=['test@ccc.com'])
+        user1 = UserFactory(email='test@nnn.com', email_list=['test@ccc.com'])  # noqa: F841
         user2 = UserFactory(email='test@zzz.com', email_list=['test@bbb.com'])
-        user3 = UserFactory(email='test@qqq.com', email_list=['test@ddd.com'])
-        user4 = UserFactory(email='test@unrelated.com')
+        user3 = UserFactory(email='test@qqq.com', email_list=['test@ddd.com'])  # noqa: F841
+        user4 = UserFactory(email='test@unrelated.com')  # noqa: F841
 
         app = ApplicationFactory()
 
@@ -213,14 +211,4 @@ class TestUserImport:
         assert user == user2
         assert user.email == 'test@bbb.com'
         assert set(user.emails.all().values_list('email', flat=True)) == \
-               set(['test@bbb.com', 'test@ccc.com', 'test@ddd.com'])
-
-
-class TestAdminImportView:
-    def test_csv_import_dry_run(self):
-        # TODO
-        pass
-
-    def test_csv_import(self):
-        # TODO
-        pass
+            set(['test@bbb.com', 'test@ccc.com', 'test@ddd.com'])

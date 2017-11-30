@@ -1,4 +1,5 @@
 from django import forms
+
 from sso.oauth2.models import Application
 
 
