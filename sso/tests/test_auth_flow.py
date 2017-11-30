@@ -45,7 +45,7 @@ pytestmark = [
 ]
 
 
-def create_oauth_application(users=None):
+def create_oauth_application(users=None, default_access_allowed=False):
     """
     Create an oauth application and returns a tuple
     (
@@ -55,7 +55,8 @@ def create_oauth_application(users=None):
     """
     application = ApplicationFactory(
         redirect_uris=OAUTH_REDIRECT_URL,
-        users=users
+        users=users,
+        default_access_allowed=default_access_allowed
     )
 
     oauth_params = {

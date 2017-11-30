@@ -23,6 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
 
         return {
             'email': primary_email,
+            'account_ref': obj.account_ref,
             'first_name': obj.first_name,
             'last_name': obj.last_name,
             'related_emails': related_emails,

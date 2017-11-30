@@ -210,7 +210,7 @@ class TestUser:
         """
 
         user = UserFactory()
-        app = ApplicationFactory(users=[user])
+        app = ApplicationFactory(users=[user], default_access_allowed=False)
 
         assert user.can_access(app)
 
@@ -220,7 +220,7 @@ class TestUser:
         Test that `can_access()` returns False when user is not assigned to app
         """
 
-        app = ApplicationFactory()
+        app = ApplicationFactory(default_access_allowed=False)
         user = UserFactory()
 
         assert not user.can_access(app)
