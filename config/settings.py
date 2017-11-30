@@ -256,10 +256,14 @@ OAUTH2_PROVIDER = {
         'write': 'Write scope',
         'introspection': 'introspect scope',
         'data-hub:internal-front-end': 'A datahub specific scope'
-    }
+    },
+    'OAUTH2_VALIDATOR_CLASS': 'sso.oauth2.validators.CustomOAuth2Validator',
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 24*60*60
 }
 
 OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2.Application'
+OAUTH2_TRUSTED_ACCESS_TOKEN_EXPIRE_SECONDS = 30*24*60*60
+
 
 LOGGING = {
     'version': 1,
@@ -313,3 +317,5 @@ GOOGLE_ANALYTICS_CODE = env('GOOGLE_ANALYTICS_CODE', default=None)
 # This is used to determine a users primary email and should be set to a comma separated list
 # e.g: 'mobile.ukti.gov.uk, digital.trade.gov.uk'
 DEFAULT_EMAIL_ORDER = env('DEFAULT_EMAIL_ORDER', default="")
+
+TRUSTED_IPS = env('TRUSTED_IPS', default='127.0.0.1')
