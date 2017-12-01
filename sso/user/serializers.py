@@ -28,3 +28,7 @@ class UserSerializer(serializers.ModelSerializer):
             'related_emails': related_emails,
             'groups': [],
         }
+
+
+class EmailParamSerializer(serializers.Serializer):
+    email = serializers.EmailField()

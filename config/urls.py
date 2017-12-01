@@ -3,12 +3,13 @@ from django.contrib import admin
 from django.views.generic.base import TemplateView
 
 from sso.healthcheck.views import HealthCheckView
-from sso.oauth2.views import CustomAuthorizationView
+from sso.user.admin_views import download_user_csv
 
 from . import api_urls
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^admin/user/csv-download/$', download_user_csv, name='user-csv-download'),
     url(r'^saml2/', include('sso.samlauth.urls')),
 
     # override authorisation and token introspection DOT views
