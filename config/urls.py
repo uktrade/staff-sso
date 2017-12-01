@@ -9,6 +9,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^admin_tools/', include('admin_tools.urls')),
     url(r'^admin/', include('sso.user.admin_urls')),
+    url(r'^admin/', include('sso.user.admin_urls')),
 
     url(r'^saml2/', include('sso.samlauth.urls')),
 
