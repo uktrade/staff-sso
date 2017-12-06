@@ -118,7 +118,7 @@ class UserImport:
 
         return self._order_users(users)
 
-    def _update_user(self, user, first_name, last_name, primary_email, related_emails):
+    def _update_user(self, user, first_name, last_name, emails):
         """Set permissions and first/last name"""
 
         # This must happen first as user.save() adds user.email to user.email_list
@@ -126,15 +126,16 @@ class UserImport:
 
         user.first_name = first_name
         user.last_name = last_name
-        user.email = primary_email
+        #user.email = primary_email
 
         user.save()
 
         user.permitted_applications.clear()
         user.permitted_applications.add(*self.applications)
 
-        for email in related_emails:
-            user.emails.create(email=email)
+        for email in emails:
+            if not user.emails.filter(email=email).exists():
+                user.emails.create(email=email)
 
     def process(self, dry_run=False):
         """
@@ -196,4 +197,4 @@ class UserImport:
             self.rows_imported += 1
 
             if not dry_run:
-                self._update_user(primary_user, first_name, last_name, primary_email, related_emails)
+                self._update_user(primary_user, first_name, last_name, emails)

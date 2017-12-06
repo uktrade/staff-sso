@@ -102,7 +102,7 @@ class TestUserImport:
         user = UserFactory(
             first_name='Steve',
             last_name='White',
-            email='test@zzz.com',
+            email='primary@email.com',
             email_list=['test@ddd.com', 'test@vvv.com']
         )
 
@@ -113,8 +113,7 @@ class TestUserImport:
             user,
             'Bill',
             'Smith',
-            'primary@email.com',
-            ['test@aaa.com', 'test@bbb.com', 'test@ccc.com'])
+            ['primary@email.com', 'test@aaa.com', 'test@bbb.com', 'test@ccc.com'])
 
         user = User.objects.first()
 
@@ -209,6 +208,32 @@ class TestUserImport:
         assert User.objects.count() == 2
         user = User.objects.exclude(email='test@unrelated.com').first()
         assert user == user2
-        assert user.email == 'test@bbb.com'
+        assert user.email == 'test@zzz.com'
         assert set(user.emails.all().values_list('email', flat=True)) == \
-            set(['test@bbb.com', 'test@ccc.com', 'test@ddd.com'])
+            set(['test@zzz.com', 'test@bbb.com', 'test@ccc.com', 'test@ddd.com'])
+
+    def test_process_does_not_change_primary_email_for_existing_users(self):
+        """
+        The primary email address `user.email` is an immutable key and must not be
+        modified.
+        """
+
+        csv = [
+            ['first', 'last', '', 'test@bbb.com', '', 'test@ccc.com', '', 'test@ddd.com']
+        ]
+
+        UserFactory(email='test@nnn.com', email_list=['test@ccc.com'])  # noqa: F841
+        app = ApplicationFactory(email_ordering='aaa.com, bbb.com, ccc.com')
+
+        user_import = UserImport(csv, [app.id])
+        user_import.process()
+
+        assert user_import.get_stats()['users_created'] == 0
+        assert user_import.get_stats()['users_deleted'] == 0
+        assert user_import.get_stats()['users_updated'] == 1
+        assert user_import.get_stats()['rows_imported'] == 1
+
+        user = User.objects.first()
+        assert user.email == 'test@nnn.com'
+        assert set(user.emails.all().values_list('email', flat=True)) == \
+               set(['test@nnn.com', 'test@bbb.com', 'test@ccc.com', 'test@ddd.com'])
