@@ -21,21 +21,14 @@ class TestUserImport:
         assert last_name == 'Smith'
         assert emails == ['test@aaa.com', 'test@bbb.com', 'test@ccc.com']
 
-    def test_extract_row_data_missing_first_name(self):
-        row = ['', 'Smith', 'test@test.com']
-
-        with pytest.raises(ValidationError):
-            UserImport(None, None)._extract_row_data(row)
-
-    def test_extract_row_data_missing_first_no_emails(self):
-        row = ['John', 'Smith', '']
-
-        with pytest.raises(ValidationError):
-            UserImport(None, None)._extract_row_data(row)
-
-    def test_extract_row_data_missing_first_invalid_emails(self):
-        row = ['John', 'Smith', 'not-an-email']
-
+    @pytest.mark.parametrize(
+        'row', (
+                ['', 'Smith', 'test@test.com'],
+                ['John', 'Smith', ''],
+                ['John', 'Smith', 'not-an-email']
+        )
+    )
+    def test_extract_row_data_invalid_data(self, row):
         with pytest.raises(ValidationError):
             UserImport(None, None)._extract_row_data(row)
 
@@ -96,7 +89,14 @@ class TestUserImport:
         assert set(users) == set([user1, user3, user4])
 
     def test_find_associated_users_dedupes_users(self):
-        pass
+        """
+        Ensure there are no duplicate users in the returned list
+        """
+        user = UserFactory(email='test@aaa.com', email_list=['test@bbb.com']    )
+
+        users = UserImport(None, None)._find_associated_users(['test@aaa.com', 'test@bbb.com'])
+
+        assert users == [user]
 
     def test_update_user(self):
         user = UserFactory(
@@ -165,7 +165,7 @@ class TestUserImport:
         assert user.first_name == 'first'
         assert user.last_name == 'last'
 
-    def test_process_dry_run_is_none_destructive(self, settings):
+    def test_process_dry_run_is_non_destructive(self, settings):
         settings.DEFAULT_EMAIL_ORDER = 'aaa.com, bbb.com, ccc.com'
 
         csv = [
