@@ -265,6 +265,7 @@ OAUTH2_PROVIDER = {
         'introspection': 'introspect scope',
         'data-hub:internal-front-end': 'A datahub specific scope'
     },
+    'DEFAULT_SCOPES': ['read', 'write'],
     'OAUTH2_VALIDATOR_CLASS': 'sso.oauth2.validators.CustomOAuth2Validator',
     'ACCESS_TOKEN_EXPIRE_SECONDS': 24*60*60
 }
