@@ -1,5 +1,0 @@
----
-applications:
-- name: staff-sso
-  memory: 512M
-  buildpack: python_buildpack
