@@ -18,6 +18,7 @@ log = logging.getLogger('oauth2_provider')
 
 
 class CustomAuthorizationView(AuthorizationView):
+
     def get(self, request, *args, **kwargs):
         """
         Overridden django-oauth-toolkit authorization view which checks that authenticated users are in the correct
@@ -44,6 +45,13 @@ class CustomAuthorizationView(AuthorizationView):
 
             # Check that the user has all of the application's groups
             allow = request.user.can_access(application)
+
+            # remember which application the user tried to access so they can request
+            # access on the access denied form.
+
+            request.session.pop('_last_failed_access_app', None)
+            if not allow:
+                request.session['_last_failed_access_app'] = application.name
 
             self.oauth2_data = kwargs
 

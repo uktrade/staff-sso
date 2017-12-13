@@ -4,13 +4,23 @@
 <div class="container">
     <h1 class="heading-large">You don't have permission to access this</h1>
     <p>If you think you should have access or need to sign up to a DIT system then get in touch.</p>
-    <p>Email login.support@uktrade.zendesk.com and put the service you want to access in the subject line, and put your team and a short description of the issue in the email. 
+    <p>Email <a href="mailto:login.support@uktrade.zendesk.com"><login class="support@uktrade zendesk com"> </login></a> and put the service you want to access in the subject line, and put your team and a short description of the issue in the email.
 
         <ul>
             <li>Digital Workspace</li>
             <li>Data Hub</li>
             <li>MI Dashboards</li>
         </ul>
+    </p>
+    <p>
+        <form method="post">
+            {{ form.non_field_errors }}
+
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <button type="submit">Request Access</button>
+        </form>
     </p>
 </div>
 {% endblock %}
