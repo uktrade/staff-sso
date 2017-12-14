@@ -5,6 +5,7 @@ from django.utils import timezone
 from oauth2_provider.models import AccessToken
 
 from sso.oauth2.models import Application
+
 from .user import UserFactory
 
 

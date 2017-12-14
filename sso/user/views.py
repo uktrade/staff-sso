@@ -1,11 +1,9 @@
 from django.contrib.auth import get_user_model
-from rest_framework import mixins, permissions, viewsets, status
-
+from oauth2_provider.contrib.rest_framework import TokenHasScope
+from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.response import Response
 
-from oauth2_provider.contrib.rest_framework import TokenHasScope
-
-from .serializers import UserSerializer, EmailParamSerializer
+from .serializers import EmailParamSerializer, UserSerializer
 
 
 class UserRetrieveViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):

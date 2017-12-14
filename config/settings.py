@@ -316,7 +316,7 @@ ADMIN_TOOLS_INDEX_DASHBOARD = 'sso.core.dashboard.CustomIndexDashboard'
 
 # session settings
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-SESSION_COOKIE_AGE = 90*24*60*60
+SESSION_COOKIE_AGE = 90 * 24 * 60 * 60
 
 # google analytics
 GOOGLE_ANALYTICS_CODE = env('GOOGLE_ANALYTICS_CODE', default=None)

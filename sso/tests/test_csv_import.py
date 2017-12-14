@@ -1,8 +1,9 @@
 import pytest
 from django.core.exceptions import ValidationError
 
-from sso.user.data_import import UserImport
+from sso.user.data_import import UserAliasImport, UserMergeImport
 from sso.user.models import User
+
 from .factories.oauth import ApplicationFactory
 from .factories.user import UserFactory
 
@@ -11,38 +12,38 @@ pytestmark = [
 ]
 
 
-class TestUserImport:
+class TestUserMergeImport:
     def test_extract_row_data_valid_data(self):
         row = ['John', 'Smith', '', 'test@aaa.com', '', 'test@bbb.com', '', 'test@ccc.com', '', '', '', '']
 
-        first_name, last_name, emails = UserImport(None, None)._extract_row_data(row)
+        first_name, last_name, emails = UserMergeImport(None, None)._extract_row_data(row)
 
         assert first_name == 'John'
         assert last_name == 'Smith'
         assert emails == ['test@aaa.com', 'test@bbb.com', 'test@ccc.com']
 
     @pytest.mark.parametrize(
-        'row', (
-                ['', 'Smith', 'test@test.com'],
-                ['John', 'Smith', ''],
-                ['John', 'Smith', 'not-an-email']
-        )
+         'row', (
+              ['', 'Smith', 'test@test.com'],
+              ['John', 'Smith', ''],
+              ['John', 'Smith', 'not-an-email']
+         )
     )
     def test_extract_row_data_invalid_data(self, row):
         with pytest.raises(ValidationError):
-            UserImport(None, None)._extract_row_data(row)
+            UserMergeImport(None, None)._extract_row_data(row)
 
     def test_extract_row_data_lower_cases_emails(self):
         row = ['John', 'Smith', ' UPPERCASE@EMAIL.COM ']
 
-        _, _, emails = UserImport(None, None)._extract_row_data(row)
+        _, _, emails = UserMergeImport(None, None)._extract_row_data(row)
 
         assert emails[0] == 'uppercase@email.com'
 
     def test_order_emails(self, settings):
         settings.DEFAULT_EMAIL_ORDER = 'aaa.com, bbb.com, ccc.com'
 
-        ordered_emails = UserImport(None, None)._order_emails(['test@fff.com', 'test@bbb.com', 'test@ccc.com'])
+        ordered_emails = UserMergeImport(None, None)._order_emails(['test@fff.com', 'test@bbb.com', 'test@ccc.com'])
 
         assert ordered_emails == ['test@bbb.com', 'test@ccc.com', 'test@fff.com']
 
@@ -53,7 +54,7 @@ class TestUserImport:
         user2 = UserFactory(email='test@qqq.com', email_list=['test@iii.com', 'test@vvv.com'])
         user3 = UserFactory(email='test@aaa.com')
 
-        users = UserImport(None, None)._order_users([user1, user2, user3])
+        users = UserMergeImport(None, None)._order_users([user1, user2, user3])
 
         assert users == [user3, user1, user2]
 
@@ -63,7 +64,7 @@ class TestUserImport:
         user1 = UserFactory(email='test@zzz.com', email_list=['test@bbb.com', 'test@ccc.com'])
         user2 = UserFactory(email='test@qqq.com', email_list=['test@iii.com', 'test@vvv.com'])
 
-        users = UserImport(None, None)._order_users([user1, user2])
+        users = UserMergeImport(None, None)._order_users([user1, user2])
 
         assert set(users) == set([user1, user2])
 
@@ -74,7 +75,7 @@ class TestUserImport:
         user2 = UserFactory(email='test@qqq.com', email_list=['test@iii.com', 'test@vvv.com'])
         user3 = UserFactory(email='test@aaa.com')
 
-        users = UserImport(None, None)._find_associated_users(['test@aaa.com', 'test@zzz.com', 'test@qqq.com'])
+        users = UserMergeImport(None, None)._find_associated_users(['test@aaa.com', 'test@zzz.com', 'test@qqq.com'])
 
         assert users == [user3, user1, user2]
 
@@ -84,7 +85,7 @@ class TestUserImport:
         user3 = UserFactory(email='test@ddd.com')
         user4 = UserFactory(email='test@eee.com', email_list=['test@fff.com', 'test@ggg.com'])
 
-        users = UserImport(None, None)._find_associated_users(['test@aaa.com', 'test@ddd.com', 'test@fff.com'])
+        users = UserMergeImport(None, None)._find_associated_users(['test@aaa.com', 'test@ddd.com', 'test@fff.com'])
 
         assert set(users) == set([user1, user3, user4])
 
@@ -92,9 +93,9 @@ class TestUserImport:
         """
         Ensure there are no duplicate users in the returned list
         """
-        user = UserFactory(email='test@aaa.com', email_list=['test@bbb.com']    )
+        user = UserFactory(email='test@aaa.com', email_list=['test@bbb.com'])
 
-        users = UserImport(None, None)._find_associated_users(['test@aaa.com', 'test@bbb.com'])
+        users = UserMergeImport(None, None)._find_associated_users(['test@aaa.com', 'test@bbb.com'])
 
         assert users == [user]
 
@@ -109,7 +110,9 @@ class TestUserImport:
         app1 = ApplicationFactory()
         app2 = ApplicationFactory(users=[user])  # noqa: F841
 
-        UserImport(None, [app1.id])._update_user(
+        form_data = dict(applications=[app1.id])
+
+        UserMergeImport(None, form_data)._update_user(
             user,
             'Bill',
             'Smith',
@@ -132,7 +135,9 @@ class TestUserImport:
             ['first', 'last', 'not-an-email']
         ]
 
-        user_import = UserImport(csv, [1])
+        form_data = dict(applications=[1])
+
+        user_import = UserMergeImport(csv, form_data)
         user_import.process()
 
         assert User.objects.count() == 0
@@ -149,7 +154,9 @@ class TestUserImport:
 
         app = ApplicationFactory()
 
-        user_import = UserImport(csv, [app.id])
+        form_data = dict(applications=[app.id])
+
+        user_import = UserMergeImport(csv, form_data)
         user_import.process()
 
         user = User.objects.first()
@@ -173,7 +180,9 @@ class TestUserImport:
 
         app = ApplicationFactory()
 
-        user_import = UserImport(csv, [app.id])
+        form_data = dict(applications=[app.id])
+
+        user_import = UserMergeImport(csv, form_data)
         user_import.process(dry_run=True)
 
         assert User.objects.count() == 0
@@ -193,7 +202,9 @@ class TestUserImport:
 
         app = ApplicationFactory()
 
-        user_import = UserImport(csv, [app.id])
+        form_data = dict(applications=[app.id])
+
+        user_import = UserMergeImport(csv, form_data)
         user_import.process()
 
         # user2 should be primary
@@ -225,7 +236,9 @@ class TestUserImport:
         UserFactory(email='test@nnn.com', email_list=['test@ccc.com'])  # noqa: F841
         app = ApplicationFactory(email_ordering='aaa.com, bbb.com, ccc.com')
 
-        user_import = UserImport(csv, [app.id])
+        form_data = dict(applications=[app.id])
+
+        user_import = UserMergeImport(csv, form_data)
         user_import.process()
 
         assert user_import.get_stats()['users_created'] == 0
@@ -236,4 +249,84 @@ class TestUserImport:
         user = User.objects.first()
         assert user.email == 'test@nnn.com'
         assert set(user.emails.all().values_list('email', flat=True)) == \
-               set(['test@nnn.com', 'test@bbb.com', 'test@ccc.com', 'test@ddd.com'])
+            set(['test@nnn.com', 'test@bbb.com', 'test@ccc.com', 'test@ddd.com'])
+
+
+class TestUserAliasImport:
+    def test_invalid_csv_data(self):
+
+        csv = [
+            ['not-an-email', 'test@test.com'],
+            ['test@test.com', 'test@test.com', 'too-many-rows']
+        ]
+
+        user_import = UserAliasImport(csv)
+        user_import.process()
+
+        assert user_import.get_stats()['rows_skipped'] == 2
+
+    def test_dry_run_does_not_change_data(self):
+        user = UserFactory(email='test@test.com', email_list=['test2@test.com'])
+
+        csv = [
+            ['test@test.com', 'test3@test.com']
+        ]
+
+        user_import = UserAliasImport(csv)
+        user_import.process(dry_run=True)
+
+        assert user_import.get_stats()['rows_processed'] == 1
+        assert not user.emails.filter(email='test3@test.com').exists()
+
+    def test_no_existing_user(self):
+        """Do nothing if we don't have an existing user"""
+
+        csv = [
+            ['test@test.com', 'test3@test.com']
+        ]
+
+        user_import = UserAliasImport(csv)
+        user_import.process()
+
+        assert user_import.get_stats()['rows_skipped'] == 1
+        assert User.objects.count() == 0
+
+    def test_duplicate_user_fails(self):
+        """Do nothing if there are multiple user records"""
+        UserFactory(email='test@test.com')
+        UserFactory(email='test2@test.com')
+
+        csv = [
+            ['test@test.com', 'test2@test.com']
+        ]
+
+        user_import = UserAliasImport(csv)
+        user_import.process(dry_run=True)
+
+        assert user_import.get_stats()['rows_skipped'] == 1
+
+    def test_alias_exists(self):
+        """Nothing to do if there alias already exists"""
+        UserFactory(email='test@test.com', email_list=['test2@test.com'])
+
+        csv = [
+            ['test@test.com', 'test2@test.com']
+        ]
+
+        user_import = UserAliasImport(csv)
+        user_import.process(dry_run=True)
+
+        assert user_import.get_stats()['rows_skipped'] == 1
+
+    def test_alias_added_success(self):
+        user = UserFactory(email='test@test.com', email_list=['test2@test.com'])
+
+        csv = [
+            ['test@test.com', 'test3@test.com']
+        ]
+
+        user_import = UserAliasImport(csv)
+        user_import.process()
+
+        assert user_import.get_stats()['rows_processed'] == 1
+        assert user.emails.filter(email='test3@test.com').exists()

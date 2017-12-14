@@ -20,3 +20,15 @@ class AdminUserUploadForm(forms.Form):
         label='select a csv file',
         required=False
     )
+
+
+class AdminUserAddAliasForm(forms.Form):
+    dry_run = forms.BooleanField(
+        label='Test run - do not change any data',
+        required=False
+    )
+
+    file = forms.FileField(
+        label='select a csv file',
+        required=False
+    )

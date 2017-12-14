@@ -8,11 +8,16 @@ from django.core.validators import EmailValidator
 User = get_user_model()
 
 
-class UserImport:
+class UserMergeImport:
+    """Import new users and combine existing user records"""
 
-    def __init__(self, csv_reader, applications):
+    def __init__(self, csv_reader, form_data):
         self.csv = csv_reader
-        self.applications = applications
+
+        if form_data and 'applications' in form_data:
+            self.applications = form_data['applications']
+        else:
+            self.applications = []
 
         self._valid_email = EmailValidator('An email is invalid')
 
@@ -126,7 +131,6 @@ class UserImport:
 
         user.first_name = first_name
         user.last_name = last_name
-        #user.email = primary_email
 
         user.save()
 
@@ -198,3 +202,94 @@ class UserImport:
 
             if not dry_run:
                 self._update_user(primary_user, first_name, last_name, emails)
+
+
+class UserAliasImport:
+    """Add additional email aliases to user entries"""
+
+    def __init__(self, csv_reader, form_data=None):
+        self.csv = csv_reader
+        self._valid_email = EmailValidator('An email is invalid')
+
+        self.logs = []
+
+        self._rows_processed = 0
+        self._rows_skipped = 0
+
+        self.logs = []
+
+    def log(self, message):
+        self.logs.append(message)
+
+    def get_stats(self):
+        return {
+            'rows_processed': self._rows_processed,
+            'rows_skipped': self._rows_skipped
+        }
+
+    def _extract_row_data(self, row):
+        """
+        Returns a tuple containing: (existing_email, new_email)
+        """
+
+        if len(row) != 2:
+            raise ValidationError('Too many columns')
+
+        for email in row:
+            try:
+                self._valid_email(email)
+            except ValidationError:
+                raise ValidationError(f'{email} is not valid')
+
+        return row
+
+    def _get_user_objects(self, email, email_alias):
+        user, other_user = None, None
+
+        try:
+            user = User.objects.get_by_email(email)
+        except User.DoesNotExist:
+            pass
+
+        try:
+            other_user = User.objects.get_by_email(email_alias)
+        except User.DoesNotExist:
+            pass
+
+        return user, other_user
+
+    def process(self, dry_run=False):
+        """
+        Process the csv
+        """
+
+        for i, row in enumerate(self.csv):
+
+            self.log(f'------ row {i+1} -------')
+
+            try:
+                email, new_email_alias = self._extract_row_data(row)
+            except ValidationError as ex:
+                self.log(f'Validation error: {ex}; skipping')
+
+                self._rows_skipped += 1
+
+                continue
+
+            user, other_user = self._get_user_objects(email, new_email_alias)
+
+            if not user:
+                self.log(f'user with {email} does not exist; skipping')
+                self._rows_skipped += 1
+            elif other_user and user != other_user:
+                self.log(f'Two user records for {email} and {new_email_alias}; manual merge required, skipping')
+                self._rows_skipped += 1
+            elif other_user and user == other_user:
+                self.log(f'Alias {new_email_alias} already exists for user with email {email}; skipping')
+                self._rows_skipped += 1
+            else:
+                if not dry_run:
+                    user.emails.create(email=new_email_alias)
+                self.log(f'{new_email_alias} added to user with email {email}')
+
+                self._rows_processed += 1

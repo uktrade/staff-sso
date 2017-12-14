@@ -3,6 +3,7 @@ from unittest import mock
 import pytest
 
 from sso.user.models import User
+
 from .factories.oauth import ApplicationFactory
 from .factories.user import UserFactory
 

@@ -35,8 +35,10 @@ class CustomIndexDashboard(Dashboard):
             collapsible=False,
             children=[
                 [_('Manage Users'), reverse('admin:user_user_changelist')],
-                [_('Import Users'),
-                 reverse('admin-user-import')]
+                [_('Import user aliases'),
+                 reverse('admin-user-alias-import')],
+                [_('Import and merge users'),
+                 reverse('admin-user-merge-import')]
             ]
         ))
 
