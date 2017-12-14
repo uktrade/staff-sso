@@ -28,6 +28,10 @@ ALLOWED_HOSTS = env('ALLOWED_HOSTS', default='localhost').split(',')
 # Application definition
 
 INSTALLED_APPS = [
+    'admin_tools',
+    'admin_tools.theming',
+    'admin_tools.menu',
+    'admin_tools.dashboard',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -70,7 +74,6 @@ TEMPLATES = [
         'DIRS': [
             os.path.join(BASE_DIR, 'sso', 'templates'),
         ],
-        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -79,8 +82,13 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'sso.core.context_processors.template_settings',
             ],
-        },
-    },
+            'loaders': [
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+                'admin_tools.template_loaders.Loader',
+            ]
+        }
+    }
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
@@ -303,13 +311,16 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 EMAIL_PORT = env('EMAIL_PORT', default=587)
 EMAIL_FROM = env('EMAIL_FROM', default='test@example.com')
 
+# admin config
+ADMIN_TOOLS_INDEX_DASHBOARD = 'sso.core.dashboard.CustomIndexDashboard'
+
 # session settings
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-SESSION_COOKIE_AGE = 90*24*60*60
+SESSION_COOKIE_AGE = 90 * 24 * 60 * 60
 
 # google analytics
 GOOGLE_ANALYTICS_CODE = env('GOOGLE_ANALYTICS_CODE', default=None)
 
 # This is used to determine a users primary email and should be set to a comma separated list
 # e.g: 'mobile.ukti.gov.uk, digital.trade.gov.uk'
-DEFAULT_EMAIL_ORDER = env('DEFAULT_EMAIL_ORDER', default="")
+DEFAULT_EMAIL_ORDER = env('DEFAULT_EMAIL_ORDER', default='')

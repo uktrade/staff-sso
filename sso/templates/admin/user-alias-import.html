@@ -1,0 +1,34 @@
+{% extends 'sso/base.html' %}
+
+{% block inner_content %}
+
+<div class="container">
+    <h1>Add aliases to existing user accounts</h1>
+
+    <p>CSV format should be:</p>
+    <table>
+        <tr>
+            <td>an-existing-alias@email.com</td>
+            <td>a-new-alias@email.com</td>
+        </tr>
+    </table>
+
+    <form method="post" enctype='multipart/form-data'>
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <input type="submit">
+    </form>
+
+    {% if status %}
+    <hr>
+
+    <h2>Output</h2>
+
+    <p>
+        {{ status|join:"<br>" }}
+    </p>
+    {% endif %}
+</div>
+
+{% endblock %}

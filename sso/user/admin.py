@@ -12,7 +12,7 @@ class EmailInline(admin.TabularInline):
 class UserAdmin(admin.ModelAdmin):
     search_fields = ('emails__email', )
     list_filter = (ApplicationFilter, 'is_superuser')
-    fields = ('email', 'first_name', 'last_name',  'is_superuser',
+    fields = ('email', 'first_name', 'last_name', 'is_superuser',
               'date_joined', 'last_login', 'permitted_applications')
     readonly_fields = ('email', 'date_joined', 'last_login')
     list_display = ('email', 'email_list', 'is_superuser', 'last_login', 'permitted_apps')

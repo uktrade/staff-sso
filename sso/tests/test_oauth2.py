@@ -1,8 +1,7 @@
 import pytest
-
 from django.core.urlresolvers import reverse
 
-from .factories.oauth import ApplicationFactory, AccessTokenFactory, UserFactory
+from .factories.oauth import AccessTokenFactory, ApplicationFactory, UserFactory
 
 pytestmark = [
     pytest.mark.django_db
@@ -102,4 +101,3 @@ class TestIntrospectView:
 
         assert response.status_code == 200
         assert response.json()['username'] == 'test@bbb.com'
-

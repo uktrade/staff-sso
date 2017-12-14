@@ -1,8 +1,15 @@
 import csv
+from io import StringIO
 
-from django.contrib.auth import get_user_model
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth import get_user_model
 from django.http.response import StreamingHttpResponse
+from django.shortcuts import render
+from django.utils.decorators import method_decorator
+from django.views.generic import FormView
+
+from .data_import import UserAliasImport, UserMergeImport
+from .forms import AdminUserAddAliasForm, AdminUserUploadForm
 
 
 class Echo(object):
@@ -35,3 +42,41 @@ def download_user_csv(request):
                                      content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=\'user_download.csv\''
     return response
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class CSVImportBaseView(FormView):
+    def form_valid(self, form):
+
+        assert getattr(self, 'import_class', None)
+
+        data = form.cleaned_data['file'].read()
+
+        # this may be too presumptious?
+        stream = StringIO(data.decode('UTF-8'))
+
+        csv_reader = csv.reader(stream)
+
+        data_import = self.import_class(csv_reader, form.cleaned_data)
+        data_import.process(dry_run=form.cleaned_data['dry_run'])
+
+        return render(
+            self.request,
+            self.template_name,
+            {
+                'status': data_import.logs,
+                'form': self.get_form()
+            }
+        )
+
+
+class AdminUserMergeImportView(CSVImportBaseView):
+    form_class = AdminUserUploadForm
+    template_name = 'admin/user-import.html'
+    import_class = UserMergeImport
+
+
+class AdminUserAliasAddImportView(CSVImportBaseView):
+    form_class = AdminUserAddAliasForm
+    template_name = 'admin/user-alias-import.html'
+    import_class = UserAliasImport

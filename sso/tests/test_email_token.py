@@ -7,6 +7,7 @@ from freezegun import freeze_time
 
 from sso.emailauth.forms import EmailForm
 from sso.emailauth.models import EmailToken
+
 from .factories.user import UserFactory
 
 pytestmark = [
@@ -93,7 +94,7 @@ class TestEmailAuthView:
     def test_expired_token(self, client):
 
         initial_datetime = dt.datetime.now()
-        expired_datetime = initial_datetime + dt.timedelta(settings.EMAIL_TOKEN_TTL+1)
+        expired_datetime = initial_datetime + dt.timedelta(settings.EMAIL_TOKEN_TTL + 1)
 
         with freeze_time(initial_datetime) as frozen_time:
 

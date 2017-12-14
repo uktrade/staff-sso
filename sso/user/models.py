@@ -121,5 +121,14 @@ class EmailAddress(models.Model):
     user = models.ForeignKey(User, related_name='emails')
     email = models.EmailField(unique=True)
 
+    def save(self, *args, **kwargs):
+        """
+        Ensure that emails are lower cased
+        """
+
+        self.email = self.email.lower()
+
+        return super().save(*args, **kwargs)
+
     class Meta:
         verbose_name_plural = 'email addresses'

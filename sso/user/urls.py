@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from .views import UserRetrieveViewSet, UserIntrospectViewSet
+from .views import UserIntrospectViewSet, UserRetrieveViewSet
 
 urlpatterns = [
     url(

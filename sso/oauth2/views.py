@@ -1,14 +1,12 @@
 import calendar
-import logging
 import json
-
-from django.shortcuts import redirect
-from django.http import HttpResponse
+import logging
 
 from django.core.exceptions import ObjectDoesNotExist
-from oauth2_provider.models import get_access_token_model
+from django.http import HttpResponse
+from django.shortcuts import redirect
 from oauth2_provider.exceptions import OAuthToolkitError
-from oauth2_provider.models import get_application_model
+from oauth2_provider.models import get_access_token_model, get_application_model
 from oauth2_provider.scopes import get_scopes_backend
 from oauth2_provider.views.base import AuthorizationView
 from oauth2_provider.views.introspect import IntrospectTokenView
@@ -71,27 +69,26 @@ class CustomIntrospectTokenView(IntrospectTokenView):
             token = get_access_token_model().objects.get(token=token_value)
         except ObjectDoesNotExist:
             return HttpResponse(
-                content=json.dumps({"active": False}),
+                content=json.dumps({'active': False}),
                 status=401,
-                content_type="application/json"
+                content_type='application/json'
             )
         else:
             if token.is_valid():
                 data = {
-                    "active": True,
-                    "scope": token.scope,
-                    "exp": int(calendar.timegm(token.expires.timetuple())),
+                    'active': True,
+                    'scope': token.scope,
+                    'exp': int(calendar.timegm(token.expires.timetuple())),
                 }
                 if token.application:
-                    data["client_id"] = token.application.client_id
+                    data['client_id'] = token.application.client_id
                 if token.user:
                     if not token.application:
                         data['username'] = token.user.get_username()
                     else:
-                        data["username"], _ = token.user.get_emails_for_application(token.application)
-                return HttpResponse(content=json.dumps(data), status=200, content_type="application/json")
+                        data['username'], _ = token.user.get_emails_for_application(token.application)
+                return HttpResponse(content=json.dumps(data), status=200, content_type='application/json')
             else:
                 return HttpResponse(content=json.dumps({
-                    "active": False,
-                }), status=200, content_type="application/json")
-
+                    'active': False,
+                }), status=200, content_type='application/json')

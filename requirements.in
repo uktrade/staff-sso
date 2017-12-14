@@ -4,6 +4,7 @@ psycopg2
 djangosaml2
 django-oauth-toolkit
 djangorestframework
+django-admin-tools
 
 waitress
 whitenoise
