@@ -18,7 +18,7 @@ class AdminUserUploadForm(forms.Form):
 
     file = forms.FileField(
         label='select a csv file',
-        required=False
+        required=True
     )
 
 
@@ -30,5 +30,5 @@ class AdminUserAddAliasForm(forms.Form):
 
     file = forms.FileField(
         label='select a csv file',
-        required=False
+        required=True
     )

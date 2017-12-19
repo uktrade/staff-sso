@@ -2,12 +2,14 @@ import csv
 from io import StringIO
 
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth import get_user_model
+
 from django.http.response import StreamingHttpResponse
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views.generic import FormView
+from django.views.generic.base import View
 
+from .data_export import UserDataExport, UserPermissionExport
 from .data_import import UserAliasImport, UserMergeImport
 from .forms import AdminUserAddAliasForm, AdminUserUploadForm
 
@@ -21,38 +23,49 @@ class Echo(object):
         return value
 
 
-def get_user_csv_data():
-    User = get_user_model()
+@method_decorator(staff_member_required, name='dispatch')
+class CSVExportView(View):
 
-    for user in User.objects.all().order_by('email'):
-        row = [user.email, user.first_name, user.last_name]
+    class Echo(object):
+        """An object that implements just the write method of the file-like
+        interface.
+        """
 
-        row.extend(user.emails.exclude(email=user.email).values_list('email', flat=True))
+        def write(self, value):
+            """Write the value by returning it, instead of storing in a buffer."""
+            return value
 
-        yield row
+    def __init__(self):
+        assert getattr(self, 'generator_object', None)
+        assert getattr(self, 'file_name', None)
+
+    def get(self, request, *args, **kwargs):
+        pseudo_buffer = self.Echo()
+        writer = csv.writer(pseudo_buffer)
+        response = StreamingHttpResponse((writer.writerow(row) for row in self.generator_object),
+                                         content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename={self.file_name}'
+        return response
 
 
-@staff_member_required
-def download_user_csv(request):
-    """A temporary CSV download view"""
+class UserDataExportView(CSVExportView):
+    generator_object = UserDataExport()
+    file_name = 'user_data.csv'
 
-    pseudo_buffer = Echo()
-    writer = csv.writer(pseudo_buffer)
-    response = StreamingHttpResponse((writer.writerow(row) for row in get_user_csv_data()),
-                                     content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename=\'user_download.csv\''
-    return response
+
+class UserPermissionExportView(CSVExportView):
+    generator_object = UserPermissionExport()
+    file_name = 'user_permission_data.csv'
 
 
 @method_decorator(staff_member_required, name='dispatch')
-class CSVImportBaseView(FormView):
+class CSVImportView(FormView):
     def form_valid(self, form):
 
         assert getattr(self, 'import_class', None)
 
         data = form.cleaned_data['file'].read()
 
-        # this may be too presumptious?
         stream = StringIO(data.decode('UTF-8'))
 
         csv_reader = csv.reader(stream)
@@ -70,13 +83,13 @@ class CSVImportBaseView(FormView):
         )
 
 
-class AdminUserMergeImportView(CSVImportBaseView):
+class AdminUserMergeImportView(CSVImportView):
     form_class = AdminUserUploadForm
     template_name = 'admin/user-import.html'
     import_class = UserMergeImport
 
 
-class AdminUserAliasAddImportView(CSVImportBaseView):
+class AdminUserAliasAddImportView(CSVImportView):
     form_class = AdminUserAddAliasForm
     template_name = 'admin/user-alias-import.html'
     import_class = UserAliasImport
