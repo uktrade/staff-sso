@@ -38,7 +38,11 @@ class CustomIndexDashboard(Dashboard):
                 [_('Import user aliases'),
                  reverse('admin-user-alias-import')],
                 [_('Import and merge users'),
-                 reverse('admin-user-merge-import')]
+                 reverse('admin-user-merge-import')],
+                [_('Export user list'),
+                 reverse('user-export-view')],
+                [_('Export user permissions list'),
+                 reverse('user-permission-export-view')]
             ]
         ))
 
