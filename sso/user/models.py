@@ -12,7 +12,8 @@ from .managers import UserManager
 
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(
-        _('email'), unique=True
+        _('email'), unique=True,
+        help_text=_('Warning: editing this field may cause user profiles to break in Digital Workspace')
     )
     first_name = models.CharField(
         _('first name'), max_length=50, blank=True
