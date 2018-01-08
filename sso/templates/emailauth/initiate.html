@@ -15,6 +15,14 @@
     <p class="email-input">
       <label class="form-label" for="username">Email address</label>
       {{ form.username }} &nbsp; {{ form.domain }}
+
+      {% if form.non_field_errors %}
+        <ul>
+        {% for error in form.non_field_errors %}
+            <li class="error-message">{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
     </p>
 
     <p><input type="submit" class="button" value="Get a secure sign-in link"></p>
