@@ -5,6 +5,8 @@ import logging
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.shortcuts import redirect
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from oauth2_provider.exceptions import OAuthToolkitError
 from oauth2_provider.models import get_access_token_model, get_application_model
 from oauth2_provider.scopes import get_scopes_backend
@@ -62,17 +64,24 @@ class CustomAuthorizationView(AuthorizationView):
                 return self.error_response(error)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class CustomIntrospectTokenView(IntrospectTokenView):
-    @staticmethod
-    def get_token_response(token_value=None):
+    def _access_denied(self):
+        return HttpResponse(
+            content=json.dumps({'active': False}),
+            status=401,
+            content_type='application/json'
+        )
+
+    def get_token_response(self, token_value=None):
+
+        introspecting_application = \
+            self.request.resource_owner.oauth2_provider_accesstoken.first().application
+
         try:
             token = get_access_token_model().objects.get(token=token_value)
         except ObjectDoesNotExist:
-            return HttpResponse(
-                content=json.dumps({'active': False}),
-                status=401,
-                content_type='application/json'
-            )
+            self._access_denied()
         else:
             if token.is_valid():
                 data = {
@@ -80,8 +89,14 @@ class CustomIntrospectTokenView(IntrospectTokenView):
                     'scope': token.scope,
                     'exp': int(calendar.timegm(token.expires.timetuple())),
                 }
-                if token.application:
+                if not token.application:
+                    self._access_denied()
+                else:
                     data['client_id'] = token.application.client_id
+
+                if introspecting_application != token.application:
+                    return self._access_denied()
+
                 if token.user:
                     if not token.application:
                         data['username'] = token.user.get_username()
