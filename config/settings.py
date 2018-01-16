@@ -139,6 +139,9 @@ LOGIN_REDIRECT_URL = '/saml2/logged-in/'
 
 SAML_USER_MODEL = 'user.user'
 
+# Allows us to use the NameID field for some IdPs
+SAML_IDPS_USE_NAME_ID_AS_USERNAME = ['http://adfsmobile.azurecore.com/adfs/services/trust', 'https://adfs.mobile.ukti.gov.uk/adfs/services/trust']
+
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'sso.samlauth.backends.MultiEmailSaml2Backend',
@@ -163,9 +166,6 @@ if env('SAML_PRIVATE_KEY', default=None) and env('SAML_PUBLIC_CERT', default=Non
 
     with open(SAML_PUBLIC_CERT_PATH, 'wb') as f:
         f.write(base64.b64decode(env('SAML_PUBLIC_CERT')))
-
-SAML_PRIVATE_KEY_PATH = os.path.join(SAML_CONFIG_DIR, 'sp.private.key')
-SAML_PUBLIC_CERT_PATH = os.path.join(SAML_CONFIG_DIR, 'sp.public.crt')
 
 # domain the metadata will refer to
 SAML_REDIRECT_RETURN_HOST = env('SAML_REDIRECT_RETURN_HOST')

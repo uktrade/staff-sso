@@ -27,6 +27,7 @@ class UserManager(BaseUserManager):
         """
         # The get() needs to be targeted at the write database in order
         # to avoid potential transaction consistency problems.
+
         self._for_write = True
 
         email = kwargs['email'].lower()
