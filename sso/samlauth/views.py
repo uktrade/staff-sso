@@ -84,11 +84,22 @@ def login(request,  # noqa: C901
                 }
             )
 
-    selected_idp = request.GET.get('idp', None)
+    selected_idp = request.GET.get('idp', request.session.get('idp', None))
+
     conf = get_config(config_loader_path, request)
 
     # is a embedded wayf needed?
     idps = available_idps(conf)
+
+    # map friendly idp name to entity id - e.g. if ?idp=cirrus, then we need to convert it to the
+    # entity id for cirrus.
+    if selected_idp in settings.SAML_IDP_ENTITY_ID_MAPPING:
+        idp_name = settings.SAML_IDP_ENTITY_ID_MAPPING[selected_idp]
+        idp_map = {v: k for k, v in idps.items()}
+
+        if idp_name in idp_map:
+            selected_idp = idp_map[idp_name]
+
     if selected_idp is None and len(idps) > 1:
         logger.debug('A discovery process is needed')
 

@@ -248,6 +248,26 @@ SAML_ATTRIBUTE_MAPPING = {
     'last_name': ('last_name',),
 }
 
+SAML_IDP_ENTITY_ID_MAPPING = {
+    'core': 'b-core',
+    'cirrus': 'a-cirrus',
+    'ukef': 'c-ukef',
+    'google': 'd-google'
+}
+
+# if ENV_NAME == 'prod':
+#     SAML_IDP_ENTITY_ID_MAPPING = {
+#         'core': 'http://adfsmobile.azurecore.com/adfs/services/trust',
+#         'cirrus': 'http://www.okta.com/exk1emefirxUCDPun0i7',
+#         'ukef': 'http://sts.ukexportfinance.gov.uk/adfs/services/trust'
+#     }
+# else:
+#     SAML_IDP_ENTITY_ID_MAPPING = {
+#         'core': 'http://adfsmobile.azurecore.com/adfs/services/trust',
+#         'cirrus': 'http://www.okta.com/exkcdhwy5vXryw6aD0h7',
+#         'ukef': 'http://sts.ukexportfinance.gov.uk/adfs/services/trust'
+#     }
+
 # DRF
 REST_FRAMEWORK = {
     'UNAUTHENTICATED_USER': None,

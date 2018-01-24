@@ -2,6 +2,7 @@ import calendar
 import json
 import logging
 
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -18,6 +19,18 @@ log = logging.getLogger('oauth2_provider')
 
 
 class CustomAuthorizationView(AuthorizationView):
+
+    def dispatch(self, request, *args, **kwargs):
+        """Overrides login required mixin, so that ?idp can be stored in session"""
+        if not request.user.is_authenticated:
+
+            # save the idp in session, if supplied
+            idp = request.GET.get('idp', None)
+            if idp and idp in settings.SAML_IDP_ENTITY_ID_MAPPING:
+                request.session['idp'] = idp
+
+            return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         """
