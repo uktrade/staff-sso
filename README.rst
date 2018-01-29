@@ -55,7 +55,7 @@ Installation
 
     ./manage.py runserver
 
-#. You will now need to `create an OAuth application <http://localhost:8000/admin/oauth2_provider/application/add/>`_ with::
+#. You will now need to `create an OAuth application <http://localhost:8000/admin/oauth2/application/add/>`_ with::
 
     Client type: Confidential
     Grant type: Authorization code
@@ -73,7 +73,7 @@ Installation
     -p 8443:443 \
     -e SIMPLESAMLPHP_SP_ENTITY_ID=https://sso.staff.service.trade.gov.uk/sp \
     -e SIMPLESAMLPHP_SECRET_SALT=secret-salt \
-    tsi
+    si
 
 Minimal Installation
 --------------------
