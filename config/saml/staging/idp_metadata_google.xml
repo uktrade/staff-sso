@@ -52,7 +52,7 @@ xRVKYrMZBI2VpsFxXkA4VqBuRyf81hPwY7E36h/jEIDa</ds:X509Certificate>
     <md:Organization>
         <md:OrganizationName xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">google
         </md:OrganizationName>
-        <md:OrganizationDisplayName xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">Google (@digital.trade.gov.uk)
+        <md:OrganizationDisplayName xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">d-google
         </md:OrganizationDisplayName>
         <md:OrganizationURL xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">
             https://digital.trade.gov.uk
