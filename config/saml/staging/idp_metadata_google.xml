@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="https://accounts.google.com/o/saml2?idpid=C00vj2kls" validUntil="2022-09-24T15:45:20.000Z">
+  <md:IDPSSODescriptor WantAuthnRequestsSigned="false" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <md:KeyDescriptor use="signing">
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:X509Data>
+          <ds:X509Certificate>MIIDdDCCAlygAwIBAgIGAV65ttpdMA0GCSqGSIb3DQEBCwUAMHsxFDASBgNVBAoTC0dvb2dsZSBJ
+bmMuMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MQ8wDQYDVQQDEwZHb29nbGUxGDAWBgNVBAsTD0dv
+b2dsZSBGb3IgV29yazELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWEwHhcNMTcwOTI1
+MTU0NTIwWhcNMjIwOTI0MTU0NTIwWjB7MRQwEgYDVQQKEwtHb29nbGUgSW5jLjEWMBQGA1UEBxMN
+TW91bnRhaW4gVmlldzEPMA0GA1UEAxMGR29vZ2xlMRgwFgYDVQQLEw9Hb29nbGUgRm9yIFdvcmsx
+CzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A
+MIIBCgKCAQEAn7GsmQQU97zrpgObtTlBsdult4wgz4xoq/JAzRi9k44S9l2i90hfEku0eJ64rLBm
+ChSJutHoabYIsXjD97bq2JfV/nej8bFwJGalbCrfHf745nSTMoTdqg6gXRk3z5qiFAgu4MOl3QXb
+0aWVp/QRS0FEWuB1eR1eTEMDwaTxHJIEuU9kVge85kjybGIJiRs10sxO7RrUpfw6ytNk2xh6hsQ1
+jFb54nZ3mp7tGEchCDiwSAdEIoOTBf3hj3GOI3O5gc456o9QfiiHZt16JOOT/htmP7Z7NdT4ADHZ
+R5m8E1hF3bfQ8Ql4/wGSuitmD6QY9U2j4/+vFpju0Igq8vuNTwIDAQABMA0GCSqGSIb3DQEBCwUA
+A4IBAQBUsSEtb22vD+VsPT5ZO8hGwGtbS95p/YPsW68zYphY5/oEVtN8eoq8OZGRy5PlC6x4HWGy
+SXF9W7hwxpa82VA/qh+dW5KDuFQ7kRrbNYJxw3NkcorDYwMS272K6AnyDkgTd8tXEC9eMhrujNc1
+nymeOfyHmH9ZvRP1Lfw0R9nacjLm/VP0HoweaURD9+V2/ZGlmO3B1A5cbx/Kbeb86NtHvzCWChd1
+tXJc18eWknl9iOUd940SH1NhnfnBI/kSVT+rdlqNhTOFP2cidp2whIZjqPZ5QjGsfghmNnGpMUr1
+dnlo63+bDgTthnSjZfPNou9PMGNBlb82OCaPH7dcJMjG</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+    <md:KeyDescriptor use="signing">
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:X509Data>
+          <ds:X509Certificate>MIIDdDCCAlygAwIBAgIGAV65utNGMA0GCSqGSIb3DQEBCwUAMHsxFDASBgNVBAoTC0dvb2dsZSBJ
+bmMuMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MQ8wDQYDVQQDEwZHb29nbGUxGDAWBgNVBAsTD0dv
+b2dsZSBGb3IgV29yazELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWEwHhcNMTcwOTI1
+MTU0OTQwWhcNMjIwOTI0MTU0OTQwWjB7MRQwEgYDVQQKEwtHb29nbGUgSW5jLjEWMBQGA1UEBxMN
+TW91bnRhaW4gVmlldzEPMA0GA1UEAxMGR29vZ2xlMRgwFgYDVQQLEw9Hb29nbGUgRm9yIFdvcmsx
+CzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A
+MIIBCgKCAQEAoc9jBBXCJ4xKXmyH6zjQyTK+l+cA7SyfGMa8mIQ1hvJp8SkW6QQtpBCjqtK7llSX
+myP2Ps0982lXxPTK2+WBuYqk2gVJzdPgpCC6mRWo8LDH6Zz2UIYa5lUSQurQiuE923zoWZW4UNwn
+Qh3f+D5g/mr/xjFTtExrQ28zpANJDkwt2XTw1Tk2nWVzPNLd7zzF9vZZjGjB92tinyKYxAqFaR/k
++3A6XYoXY/5WGOsBjt9dniHRhaSh+x2CjDxAYa6imlvcFWf2YuCpwhIfXEzqNR7H2VIsjlnGWZI0
+rigV6XyM+3rvGS7ecfbgHxxRnR5Y6eaU9K2OLzDPL4IXzwo6EQIDAQABMA0GCSqGSIb3DQEBCwUA
+A4IBAQBEzJZPuzDfYgnkGCxEtyJ8I8Bz1vNys7hJtuG+qKTiE7FMz+V6HEqySA+rlysiFQRGikp2
+7yRIFoyL270HZE2wIFNVPNm/2wprSjyUap6I8BISUze0eaVsO6lJwF857qdIq9Xhfj/+kJW/KR5r
+Dkvcb5qzM6gvQKkRZKLzs9PpYYSOwoOcqDv9s7oCKFyBc2neuhjBEsRpKSv5intG9UOg+t78wdYF
+2T/nyeNM5Bw4Zy8wvd3JfeulqJm2vjg7WktbmUgIr5+Wc7aDi1uUmanrXSPgtdh/qvpi+5QsGOgY
+xRVKYrMZBI2VpsFxXkA4VqBuRyf81hPwY7E36h/jEIDa</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat>
+    <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://accounts.google.com/o/saml2/idp?idpid=C00vj2kls"/>
+    <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://accounts.google.com/o/saml2/idp?idpid=C00vj2kls"/>
+  </md:IDPSSODescriptor>
+    <md:Organization>
+        <md:OrganizationName xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">google
+        </md:OrganizationName>
+        <md:OrganizationDisplayName xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">d-google
+        </md:OrganizationDisplayName>
+        <md:OrganizationURL xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en">
+            https://digital.trade.gov.uk
+        </md:OrganizationURL>
+    </md:Organization>
+</md:EntityDescriptor>

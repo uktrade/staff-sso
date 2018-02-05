@@ -6,10 +6,15 @@ from sso.oauth2.models import Application
 class UserDataExport:
     def __iter__(self):
 
-        yield ['email', 'first_name', 'last_name', 'other emails']
+        yield ['email', 'first_name', 'last_name', 'last login', 'other emails']
 
         for user in get_user_model().objects.all().order_by('email'):
-            row = [user.email, user.first_name, user.last_name]
+            if user.last_login:
+                last_login = user.last_login.strftime('%Y-%m-%d %H:%m:%S')
+            else:
+                last_login = ''
+
+            row = [user.email, user.first_name, user.last_name, last_login]
 
             row.extend(user.emails.exclude(email=user.email).values_list('email', flat=True))
 
