@@ -227,6 +227,7 @@ if ENV_NAME == 'staging':
     SAML_CONFIG['metadata']['local'] = [
         os.path.join(SAML_CONFIG_DIR, 'idp_metadata_okta.xml'),
         os.path.join(SAML_CONFIG_DIR, 'idp_metadata_ukef.xml'),
+        os.path.join(SAML_CONFIG_DIR, 'idp_metadata_google.xml'),
         os.path.join(SAML_CONFIG_DIR, 'idp_metadata.xml')
     ]
 
