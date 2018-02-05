@@ -47,7 +47,7 @@
       </ds:KeyInfo>
     </ds:Signature>
     <saml:Subject>
-      <saml:NameID SPNameQualifier="https://sso.staff.service.trade.gov.uk/sp" Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">c1e915bbc0586c0483a8f5654ed25d7afcdc315f</saml:NameID>
+      <saml:NameID SPNameQualifier="https://sso.staff.service.trade.gov.uk/sp" Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">user1(nameid)@example.com</saml:NameID>
       <saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
         <saml:SubjectConfirmationData NotOnOrAfter="2017-06-22T15:51:10Z" Recipient="http://localhost:8000/saml2/acs/" InResponseTo="id-WmZMklyFygoDg96gy"/>
       </saml:SubjectConfirmation>
