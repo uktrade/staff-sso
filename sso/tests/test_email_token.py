@@ -15,6 +15,16 @@ pytestmark = [
 ]
 
 
+def _get_email_token_obj(email):
+    assert EmailToken.objects.count() == 0
+
+    EmailToken.objects.create_token(email)
+
+    assert EmailToken.objects.count() == 1
+
+    return EmailToken.objects.first()
+
+
 class TestEmailTokenModel:
     def test_extract_name_from_email(self):
         test_emails = [
@@ -29,6 +39,23 @@ class TestEmailTokenModel:
             obj.extract_name_from_email(email)
             assert obj.first_name == first_name, email
             assert obj.last_name == last_name, email
+
+    def test_get_user_creates_user_with_name(self):
+        token_obj = _get_email_token_obj('john.smith@testing.com')
+
+        user = token_obj.get_user()
+
+        assert user.first_name == 'john'
+        assert user.last_name == 'smith'
+
+
+class TestEmailTokenManager:
+    def test_create_user_populates_name_field(self):
+
+        token_obj = _get_email_token_obj('john.smith@testing.com')
+
+        assert token_obj.first_name == 'john'
+        assert token_obj.last_name == 'smith'
 
 
 class TestEmailTokenForm:
