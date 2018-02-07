@@ -60,7 +60,7 @@ class EmailForm(forms.Form):
             next_url=next_url
         )
 
-        subject = render_to_string('emailauth/email_subject.txt')
+        subject = render_to_string('emailauth/email_subject.txt').strip()
         message = render_to_string('emailauth/email.txt', context=dict(auth_url=url))
 
         send_mail(
