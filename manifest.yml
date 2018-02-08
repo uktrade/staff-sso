@@ -1,6 +1,3 @@
 ---
 applications:
 - name: staff-sso
-  health-check-type: http
-  health-check-http-endpoint: /check/
-
