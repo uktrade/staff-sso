@@ -28,10 +28,11 @@ def _get_email_token_obj(email):
 class TestEmailTokenModel:
     def test_extract_name_from_email(self):
         test_emails = [
-            ['aaa.bbb.ccc@example.com', 'aaa', 'bbb ccc'],
-            ['aaa@example.com', 'aaa', ''],
-            ['aaa-bbb@example.com', 'aaa-bbb', ''],
-            ['aaa.bbb@example.com', 'aaa', 'bbb']
+            ['aaa.bbb.ccc@example.com', 'Aaa', 'Bbb ccc'],
+            ['aaa@example.com', 'Aaa', ''],
+            ['aaa-bbb@example.com', 'Aaa-bbb', ''],
+            ['aaa.bbb@example.com', 'Aaa', 'Bbb'],
+            ['aaa.bbb-ccc@example.com', 'Aaa', 'Bbb-ccc']
         ]
 
         for email, first_name, last_name in test_emails:
@@ -45,8 +46,8 @@ class TestEmailTokenModel:
 
         user = token_obj.get_user()
 
-        assert user.first_name == 'john'
-        assert user.last_name == 'smith'
+        assert user.first_name == 'John'
+        assert user.last_name == 'Smith'
 
 
 class TestEmailTokenManager:
@@ -54,8 +55,8 @@ class TestEmailTokenManager:
 
         token_obj = _get_email_token_obj('john.smith@testing.com')
 
-        assert token_obj.first_name == 'john'
-        assert token_obj.last_name == 'smith'
+        assert token_obj.first_name == 'John'
+        assert token_obj.last_name == 'Smith'
 
 
 class TestEmailTokenForm:
