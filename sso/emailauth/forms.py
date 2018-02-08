@@ -5,6 +5,8 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
+from django.core.exceptions import ValidationError
+from django.core.validators import EmailValidator
 
 from .models import EmailToken
 
@@ -13,11 +15,21 @@ class EmailForm(forms.Form):
     username = forms.CharField(
         max_length=255,
         widget=forms.TextInput(attrs={'class': 'form-control form-control-1-4', 'placeholder': 'i.e. john.smith5'})
-    )   # TODO: regex restrict to allowed chars
+    )
     domain = forms.ChoiceField(
         choices=settings.EMAIL_TOKEN_DOMAIN_WHITELIST,
         widget=forms.Select(attrs={'class': 'form-control form-control-1-4'})
     )
+
+    def clean(self):
+        """Check that the supplied email is valid"""
+
+        validate_email = EmailValidator(
+            'Enter the first part of your email address only')
+
+        email = self.cleaned_data['username'] + self.cleaned_data['domain']
+
+        validate_email(email)
 
     @property
     def email(self):
