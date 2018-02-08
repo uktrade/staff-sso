@@ -84,9 +84,40 @@ class User(AbstractBaseUser, PermissionsMixin):
         """Django method that must be implemented"""
         return self.get_full_name()
 
+    def _is_allowed_email(self, application):
+        """Returns True if any of the user's emails are whitelisted in the OAuth2 app"""
+
+        def _remove_username(email):
+            return email.split('@')[1]
+
+        if not application.allow_access_by_email_suffix:
+            return False
+
+        allowed_emails = {email.strip() for email in application.allow_access_by_email_suffix.split(',')}
+
+        emails = self._get_domain_to_email_mapping().keys()
+
+        return not allowed_emails.isdisjoint(emails)
+
+    def _get_domain_to_email_mapping(self):
+        """Return a dictionary of a user's emails and the domain, e.g. `{domain: email}` """
+
+        def _remove_username(email):
+            return email.split('@')[1]
+
+        return {
+            _remove_username(email): email for email in self.emails.all().values_list('email', flat=True)
+        }
+
     def can_access(self, application):
         """Can this user access the application?"""
-        return application.default_access_allowed or application in self.permitted_applications.all()
+
+        if application.default_access_allowed:
+            return True
+        elif self._is_allowed_email(application):
+            return True
+        else:
+            return application in self.permitted_applications.all()
 
     def get_emails_for_application(self, application):
         """
@@ -96,12 +127,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         if not application or application.provide_immutable_email:
             return self.email, list(self.emails.exclude(email=self.email).values_list('email', flat=True))
 
-        def _remove_username(email):
-            return email.split('@')[1]
-
-        emails = {
-            _remove_username(email): email for email in self.emails.all().values_list('email', flat=True)
-        }
+        emails = self._get_domain_to_email_mapping()
 
         if not emails:
             return self.email, []
