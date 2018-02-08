@@ -1,5 +1,6 @@
 ---
 applications:
 - name: staff-sso
-  memory: 512M
-  buildpack: python_buildpack
+  health-check-type: http
+  health-check-http-endpoint: /check/
+
