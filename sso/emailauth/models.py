@@ -43,8 +43,8 @@ class EmailToken(models.Model):
 
         username = email.split('@')[0]
         parts = username.split('.')
-        self.first_name = parts[0]
-        self.last_name = ' '.join(parts[1:])
+        self.first_name = parts[0].capitalize()
+        self.last_name = ' '.join(parts[1:]).capitalize()
 
     def get_user(self):
 

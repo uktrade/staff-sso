@@ -30,12 +30,14 @@ class UserManager(BaseUserManager):
 
         self._for_write = True
 
+        defaults = defaults or {}
         email = kwargs['email'].lower()
+        params = {'email': email, **defaults}
 
         try:
             return self.get_by_email(email), False
         except self.model.DoesNotExist:
-            user = self.create(email=email)
+            user = self.create(**params)
 
             return user, True
 
