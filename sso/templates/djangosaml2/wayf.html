@@ -8,25 +8,28 @@
     <ul class="list available_idps">
         <li>
           <a class="button" href="{% url 'email-auth-initiate' %}{% if came_from %}?next={{ came_from|urlencode }}{% endif %}">Your email address</a>
-          <span>We'll send you a link by email.</span>
-          <hr>
+          <span>we'll send you a link by email</span>
         </li>
       {% for url, name in available_idps %}
             {% spaceless %}
                 <li>
-                {% if name == 'a-core' %}
-                    <a class="button" href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Evolve, Mobile Office</a>
-                    <span>Username ends with @mobile.ukti.gov.uk or @extranet.ukti.gov.uk.</span>
-                {% elif name == 'b-ukef' %}
-                    <a class="button" href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">UKEF</a>
-                    <span>username ends with @ukexportfinance.gov.uk.</span>
-                {% elif name == 'cirrus' %}
+                  <hr>
+                {% if name == 'a-cirrus' %}
                     <a class="button"  href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Cirrus, CTP</a>
-                    <span>username ends with @trade.gov.uk.</span>
+                    <span>username ends with @trade.gov.uk</span>
+                {% elif name == 'b-core' %}
+                    <a class="button" href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Evolve, Mobile Office</a>
+                    <span>username ends with @mobile.ukti.gov.uk or @extranet.ukti.gov.uk</span>
+                {% elif name == 'c-ukef' %}
+                    <a class="button" href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">UKEF</a>
+                    <span>username ends with @ukexportfinance.gov.uk</span>
+                {% elif name == 'd-google' %}
+                    <a class="button"  href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Digital Team</a>
+                    <span>username ends with @digital.trade.gov.uk</span>
                 {% else %}
                     <a class="button" href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">{{ name }}</a>
                 {% endif %}
-                  <hr>
+
                 </li>
             {% endspaceless %}
       {% endfor %}
