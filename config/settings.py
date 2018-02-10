@@ -268,7 +268,8 @@ OAUTH2_PROVIDER = {
         'write': 'Write scope',
         'introspection': 'introspect scope',
         'data-hub:internal-front-end': 'A datahub specific scope'
-    }
+    },
+    'DEFAULT_SCOPES': ['read', 'write'],
 }
 
 OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2.Application'
