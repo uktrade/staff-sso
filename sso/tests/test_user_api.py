@@ -204,7 +204,7 @@ class TestApiUserIntrospect:
         app.default_access_allowed = False
         app.save()
 
-        introspected_user = UserFactory(email='test@aaa.com')
+        introspected_user = UserFactory(email='test@aaa.com')  # noqa: F841
 
         api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
         response = api_client.get(self.GET_USER_INTROSPECT_URL + '?email={introspected_user.email}')

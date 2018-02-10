@@ -101,3 +101,30 @@ class TestIntrospectView:
 
         assert response.status_code == 200
         assert response.json()['username'] == 'test@bbb.com'
+
+    def test_can_only_introspect_tokens_belonging_to_same_application(self, api_client):
+        """
+        An introspect token for app1 should not be able to introspect tokens issued to app2.
+        """
+
+        application1 = ApplicationFactory()
+        application2 = ApplicationFactory()
+
+        introspect_user = UserFactory()
+        user = UserFactory(email='test@bbb.com')
+
+        intospect_token = AccessTokenFactory(
+            application=application1,
+            user=introspect_user,
+            scope='introspection read'
+        )
+
+        token = AccessTokenFactory(
+            application=application2,
+            user=user
+        )
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + intospect_token.token)
+        response = api_client.get(self.OAUTH2_INTROSPECTION_URL + f'?token={token.token}')
+
+        assert response.status_code == 401
