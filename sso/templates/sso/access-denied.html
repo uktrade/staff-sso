@@ -2,25 +2,35 @@
 
 {% block inner_content %}
 <div class="container">
-    <h1 class="heading-large">You don't have permission to access this</h1>
-    <p>If you think you should have access or need to sign up to a DIT system then get in touch.</p>
-    <p>Email <a href="mailto:login.support@uktrade.zendesk.com"><login class="support@uktrade zendesk com"> </login></a> and put the service you want to access in the subject line, and put your team and a short description of the issue in the email.
+    <h1 class="heading-large">You do not have permission to access this service</h1>
 
-        <ul>
-            <li>Digital Workspace</li>
-            <li>Data Hub</li>
-            <li>MI Dashboards</li>
-        </ul>
-    </p>
-    <p>
-        <form method="post">
-            {{ form.non_field_errors }}
+    {% if request.user.is_authenticated %}
+    <p>If you think you should have access or need to sign up to a DIT system then complete the form below:</p>
 
-            {% csrf_token %}
-            {{ form.as_p }}
-
-            <button type="submit">Request Access</button>
-        </form>
-    </p>
+    <h2 class="heading-medium">Request Access</h2>
+    <form method="post" action="">
+        {{ form.non_field_errors }}
+        {% csrf_token %}
+        <div class="form-group{% if form.full_name.errors %} form-group-error{% endif %}">
+            <label class="form-label" for="id_full_name">Your name</label>
+            {% if form.full_name.errors %}
+            <span class="error-message">
+                {{ form.full_name.errors }}
+            </span>
+            {% endif %}
+            {{ form.full_name }}
+        </div>
+        <div class="form-group{% if form.team.errors %} form-group-error{% endif %}">
+            <label class="form-label" for="id_team">Your team</label>
+            {% if form.team.errors %}
+            <span class="error-message">
+                {{ form.team.errors }}
+            </span>
+            {% endif %}
+            {{ form.team }}
+        </div>
+        <input class="button" type="submit" value="Submit">
+    </form>
+    {% endif %}
 </div>
 {% endblock %}

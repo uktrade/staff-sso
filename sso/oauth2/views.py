@@ -67,7 +67,7 @@ class CustomAuthorizationView(AuthorizationView):
 
         except OAuthToolkitError as error:
             if isinstance(error.oauthlib_error, AccessDeniedError):
-                return redirect('access-denied')
+                return redirect('contact:access-denied')
             else:
                 return self.error_response(error)
 
