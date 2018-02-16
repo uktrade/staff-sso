@@ -36,7 +36,8 @@ class AccessDeniedView(FormView):
         email = self.request.user.email
         application = self.request.session.get('_last_failed_access_app', 'Unspecified')
 
-        zendesk_user = self.get_or_create_zendesk_user(cleaned_data['full_name'], email)
+        # zendesk_user = self.get_or_create_zendesk_user(cleaned_data['full_name'], email)
+        zendesk_user = ZendeskUser(name=cleaned_data['full_name'], email=email)
 
         description = (
             'Name: {full_name}\n'
@@ -47,8 +48,7 @@ class AccessDeniedView(FormView):
         ticket = Ticket(
             subject=settings.ZENDESK_TICKET_SUBJECT,
             description=description,
-            submitter_id=zendesk_user.id,
-            requester_id=zendesk_user.id,
+            requester=zendesk_user,
             custom_fields=[CustomField(id='31281329', value='auth_broker')]
         )
         response = self.get_zendesk_client().tickets.create(ticket)
