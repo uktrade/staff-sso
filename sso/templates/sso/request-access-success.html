@@ -1,0 +1,15 @@
+{% extends 'sso/base.html' %}
+
+{% block inner_content %}
+<div class="container">
+    <h1 class="heading-large">Request submitted</h1>
+
+    <p>Your request to access this service has been submitted.</p>
+
+    <p>Your reference number for this request is <span class="strong bold">{{ zendesk_ticket_id }}</span></p>
+
+    <p>Our team aim to respond to these requests within 3 working days.</p>
+
+    <p>Should you require urgent support, please contact <a href="mailto:login.support@uktrade.zendesk.com">login.support@uktrade.zendesk.com</a>.</p>
+</div>
+{% endblock %}

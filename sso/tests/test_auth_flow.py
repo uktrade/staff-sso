@@ -183,9 +183,6 @@ class TestSAMLLogin:
 
         settings.SAML_IDPS_USE_NAME_ID_AS_USERNAME = ['http://localhost:8080/simplesaml/saml2/idp/metadata.php']
 
-        # we require an existing user with permissions to access the application
-        #user = UserFactory(email='user1@example.com')
-
         application, authorize_params = create_oauth_application()
         response = client.get(OAUTH_AUTHORIZE_URL, data=authorize_params)
 
@@ -255,6 +252,10 @@ class TestSAMLLogin:
         assert response.status_code == 302
 
         assert response['location'] == '/access-denied/'
+
+        # The application the user tried to access is recorded in session under the _last_failed_access_app
+        # and is used by the request access form.
+        assert client.session['_last_failed_access_app'] == application.name
 
     @freeze_time('2017-06-22 15:50:00.000000+00:00')
     def test_saml_login_with_alternative_email(self, client, mocker):

@@ -330,3 +330,11 @@ GOOGLE_ANALYTICS_CODE = env('GOOGLE_ANALYTICS_CODE', default=None)
 # This is used to determine a users primary email and should be set to a comma separated list
 # e.g: 'mobile.ukti.gov.uk, digital.trade.gov.uk'
 DEFAULT_EMAIL_ORDER = env('DEFAULT_EMAIL_ORDER', default='')
+
+ZENPY_CREDENTIALS = {
+    'email': env('ZENDESK_EMAIL', default=''),
+    'token': env('ZENDESK_TOKEN', default=''),
+    'subdomain': env('ZENDESK_SUBDOMAIN', default=''),
+}
+
+ZENDESK_TICKET_SUBJECT = 'AuthBroker: Support request'
