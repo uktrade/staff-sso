@@ -24,19 +24,11 @@ class AccessDeniedView(FormView):
         # Zenpy will let the connection timeout after 5s and will retry 3 times
         return Zenpy(timeout=5, **settings.ZENPY_CREDENTIALS)
 
-    def get_or_create_zendesk_user(self, name, email):
-        zendesk_user = ZendeskUser(
-            name=name,
-            email=email,
-        )
-        return self.get_zendesk_client().users.create_or_update(zendesk_user)
-
     def create_zendesk_ticket(self, cleaned_data):
 
         email = self.request.user.email
         application = self.request.session.get('_last_failed_access_app', 'Unspecified')
 
-        # zendesk_user = self.get_or_create_zendesk_user(cleaned_data['full_name'], email)
         zendesk_user = ZendeskUser(name=cleaned_data['full_name'], email=email)
 
         description = (
