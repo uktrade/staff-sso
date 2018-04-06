@@ -248,7 +248,7 @@ SAML_ATTRIBUTE_MAPPING = {
     'last_name': ('last_name',),
 }
 
-# DRF
+
 REST_FRAMEWORK = {
     'UNAUTHENTICATED_USER': None,
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -327,6 +327,7 @@ SESSION_COOKIE_AGE = 90 * 24 * 60 * 60
 
 # google analytics
 GOOGLE_ANALYTICS_CODE = env('GOOGLE_ANALYTICS_CODE', default=None)
+GOOGLE_TAG_CODE = env('GOOGLE_TAG_CODE', default=None)
 
 # This is used to determine a users primary email and should be set to a comma separated list
 # e.g: 'mobile.ukti.gov.uk, digital.trade.gov.uk'
