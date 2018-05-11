@@ -89,7 +89,7 @@ class CustomIntrospectTokenView(IntrospectTokenView):
         try:
             token = get_access_token_model().objects.get(token=token_value)
         except ObjectDoesNotExist:
-            self._access_denied()
+            return self._access_denied()
         else:
             if token.is_valid():
                 data = {

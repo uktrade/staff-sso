@@ -128,3 +128,24 @@ class TestIntrospectView:
         response = api_client.get(self.OAUTH2_INTROSPECTION_URL + f'?token={token.token}')
 
         assert response.status_code == 401
+
+    def test_introspect_with_invalid_token(self, api_client):
+        """
+        An introspect view should return {active: False} for invalid tokens
+        """
+
+        application = ApplicationFactory()
+
+        introspect_user = UserFactory()
+        UserFactory(email='test@bbb.com')
+
+        intospect_token = AccessTokenFactory(
+            application=application,
+            user=introspect_user,
+            scope='introspection read'
+        )
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + intospect_token.token)
+        response = api_client.get(self.OAUTH2_INTROSPECTION_URL + f'?token=invalid-token')
+
+        assert response.status_code == 401
