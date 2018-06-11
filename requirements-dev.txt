@@ -60,7 +60,7 @@ repoze.who==2.3
 requests==2.18.1
 six==1.10.0
 termcolor==1.1.0          # via pytest-sugar
-text-unidecode==1.1       # via faker
+text-unidecode==1.2       # via faker
 urllib3==1.21.1
 waitress==1.0.2
 webob==1.7.2
