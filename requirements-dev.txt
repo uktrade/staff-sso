@@ -65,5 +65,5 @@ urllib3==1.21.1
 waitress==1.0.2
 webob==1.7.2
 whitenoise==3.3.0
-zenpy==1.2.6
+zenpy==2.0.4
 zope.interface==4.4.2
