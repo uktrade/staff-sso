@@ -13,7 +13,7 @@ cffi==1.10.0
 chardet==3.0.4
 coverage==4.4.2           # via pytest-cov
 cryptography==1.9
-decorator==4.0.11
+decorator==4.2.1
 defusedxml==0.4.1
 dj-database-url==0.4.2
 django-admin-tools==0.8.1
