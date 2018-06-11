@@ -38,7 +38,7 @@ requests==2.18.1          # via django-oauth-toolkit, pysaml2, zenpy
 six==1.10.0               # via cryptography, django-environ, paste, pyopenssl, pysaml2, python-dateutil
 urllib3==1.21.1           # via requests
 waitress==1.0.2
-webob==1.7.2              # via repoze.who
+webob==1.8.2              # via repoze.who
 whitenoise==3.3.0
 zenpy==1.2.6
 zope.interface==4.4.2     # via pysaml2, repoze.who
