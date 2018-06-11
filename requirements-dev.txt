@@ -66,4 +66,4 @@ waitress==1.0.2
 webob==1.7.2
 whitenoise==3.3.0
 zenpy==1.2.6
-zope.interface==4.4.2
+zope.interface==4.5.0
