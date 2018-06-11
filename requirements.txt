@@ -13,7 +13,7 @@ chardet==3.0.4            # via requests
 cryptography==1.9         # via pyopenssl
 decorator==4.0.11         # via pysaml2
 defusedxml==0.4.1         # via djangosaml2
-dj-database-url==0.4.2
+dj-database-url==0.5.0
 django-admin-tools==0.8.1
 django-axes==2.3.3
 django-environ==0.4.3
