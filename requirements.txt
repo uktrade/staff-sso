@@ -20,7 +20,7 @@ django-environ==0.4.3
 django-oauth-toolkit==1.0.0
 django==1.11.2
 djangorestframework==3.6.3
-djangosaml2==0.16.0
+djangosaml2==0.16.11
 future==0.16.0            # via pysaml2, zenpy
 idna==2.5                 # via cryptography, requests
 oauthlib==2.0.2           # via django-oauth-toolkit
