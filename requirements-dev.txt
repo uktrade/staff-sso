@@ -24,7 +24,7 @@ django==1.11.2
 djangorestframework==3.6.3
 djangosaml2==0.16.0
 factory-boy==2.9.2
-faker==0.8.7              # via factory-boy
+faker==0.8.16              # via factory-boy
 flake8-blind-except==0.1.1
 flake8-debugger==3.0.0
 flake8-import-order==0.15
