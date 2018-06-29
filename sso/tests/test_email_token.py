@@ -91,7 +91,7 @@ class TestEmailTokenForm:
 
     def test_email_property(self):
 
-        domain = settings.EMAIL_TOKEN_DOMAIN_WHITELIST[0][0]
+        domain = settings.EMAIL_TOKEN_DOMAIN_WHITELIST[0]
 
         form = EmailForm({
             'username': 'test.user',
@@ -107,7 +107,7 @@ class TestEmailTokenForm:
         assert form.email == form.cleaned_data['username'] + form.cleaned_data['domain']
 
     def test_invalid_username_is_detected(self):
-        domain = settings.EMAIL_TOKEN_DOMAIN_WHITELIST[0][0]
+        domain = settings.EMAIL_TOKEN_DOMAIN_WHITELIST[0]
 
         form = EmailForm({
             'username': 'invalid@username.com',
