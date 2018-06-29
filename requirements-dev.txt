@@ -11,7 +11,7 @@ cachetools==2.0.1
 certifi==2017.4.17
 cffi==1.11.5
 chardet==3.0.4
-coverage==4.4.2           # via pytest-cov
+coverage==4.5.1           # via pytest-cov
 cryptography==1.9
 decorator==4.0.11
 defusedxml==0.4.1
