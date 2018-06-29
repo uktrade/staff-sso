@@ -6,7 +6,7 @@
 #
 -e git+https://github.com/uktrade/dit-ip@v1.1.0#egg=django-ip-restriction
 asn1crypto==0.24.0
-asttokens==1.1.7          # via flake8-import-order
+asttokens==1.1.10          # via flake8-import-order
 cachetools==2.1.0
 certifi==2018.4.16
 cffi==1.11.5
