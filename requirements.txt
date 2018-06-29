@@ -39,6 +39,6 @@ six==1.10.0               # via cryptography, django-environ, paste, pyopenssl, 
 urllib3==1.21.1           # via requests
 waitress==1.0.2
 webob==1.7.2              # via repoze.who
-whitenoise==3.3.0
+whitenoise==3.3.1
 zenpy==1.2.6
 zope.interface==4.5.0     # via pysaml2, repoze.who
