@@ -19,7 +19,7 @@ django-axes==2.3.3
 django-environ==0.4.4
 django-oauth-toolkit==1.2.0
 django==1.11.13
-djangorestframework==3.6.3
+djangorestframework==3.8.2
 djangosaml2==0.16.0
 future==0.16.0            # via future, pysaml2, zenpy
 idna==2.5                 # via cryptography, requests
