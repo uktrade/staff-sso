@@ -12,7 +12,7 @@ certifi==2018.4.16
 cffi==1.11.5
 chardet==3.0.4
 coverage==4.5.1           # via pytest-cov
-cryptography==1.9
+cryptography==2.2.2
 decorator==4.0.11
 defusedxml==0.4.1
 dj-database-url==0.5.0
