@@ -23,7 +23,7 @@ djangorestframework==3.8.2
 djangosaml2==0.16.0
 future==0.16.0            # via future, pysaml2, zenpy
 idna==2.5                 # via cryptography, requests
-oauthlib==2.0.2           # via django-oauth-toolkit
+oauthlib==2.0.3           # via django-oauth-toolkit
 paste==2.0.3              # via pysaml2
 psycopg2==2.7.5
 pycparser==2.18           # via cffi
