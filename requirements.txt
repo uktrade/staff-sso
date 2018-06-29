@@ -27,7 +27,7 @@ oauthlib==2.0.3           # via django-oauth-toolkit
 paste==2.0.3              # via pysaml2
 psycopg2==2.7.5
 pycparser==2.18           # via cffi
-pycryptodomex==3.4.6      # via pysaml2
+pycryptodomex==3.6.1      # via pysaml2
 pyopenssl==17.0.0         # via pysaml2
 pysaml2==4.4.0            # via djangosaml2
 python-dateutil==2.7.3    # via pysaml2, zenpy
