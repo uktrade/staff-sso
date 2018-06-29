@@ -53,7 +53,7 @@ pytest-env==0.6.2
 pytest-mock==1.6.3
 pytest-sugar==0.9.0
 pytest==3.2.5
-python-dateutil==2.6.0
+python-dateutil==2.7.3
 pytz==2018.4
 raven==6.3.0
 repoze.who==2.3
