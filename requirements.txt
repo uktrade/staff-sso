@@ -7,9 +7,9 @@
 -e git+https://github.com/uktrade/dit-ip@v1.1.0#egg=django-ip-restriction
 asn1crypto==0.22.0        # via cryptography
 cachetools==2.0.1         # via zenpy
-certifi==2017.4.17        # via requests
+certifi==2018.4.17        # via requests
 cffi==1.11.5              # via cryptography
-chardet==3.0.4            # via chardet, requests
+chardet==3.0.4            # via requests
 cryptography==1.9         # via pyopenssl
 decorator==4.0.11         # via pysaml2
 defusedxml==0.4.1         # via djangosaml2
