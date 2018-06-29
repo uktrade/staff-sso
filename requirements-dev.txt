@@ -59,8 +59,8 @@ raven==6.9.0
 repoze.who==2.3
 requests==2.19.1
 six==1.11.0
-termcolor==1.1.0          # via pytest-sugar, termcolor
-text-unidecode==1.1       # via faker
+termcolor==1.1.0          # via pytest-sugar
+text-unidecode==1.2       # via faker
 urllib3==1.22
 waitress==1.1.0
 webob==1.7.2
