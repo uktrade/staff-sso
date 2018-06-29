@@ -17,7 +17,7 @@ class EmailForm(forms.Form):
         widget=forms.TextInput(attrs={'class': 'form-control form-control-1-4', 'placeholder': 'i.e. john.smith5'})
     )
     domain = forms.ChoiceField(
-        choices=settings.EMAIL_TOKEN_DOMAIN_WHITELIST,
+        choices=zip(settings.EMAIL_TOKEN_DOMAIN_WHITELIST, settings.EMAIL_TOKEN_DOMAIN_WHITELIST),
         widget=forms.Select(attrs={'class': 'form-control form-control-1-4'})
     )
 
