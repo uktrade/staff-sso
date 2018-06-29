@@ -40,8 +40,8 @@ mccabe==0.6.1             # via flake8
 oauthlib==2.0.3
 paste==2.0.3
 psycopg2==2.7.5
-py==1.5.2                 # via pytest
-pycodestyle==2.4.0        # via flake8, flake8-debugger, flake8-import-order, flake8-print, pycodestyle
+py==1.5.3                 # via pytest
+pycodestyle==2.4.0        # via flake8, flake8-debugger, flake8-import-order, flake8-print
 pycparser==2.18
 pycryptodomex==3.4.6
 pyflakes==2.0.0           # via flake8
