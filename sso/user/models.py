@@ -145,7 +145,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class EmailAddress(models.Model):
-    user = models.ForeignKey(User, related_name='emails')
+    user = models.ForeignKey(User, related_name='emails', on_delete=models.CASCADE)
     email = models.EmailField(unique=True)
 
     def save(self, *args, **kwargs):

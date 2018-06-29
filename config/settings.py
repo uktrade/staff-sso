@@ -297,16 +297,7 @@ RAVEN_CONFIG = {
 }
 
 # email auth
-EMAIL_TOKEN_DOMAIN_WHITELIST = [
-    ('@digital.trade.gov.uk', '@digital.trade.gov.uk'),
-    ('@trade.gsi.gov.uk', '@trade.gsi.gov.uk'),
-    ('@fco.gov.uk', '@fco.gov.uk'),
-    ('@fco.gsi.gov.uk', '@fco.gsi.gov.uk'),
-    ('@trade.gov.uk', '@trade.gov.uk'),
-    ('@cirrus.beis.gov.uk', '@cirrus.beis.gov.uk'),
-    ('@decc.gsi.gov.uk', '@decc.gsi.gov.uk'),
-    ('@dfid.gov.uk', '@dfid.gov.uk'),
-]
+EMAIL_TOKEN_DOMAIN_WHITELIST = env.tuple('EMAIL_TOKEN_DOMAIN_WHITELIST')
 
 EMAIL_TOKEN_TTL = 3600
 
@@ -340,3 +331,6 @@ ZENPY_CREDENTIALS = {
 }
 
 ZENDESK_TICKET_SUBJECT = 'AuthBroker: Support request'
+
+SECURE_BROWSER_XSS_FILTER = env.bool('SECURE_BROWSER_XSS_FILTER', True)
+SECURE_CONTENT_TYPE_NOSNIFF = env.bool('SECURE_CONTENT_TYPE_NOSNIFF', True)
