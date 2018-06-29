@@ -9,36 +9,36 @@ asn1crypto==0.22.0        # via cryptography
 cachetools==2.0.1         # via zenpy
 certifi==2017.4.17        # via requests
 cffi==1.10.0              # via cryptography
-chardet==3.0.4            # via requests
+chardet==3.0.4            # via chardet, requests
 cryptography==1.9         # via pyopenssl
 decorator==4.0.11         # via pysaml2
 defusedxml==0.4.1         # via djangosaml2
 dj-database-url==0.4.2
 django-admin-tools==0.8.1
 django-axes==2.3.3
-django-environ==0.4.3
+django-environ==0.4.4
 django-oauth-toolkit==1.0.0
-django==1.11.2
+django==1.11.13
 djangorestframework==3.6.3
 djangosaml2==0.16.0
-future==0.16.0            # via pysaml2, zenpy
+future==0.16.0            # via future, pysaml2, zenpy
 idna==2.5                 # via cryptography, requests
 oauthlib==2.0.2           # via django-oauth-toolkit
 paste==2.0.3              # via pysaml2
-psycopg2==2.7.1
+psycopg2==2.7.5
 pycparser==2.17           # via cffi
 pycryptodomex==3.4.6      # via pysaml2
 pyopenssl==17.0.0         # via pysaml2
 pysaml2==4.4.0            # via djangosaml2
 python-dateutil==2.7.3    # via pysaml2, zenpy
-pytz==2017.3              # via django, django-axes, pysaml2, zenpy
+pytz==2018.4              # via django, django-axes, pysaml2, zenpy
 raven==6.3.0
 repoze.who==2.3           # via pysaml2
-requests==2.18.1          # via django-oauth-toolkit, pysaml2, zenpy
+requests==2.19.1          # via django-oauth-toolkit, pysaml2, zenpy
 six==1.10.0               # via cryptography, django-environ, paste, pyopenssl, pysaml2, python-dateutil
 urllib3==1.21.1           # via requests
 waitress==1.0.2
 webob==1.7.2              # via repoze.who
-whitenoise==3.3.0
+whitenoise==3.3.1
 zenpy==1.2.6
-zope.interface==4.4.2     # via pysaml2, repoze.who
+zope.interface==4.5.0     # via pysaml2, repoze.who
