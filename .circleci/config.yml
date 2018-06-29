@@ -1,0 +1,48 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: python:3.6.5
+
+      - image: postgres:9.6
+        environment:
+          POSTGRES_DB=staffsso
+
+    environment:
+      DATABASE_URL: postgresql://postgres@localhost/staffsso
+
+    working_directory: ~/app
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          name: Restore pip cache
+          keys:
+            - v1-staff-sso-{{ checksum "requirements-dev.txt" }}
+            - v1-staff-sso-
+          paths:
+            - ~/cache/pip
+
+      - run:
+          name: Install xmlsec
+          command: |
+            apt-get update
+            apt-get install -y xmlsec1
+
+      - run:
+          name: Install dependencies
+          command: python -m pip install --cache-dir ~/cache/pip -r requirements-dev.txt
+
+      - save_cache:
+          name: Save pip cache
+          key: v1-staff-sso-{{ checksum "requirements-dev.txt" }}
+          paths:
+            - ~/cache/pip
+
+      - run:
+          name: Run tests
+          command: python -m pytest --cov -s --junitxml=test-reports/junit.xml sso
+
+      - store_test_results:
+          path: test-reports
