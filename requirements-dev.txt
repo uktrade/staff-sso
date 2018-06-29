@@ -9,7 +9,7 @@ asn1crypto==0.22.0
 asttokens==1.1.7          # via flake8-import-order
 cachetools==2.0.1
 certifi==2017.4.17
-cffi==1.10.0
+cffi==1.11.5
 chardet==3.0.4
 coverage==4.4.2           # via pytest-cov
 cryptography==1.9
