@@ -43,7 +43,7 @@ psycopg2==2.7.5
 py==1.5.3                 # via pytest
 pycodestyle==2.4.0        # via flake8, flake8-debugger, flake8-import-order, flake8-print
 pycparser==2.18
-pycryptodomex==3.6.6
+pycryptodomex==3.6.1
 pyflakes==2.0.0           # via flake8
 pyopenssl==17.0.0
 pysaml2==4.4.0
