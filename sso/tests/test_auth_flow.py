@@ -127,6 +127,23 @@ class TestSAMLLogin:
         assert f'Destination="{SAML_SSO_SERVICE}"' in saml_request
         assert f'AssertionConsumerServiceURL="{settings.SAML_ACS_URL}"' in saml_request
 
+    def test_post_binding_form_sanitises_form_fields(self, client):
+        """
+        Test that the RelayState field is correctly sanitised
+        """
+        application, authorize_params = create_oauth_application()
+
+        malicious_code = '%22%3E%3Cscript%3Ealert%28%27NCC%2BXSS%27%29%3C%2Fscript%3E'
+
+        login_url = f'{SAML_LOGIN_URL}?next={OAUTH_AUTHORIZE_URL}{malicious_code}?{urlencode(authorize_params)}'
+        response = client.get(login_url)
+
+        # check form
+        content = response.content.decode('utf-8')
+        assert response.status_code == 200
+        assert '<input type="hidden" name="RelayState" value="/o/authorize/&quot;&gt;&lt;script&gt;alert(&#39;NCC+XSS&#39;)&lt;/script&gt;?scope=read write" />' in content  # noqa
+        assert '<script>alert(\'NCC+XSS\')</script>' not in content
+
     @freeze_time('2017-06-22 15:50:00.000000+00:00')
     def test_saml_login_generates_oauth_code(self, client, mocker):
         """
