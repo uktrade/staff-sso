@@ -2,7 +2,7 @@
 
 pytest
 pytest-django
-pytest-sugar
+pytest-sugar==0.9.1
 pytest-mock
 pytest-env
 pytest-cov
