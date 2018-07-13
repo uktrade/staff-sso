@@ -16,5 +16,4 @@ flake8-import-order
 flake8-print
 flake8-quotes
 
-isort
 lxml
