@@ -3,7 +3,11 @@ import xml.etree.ElementTree as ET
 from unittest.mock import MagicMock, patch
 
 import pytest
-from django.core.urlresolvers import reverse
+
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 
 pytestmark = [
     pytest.mark.django_db
