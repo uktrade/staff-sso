@@ -63,7 +63,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'sso.core.middleware.NeverCacheMiddleware',
-    'ip_restriction.IpWhitelister',
+    # 'ip_restriction.IpWhitelister',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -287,6 +287,18 @@ LOGGING = {
         'level': 'WARN'
     }
 }
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    },
+    'axes_cache': {
+        # See - https://github.com/jazzband/django-axes/blob/master/docs/configuration.rst#cache-problems
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    }
+}
+
+AXES_CACHE = 'axes_cache'
 
 # admin ip restriction
 RESTRICT_ADMIN_BY_IPS = env('RESTRICT_ADMIN_BY_IPS')
