@@ -2,13 +2,17 @@ import datetime as dt
 
 import pytest
 from django.conf import settings
-from django.core.urlresolvers import reverse
 from freezegun import freeze_time
 
 from sso.emailauth.forms import EmailForm
 from sso.emailauth.models import EmailToken
 
 from .factories.user import UserFactory
+
+try:
+    from django.urls import reverse, reverse_lazy
+except ImportError:
+    from django.core.urlresolvers import reverse, reverse_lazy
 
 pytestmark = [
     pytest.mark.django_db
