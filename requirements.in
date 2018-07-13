@@ -1,4 +1,4 @@
-Django<2.0.0
+Django==2.0.0
 django-environ
 psycopg2
 djangosaml2
@@ -11,5 +11,5 @@ waitress
 whitenoise
 dj-database-url
 django-axes
--e git+https://github.com/uktrade/dit-ip@v1.1.0#egg=django-ip-restriction
+django-admin-ip-restrictor
 raven
