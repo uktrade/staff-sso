@@ -63,7 +63,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'sso.core.middleware.NeverCacheMiddleware',
-    'ip_restriction.IpWhitelister',
+    # 'ip_restriction.IpWhitelister',
 ]
 
 ROOT_URLCONF = 'config.urls'
