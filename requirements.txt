@@ -10,19 +10,24 @@ cachetools==2.1.0         # via zenpy
 certifi==2018.4.16        # via requests
 cffi==1.11.5              # via cryptography
 chardet==3.0.4            # via requests
+contextlib2==0.5.5        # via raven
 cryptography==2.2.2       # via pyopenssl
 decorator==4.2.1          # via pysaml2
 defusedxml==0.4.1         # via djangosaml2
 dj-database-url==0.5.0
 django-admin-tools==0.8.1
+django-appconf==1.0.2     # via django-axes
 django-axes==4.4.0
 django-environ==0.4.4
+django-ipware==2.1.0      # via django-axes
 django-oauth-toolkit==1.1.0
 django==1.11.13
 djangorestframework==3.8.2
 djangosaml2==0.16.0
+enum34==1.1.6             # via cryptography
 future==0.16.0            # via pysaml2, zenpy
 idna==2.5                 # via cryptography, requests
+ipaddress==1.0.22         # via cryptography
 oauthlib==2.0.3           # via django-oauth-toolkit
 paste==2.0.3              # via pysaml2
 psycopg2==2.7.5
