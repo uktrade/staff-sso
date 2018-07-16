@@ -1,9 +1,9 @@
-from axes.decorators import watch_login
+from axes.decorators import axes_dispatch
 from django.conf.urls import url
 
 from sso.localauth import views
 
 urlpatterns = [
-    url(r'^login/$', watch_login(views.LoginView.as_view()), name='login'),
+    url(r'^login/$', axes_dispatch(views.LoginView.as_view()), name='login'),
     url(r'^logout/$', views.session_logout, name='session-logout'),
 ]

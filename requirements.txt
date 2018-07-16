@@ -15,8 +15,10 @@ decorator==4.2.1          # via pysaml2
 defusedxml==0.4.1         # via djangosaml2
 dj-database-url==0.5.0
 django-admin-tools==0.8.1
-django-axes==2.3.3
+django-appconf==1.0.2     # via django-axes
+django-axes==4.4.0
 django-environ==0.4.4
+django-ipware==2.1.0      # via django-axes
 django-oauth-toolkit==1.1.0
 django==1.11.13
 djangorestframework==3.8.2
