@@ -1,8 +1,8 @@
 Django==2.0.0
 django-environ
 psycopg2-binary
-djangosaml2
-django-oauth-toolkit
+djangosaml2==0.16.0
+django-oauth-toolkit==1.1.0
 djangorestframework
 django-admin-tools
 zenpy

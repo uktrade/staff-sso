@@ -126,7 +126,7 @@ class TestEmailAuthView:
 
         token = 'aninvalidtoken'
 
-        url = reverse('email-auth-signin', kwargs=dict(token=token))
+        url = reverse('emailauth:email-auth-signin', kwargs=dict(token=token))
 
         response = client.get(url)
 
@@ -142,7 +142,7 @@ class TestEmailAuthView:
 
             token = EmailToken.objects.create_token('test@test.com')
 
-            url = reverse('email-auth-signin', kwargs=dict(token=token))
+            url = reverse('emailauth:email-auth-signin', kwargs=dict(token=token))
 
             frozen_time.move_to(expired_datetime)
 
