@@ -41,7 +41,7 @@ class EmailAuthView(RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         next_url = self.request.GET.get('next')
 
-        invalid_token_url = reverse('email-auth-invalid-token')
+        invalid_token_url = reverse('emailauth:email-auth-invalid-token')
 
         if next_url:
             invalid_token_url = '{url}?next={qs}'.format(

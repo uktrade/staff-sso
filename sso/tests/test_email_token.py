@@ -10,9 +10,9 @@ from sso.emailauth.models import EmailToken
 from .factories.user import UserFactory
 
 try:
-    from django.urls import reverse, reverse_lazy
+    from django.urls import reverse
 except ImportError:
-    from django.core.urlresolvers import reverse, reverse_lazy
+    from django.core.urlresolvers import reverse
 
 pytestmark = [
     pytest.mark.django_db
@@ -126,7 +126,7 @@ class TestEmailAuthView:
 
         token = 'aninvalidtoken'
 
-        url = reverse('email-auth-signin', kwargs=dict(token=token))
+        url = reverse('emailauth:email-auth-signin', kwargs=dict(token=token))
 
         response = client.get(url)
 
@@ -142,7 +142,7 @@ class TestEmailAuthView:
 
             token = EmailToken.objects.create_token('test@test.com')
 
-            url = reverse('email-auth-signin', kwargs=dict(token=token))
+            url = reverse('emailauth:email-auth-signin', kwargs=dict(token=token))
 
             frozen_time.move_to(expired_datetime)
 
@@ -156,7 +156,7 @@ class TestEmailAuthView:
         token = EmailToken.objects.create_token('test@test.com')
 
         url = '{}?next={}'.format(
-            reverse('email-auth-signin', kwargs=dict(token=token)),
+            reverse('emailauth:email-auth-signin', kwargs=dict(token=token)),
             'https://myapp.com'
         )
 
@@ -170,7 +170,7 @@ class TestEmailAuthView:
         token = EmailToken.objects.create_token('test@test.com')
 
         url = '{}?next={}'.format(
-            reverse('email-auth-signin', kwargs=dict(token=token)),
+            reverse('emailauth:email-auth-signin', kwargs=dict(token=token)),
             'https://myapp.com'
         )
 
@@ -187,7 +187,7 @@ class TestEmailAuthView:
         token = EmailToken.objects.create_token('test@test.com')
 
         url = '{}?next={}'.format(
-            reverse('email-auth-signin', kwargs=dict(token=token)),
+            reverse('emailauth:email-auth-signin', kwargs=dict(token=token)),
             'https://myapp.com'
         )
 

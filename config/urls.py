@@ -20,7 +20,7 @@ urlpatterns = [
     url(r'^api/v1/', include((api_urls, 'api'), namespace='api-v1')),
 
     url(r'^', include(('sso.contact.urls', 'sso_contact'), namespace='contact')),
-    url(r'^email/', include(('sso.emailauth.urls', 'sso_emailauth'))),
+    url(r'^email/', include(('sso.emailauth.urls', 'sso_emailauth'), namespace='emailauth')),
     url(r'^', include(('sso.localauth.urls', 'sso_localauth'), namespace='localauth')),
 
     url(r'^check/$', HealthCheckView.as_view(), name='healthcheck'),
