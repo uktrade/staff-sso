@@ -167,7 +167,7 @@ def login(request,  # noqa: C901
             http_response = render(request, post_binding_form_template, {
                 'target_url': location,
                 'params': {
-                    'SAMLRequest': base64.b64encode(force_bytes(request_xml)),
+                    'SAMLRequest': base64.b64encode(force_bytes(request_xml)).decode('utf-8'),
                     'RelayState': came_from,
                 },
             })
