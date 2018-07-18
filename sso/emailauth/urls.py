@@ -3,6 +3,8 @@ from django.views.generic import TemplateView
 
 from .views import EmailAuthView, EmailTokenView, InvalidToken
 
+app_name = 'emailauth'
+
 urlpatterns = [
     url(r'^token/$', EmailTokenView.as_view(), name='email-auth-initiate'),
     url(r'^signin/(?P<token>[A-Za-z0-9]+)/$', EmailAuthView.as_view(), name='email-auth-signin'),

@@ -68,7 +68,7 @@ def login(request,  # noqa: C901
     # SAML_IGNORE_AUTHENTICATED_USERS_ON_LOGIN setting. If that setting
     # is True (default value) we will redirect him to the came_from view.
     # Otherwise, we will show an (configurable) authorization error.
-    if not request.user.is_anonymous():
+    if not request.user.is_anonymous:
         try:
             redirect_authenticated_user = settings.SAML_IGNORE_AUTHENTICATED_USERS_ON_LOGIN
         except AttributeError:
@@ -167,7 +167,7 @@ def login(request,  # noqa: C901
             http_response = render(request, post_binding_form_template, {
                 'target_url': location,
                 'params': {
-                    'SAMLRequest': base64.b64encode(force_bytes(request_xml)),
+                    'SAMLRequest': base64.b64encode(force_bytes(request_xml)).decode('utf-8'),
                     'RelayState': came_from,
                 },
             })
@@ -244,6 +244,6 @@ def logged_out(request):
     """
     Fallback view after logging out if no redirect url is specified.
     """
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         return HttpResponseRedirect(reverse('saml2_logged_in'))
     return render(request, 'sso/logged-out.html')

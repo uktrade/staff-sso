@@ -1,7 +1,6 @@
 from urllib.parse import quote_plus
 
 from django.contrib.auth import login
-from django.core.urlresolvers import reverse, reverse_lazy
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
@@ -9,6 +8,11 @@ from django.views.generic.edit import FormView
 
 from .forms import EmailForm
 from .models import EmailToken
+
+try:
+    from django.urls import reverse, reverse_lazy
+except ImportError:
+    from django.core.urlresolvers import reverse, reverse_lazy
 
 
 class EmailTokenView(FormView):
@@ -37,7 +41,7 @@ class EmailAuthView(RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         next_url = self.request.GET.get('next')
 
-        invalid_token_url = reverse('email-auth-invalid-token')
+        invalid_token_url = reverse('emailauth:email-auth-invalid-token')
 
         if next_url:
             invalid_token_url = '{url}?next={qs}'.format(
