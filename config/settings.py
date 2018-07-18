@@ -17,6 +17,7 @@ if os.path.exists(ENV_FILE):
 env = environ.Env(
     DEBUG=(bool, False),
     RESTRICT_ADMIN=(bool, False),
+    RESTRICT_ADMIN_BY_IPS=(str,'127.0.0.1')
 )
 
 SECRET_KEY = env('SECRET_KEY')
