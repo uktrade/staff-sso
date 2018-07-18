@@ -69,7 +69,7 @@ class CustomAuthorizationView(AuthorizationView):
             if isinstance(error.oauthlib_error, AccessDeniedError):
                 return redirect('contact:access-denied')
             else:
-                return self.error_response(error)
+                return self.error_response(error, application)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
