@@ -123,7 +123,7 @@ class TestSAMLLogin:
         saml_request_search = re.search('<input type="hidden" name="SAMLRequest" value="(.*)" />', content)
         saml_request = base64.b64decode(saml_request_search.group(1)).decode('utf-8')
 
-        assert '<ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>' in saml_request
+        assert '<ns2:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>' in saml_request
         assert f'Destination="{SAML_SSO_SERVICE}"' in saml_request
         assert f'AssertionConsumerServiceURL="{settings.SAML_ACS_URL}"' in saml_request
 
@@ -506,18 +506,18 @@ class TestSAMLLogout:
         # check form
         content = response.content.decode('utf-8')
         assert response.status_code == 200
-        assert f'<form method="post" action="{SAML_LOGOUT_SERVICE}">' in content
+        assert f'<form action="{SAML_LOGOUT_SERVICE}" method="post">' in content
         assert '<input type="hidden" name="SAMLRequest"' in content
         assert '<input type="hidden" name="RelayState"' in content
-        assert '<input type="submit" value="Submit" />' in content
+        assert '<input type="submit" value="Continue"/>' in content
 
         # check saml request
-        saml_request_search = re.search('<input type="hidden" name="SAMLRequest" value="(.*)" />', content)
+        saml_request_search = re.search('<input type="hidden" name="SAMLRequest" value="(.*)"/>', content)
         saml_request = base64.b64decode(saml_request_search.group(1)).decode('utf-8')
 
-        assert '<ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>' in saml_request
+        assert '<ns2:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>' in saml_request
         assert f'Destination="{SAML_LOGOUT_SERVICE}"' in saml_request
-        assert f'<samlp:SessionIndex>{session_id}</samlp:SessionIndex>' in saml_request
+        assert f'<ns0:SessionIndex>{session_id}</ns0:SessionIndex>' in saml_request
 
     @freeze_time('2017-06-30 16:24:00.000000+00:00')
     def test_saml_logout_with_default_redirect_url(self, client, mocker):
