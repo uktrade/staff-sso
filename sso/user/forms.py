@@ -13,12 +13,14 @@ class AdminUserUploadForm(forms.Form):
 
     dry_run = forms.BooleanField(
         label='Test run - do not change any data',
-        required=False
+        required=False,
+        initial=True
     )
 
     file = forms.FileField(
         label='select a csv file',
-        required=True
+        required=True,
+        initial=True
     )
 
 
