@@ -27,7 +27,8 @@ class AdminUserUploadForm(forms.Form):
 class AdminUserAddAliasForm(forms.Form):
     dry_run = forms.BooleanField(
         label='Test run - do not change any data',
-        required=False
+        required=False,
+        initial=True
     )
 
     file = forms.FileField(
