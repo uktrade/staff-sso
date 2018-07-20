@@ -42,6 +42,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=True
     )
 
+    last_accessed = models.DateTimeField(blank=True, null=True)
+
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
