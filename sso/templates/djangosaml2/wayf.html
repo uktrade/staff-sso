@@ -7,7 +7,7 @@
   <section class="idp">
     <ul class="list available_idps">
         <li>
-          <a class="button" href="{% url 'email-auth-initiate' %}{% if came_from %}?next={{ came_from|urlencode }}{% endif %}">Your email address</a>
+          <a class="button" href="{% url 'emailauth:email-auth-initiate' %}{% if came_from %}?next={{ came_from|urlencode }}{% endif %}">Your email address</a>
           <span>we'll send you a link by email</span>
         </li>
       {% for url, name in available_idps %}

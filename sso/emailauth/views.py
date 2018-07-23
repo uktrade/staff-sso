@@ -18,7 +18,7 @@ except ImportError:
 class EmailTokenView(FormView):
     form_class = EmailForm
     template_name = 'emailauth/initiate.html'
-    success_url = reverse_lazy('email-auth-initiate-success')
+    success_url = reverse_lazy('emailauth:email-auth-initiate-success')
 
     def get(self, request, *args, **kwargs):
 
