@@ -62,6 +62,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         self.email = self.email.lower()
 
+        if 'email' in kwargs:
+            kwargs['email'] = kwargs['email'].lower()
         return_value = super().save(*args, **kwargs)
 
         if not self.emails.filter(email=self.email).exists():
