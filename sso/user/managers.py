@@ -32,7 +32,12 @@ class UserManager(BaseUserManager):
 
         defaults = defaults or {}
         email = kwargs['email'].lower()
-        params = {'email': email, **defaults}
+        default_email = defaults.get('email', '').lower()
+        params = {
+            **defaults,
+            'email': default_email,
+            'email': email
+        }
 
         try:
             return self.get_by_email(email), False
