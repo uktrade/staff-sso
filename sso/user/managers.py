@@ -49,4 +49,7 @@ class UserManager(BaseUserManager):
 
     def get_by_email(self, email):
         email = email.lower()
-        return self.get(Q(emails__email=email) | Q(email=email))
+        try:
+            return self.get(emails__email=email)
+        except self.model.DoesNotExist:
+            return self.get(email=email)
