@@ -1,4 +1,5 @@
 from django.contrib.auth.models import BaseUserManager
+from django.db.models import Q
 
 
 class UserManager(BaseUserManager):
@@ -32,7 +33,12 @@ class UserManager(BaseUserManager):
 
         defaults = defaults or {}
         email = kwargs['email'].lower()
-        params = {'email': email, **defaults}
+        default_email = defaults.get('email', '').lower()
+        params = {
+            **defaults,
+            'email': default_email,
+            'email': email
+        }
 
         try:
             return self.get_by_email(email), False
@@ -42,4 +48,8 @@ class UserManager(BaseUserManager):
             return user, True
 
     def get_by_email(self, email):
-        return self.get(emails__email=email)
+        email = email.lower()
+        try:
+            return self.get(emails__email=email)
+        except self.model.DoesNotExist:
+            return self.get(email=email)
