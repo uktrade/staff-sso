@@ -1,4 +1,5 @@
 from django.contrib.auth.models import BaseUserManager
+from django.db.models import Q
 
 
 class UserManager(BaseUserManager):
@@ -47,4 +48,5 @@ class UserManager(BaseUserManager):
             return user, True
 
     def get_by_email(self, email):
-        return self.get(emails__email=email)
+        email = email.lower()
+        return self.get(Q(emails__email=email) | Q(email=email))
