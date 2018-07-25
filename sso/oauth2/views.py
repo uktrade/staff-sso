@@ -24,47 +24,50 @@ class CustomAuthorizationView(AuthorizationView):
         Overridden django-oauth-toolkit authorization view which checks that authenticated users are in the correct
         group to access the resource.
         """
-
         try:
             scopes, credentials = self.validate_authorization_request(request)
-            all_scopes = get_scopes_backend().get_all_scopes()
-            kwargs['scopes_descriptions'] = [all_scopes[scope] for scope in scopes]
-            kwargs['scopes'] = scopes
-            # at this point we know an Application instance with such client_id exists in the database
+        except OAuthToolkitError as error:
+            # Application is not available at this time.
+            return self.error_response(error, application=None)
 
-            # TODO: Cache this!
-            application = get_application_model().objects.get(client_id=credentials['client_id'])
+        all_scopes = get_scopes_backend().get_all_scopes()
+        kwargs['scopes_descriptions'] = [all_scopes[scope] for scope in scopes]
+        kwargs['scopes'] = scopes
+        # at this point we know an Application instance with such client_id exists in the database
 
-            kwargs['application'] = application
-            kwargs['client_id'] = credentials['client_id']
-            kwargs['redirect_uri'] = credentials['redirect_uri']
-            kwargs['response_type'] = credentials['response_type']
-            kwargs['state'] = credentials['state']
+        # TODO: Cache this!
+        application = get_application_model().objects.get(client_id=credentials['client_id'])
 
-            assert request.user.is_authenticated
+        kwargs['application'] = application
+        kwargs['client_id'] = credentials['client_id']
+        kwargs['redirect_uri'] = credentials['redirect_uri']
+        kwargs['response_type'] = credentials['response_type']
+        kwargs['state'] = credentials['state']
 
-            # Check that the user has all of the application's groups
-            allow = request.user.can_access(application)
+        assert request.user.is_authenticated
 
-            # remember which application the user tried to access so they can request
-            # access on the access denied form.
+        # Check that the user has all of the application's groups
+        allow = request.user.can_access(application)
 
-            request.session.pop('_last_failed_access_app', None)
-            if not allow:
-                request.session['_last_failed_access_app'] = application.name
+        # remember which application the user tried to access so they can request
+        # access on the access denied form.
 
-            self.oauth2_data = kwargs
+        request.session.pop('_last_failed_access_app', None)
+        if not allow:
+            request.session['_last_failed_access_app'] = application.name
 
-            # following two loc are here only because of https://code.djangoproject.com/ticket/17795
-            form = self.get_form(self.get_form_class())
-            kwargs['form'] = form
+        self.oauth2_data = kwargs
 
+        # following two loc are here only because of https://code.djangoproject.com/ticket/17795
+        form = self.get_form(self.get_form_class())
+        kwargs['form'] = form
+
+        try:
             uri, headers, body, status = self.create_authorization_response(
                 request=self.request, scopes=' '.join(scopes),
                 credentials=credentials, allow=allow)
 
             return redirect(uri)
-
         except OAuthToolkitError as error:
             if isinstance(error.oauthlib_error, AccessDeniedError):
                 return redirect('contact:access-denied')
