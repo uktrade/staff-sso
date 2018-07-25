@@ -66,7 +66,7 @@ class EmailForm(forms.Form):
             next_url = self.extract_redirect_url(next_url)
             next_url = quote_plus(next_url)
 
-        path = reverse('email-auth-signin', kwargs=dict(token=token))
+        path = reverse('emailauth:email-auth-signin', kwargs=dict(token=token))
 
         url = '{scheme}{host}{path}?next={next_url}'.format(
             scheme='https://',
