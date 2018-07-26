@@ -152,3 +152,28 @@ class TestIntrospectView:
         response = api_client.get(self.OAUTH2_INTROSPECTION_URL + f'?token=invalid-token')
 
         assert response.status_code == 401
+
+    def test_peered_applications(self, api_client):
+        application1 = ApplicationFactory()
+        application2 = ApplicationFactory()
+        application1.peers.add(application2)
+
+        introspect_user = UserFactory()
+        user = UserFactory(email='test@bbb.com')
+
+        intospect_token = AccessTokenFactory(
+            application=application1,
+            user=introspect_user,
+            scope='introspection read'
+        )
+
+        token = AccessTokenFactory(
+            application=application2,
+            user=user
+        )
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + intospect_token.token)
+        response = api_client.get(self.OAUTH2_INTROSPECTION_URL + f'?token={token.token}')
+
+        assert response.status_code == 200
+        assert response.json().get('cross_client_token') == 'yes'

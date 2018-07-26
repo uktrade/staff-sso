@@ -1,4 +1,7 @@
+import re
+
 from django.contrib import admin
+from oauth2_provider.admin import ApplicationAdmin, Application
 
 from .filter import ApplicationFilter
 from .models import EmailAddress, User
@@ -25,3 +28,15 @@ class UserAdmin(admin.ModelAdmin):
 
     def email_list(self, obj):
         return ', '.join(obj.emails.all().values_list('email', flat=True))
+
+
+admin.site.unregister(Application)
+
+
+@admin.register(Application)
+class ExtendedApplicationAdmin(ApplicationAdmin):
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        if db_field.name == "peers":
+            pk = re.match('.*/(\d+).*', request.path).groups()[-1]
+            kwargs["queryset"] = Application.objects.exclude(pk=pk)
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
