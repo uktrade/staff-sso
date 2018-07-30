@@ -103,7 +103,7 @@ class CustomIntrospectTokenView(IntrospectTokenView):
                     data['client_id'] = token.application.client_id
 
                 if introspecting_application != token.application:
-                    if introspecting_application in token.application.peers.all():
+                    if introspecting_application in token.application.peer_applications.all():
                         data['cross_client_token'] = 'yes'
                     else:
                         return self._access_denied()

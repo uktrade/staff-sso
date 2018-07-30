@@ -44,7 +44,7 @@ class Application(AbstractApplication):
         )
     )
 
-    peers = models.ManyToManyField('self', blank=True)
+    peer_applications = models.ManyToManyField('self', blank=True, symmetrical=False)
 
     def get_email_order(self):
         ordering = self.email_ordering or getattr(settings, 'DEFAULT_EMAIL_ORDER', '')
