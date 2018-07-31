@@ -43,7 +43,7 @@ class ExtendedApplicationAdmin(ApplicationAdmin):
         Customise the formfield for peer_applications, removing self from the list of possible
         peer applications.
         """
-        if db_field.name == "peer_applications":
+        if db_field.name == "allow_tokens_from":
             pk = re.match('.*/(\d+).*', request.path).groups()[-1]
             kwargs["queryset"] = Application.objects.exclude(pk=pk)
         return super().formfield_for_manytomany(db_field, request, **kwargs)
