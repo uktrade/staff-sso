@@ -103,7 +103,7 @@ class CustomIntrospectTokenView(IntrospectTokenView):
                     data.update({
                         'access_type': 'cross_client',
                         'source_name': token.application.name,
-                        'source_token': token.application.client_id
+                        'source_client_id': token.application.client_id
                     })
                 else:
                     return self._access_denied()

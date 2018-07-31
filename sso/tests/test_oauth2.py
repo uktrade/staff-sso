@@ -180,5 +180,5 @@ class TestIntrospectView:
 
         response_json = response.json()
         assert response_json['access_type'] == 'cross_client'
-        assert response_json['source_token'] == other_application.client_id
         assert response_json['source_name'] == other_application.name
+        assert response_json['source_client_id'] == other_application.client_id
