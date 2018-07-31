@@ -155,9 +155,9 @@ class TestIntrospectView:
 
     def test_application_peer(self, api_client):
         application = ApplicationFactory()
-        peer_application = ApplicationFactory()
+        other_application = ApplicationFactory()
 
-        application.peer_applications.add(peer_application)
+        application.allow_tokens_from.add(other_application)
 
         introspect_user = UserFactory()
         user = UserFactory(email='test@bbb.com')
@@ -168,16 +168,17 @@ class TestIntrospectView:
             scope='introspection read'
         )
 
-        peer_token = AccessTokenFactory(
-            application=peer_application,
+        other_application_token = AccessTokenFactory(
+            application=other_application,
             user=user
         )
 
         api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + application_token.token)
-        response = api_client.get(self.OAUTH2_INTROSPECTION_URL + f'?token={peer_token.token}')
+        response = api_client.get(self.OAUTH2_INTROSPECTION_URL + f'?token={other_application_token.token}')
 
         assert response.status_code == 200
 
         response_json = response.json()
-        assert response_json['cross_client_token'] == 'yes'
-        assert response_json['peer_token'] == peer_application.client_id
+        assert response_json['access_type'] == 'cross_client'
+        assert response_json['source_token'] == other_application.client_id
+        assert response_json['source_name'] == other_application.name

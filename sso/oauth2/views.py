@@ -97,25 +97,20 @@ class CustomIntrospectTokenView(IntrospectTokenView):
                     'scope': token.scope,
                     'exp': int(calendar.timegm(token.expires.timetuple())),
                 }
-                if not token.application:
-                    self._access_denied()
-                else:
-                    data['client_id'] = token.application.client_id
-
-                if token.application in introspecting_application.peer_applications.all():
+                if token.application == introspecting_application:
+                    data['access_type'] = 'client'
+                elif token.application in introspecting_application.allow_tokens_from.all():
                     data.update({
-                        'cross_client_token': 'yes',
-                        'peer_name': token.application.name,
-                        'peer_token': token.application.client_id
+                        'access_type': 'cross_client',
+                        'source_name': token.application.name,
+                        'source_token': token.application.client_id
                     })
-                elif introspecting_application != token.application:
+                else:
                     return self._access_denied()
 
+                data['client_id'] = token.application.client_id
                 if token.user:
-                    if not token.application:
-                        data['username'] = token.user.get_username()
-                    else:
-                        data['username'], _ = token.user.get_emails_for_application(token.application)
+                    data['username'], _ = token.user.get_emails_for_application(token.application)
                 return HttpResponse(content=json.dumps(data), status=200, content_type='application/json')
             else:
                 return HttpResponse(content=json.dumps({
