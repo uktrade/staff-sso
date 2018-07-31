@@ -153,7 +153,7 @@ class TestIntrospectView:
 
         assert response.status_code == 401
 
-    def test_application_peer(self, api_client):
+    def test_allowed_application(self, api_client):
         application = ApplicationFactory()
         other_application = ApplicationFactory()
 
