@@ -145,6 +145,18 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         return primary_email, emails.values()
 
+    def get_application_username(self, application=None):
+        """
+        Convenience method
+
+        :param application:  application or None
+        :return:  result of get_emails_for_application or get_username if application is None
+        """
+        if application is None:
+            return self.get_username()
+        else:
+            return self.get_emails_for_application(application)[0]
+
 
 class EmailAddress(models.Model):
     user = models.ForeignKey(User, related_name='emails', on_delete=models.CASCADE)

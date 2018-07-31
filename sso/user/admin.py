@@ -1,7 +1,6 @@
-import re
-
+from django import forms
 from django.contrib import admin
-from oauth2_provider.admin import ApplicationAdmin, Application
+from oauth2_provider.admin import ApplicationAdmin as OAuth2ApplicationAdmin, Application
 
 from .filter import ApplicationFilter
 from .models import EmailAddress, User
@@ -13,7 +12,7 @@ class EmailInline(admin.TabularInline):
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    search_fields = ('emails__email', )
+    search_fields = ('emails__email',)
     list_filter = (ApplicationFilter, 'is_superuser')
     fields = ('email', 'first_name', 'last_name', 'is_superuser',
               'date_joined', 'last_login', 'permitted_applications')
@@ -30,20 +29,21 @@ class UserAdmin(admin.ModelAdmin):
         return ', '.join(obj.emails.all().values_list('email', flat=True))
 
 
+class ApplicationForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance:
+            allowed_tokens_from = self.fields['allow_tokens_from']
+            allowed_tokens_from.queryset = allowed_tokens_from.queryset.exclude(pk=self.instance.pk)
+
+    class Meta:
+        fields = '__all__'
+        model = Application
+
+
 admin.site.unregister(Application)
 
 
 @admin.register(Application)
-class ExtendedApplicationAdmin(ApplicationAdmin):
-    """
-    Re-register the Application editor form to customise the Many to Many editor
-    """
-    def formfield_for_manytomany(self, db_field, request, **kwargs):
-        """
-        Customise the formfield for peer_applications, removing self from the list of possible
-        peer applications.
-        """
-        if db_field.name == "allow_tokens_from":
-            pk = re.match('.*/(\d+).*', request.path).groups()[-1]
-            kwargs["queryset"] = Application.objects.exclude(pk=pk)
-        return super().formfield_for_manytomany(db_field, request, **kwargs)
+class ApplicationAdmin(OAuth2ApplicationAdmin):
+    form = ApplicationForm
