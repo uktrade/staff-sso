@@ -102,8 +102,8 @@ class CustomIntrospectTokenView(IntrospectTokenView):
         elif token.application in introspecting_application.allow_tokens_from.all():
             result.update({
                 'access_type': 'cross_client',
-                'source_name': token.application.name,
-                'source_client_id': token.application.client_id
+                'source_name': introspecting_application.name,
+                'source_client_id': introspecting_application.client_id
             })
         elif token.application is not None:
             # An unknown token
