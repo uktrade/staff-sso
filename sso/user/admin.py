@@ -35,7 +35,14 @@ admin.site.unregister(Application)
 
 @admin.register(Application)
 class ExtendedApplicationAdmin(ApplicationAdmin):
+    """
+    Re-register the Application editor form to customise the Many to Many editor
+    """
     def formfield_for_manytomany(self, db_field, request, **kwargs):
+        """
+        Customise the formfield for peer_applications, removing self from the list of possible
+        peer applications.
+        """
         if db_field.name == "peer_applications":
             pk = re.match('.*/(\d+).*', request.path).groups()[-1]
             kwargs["queryset"] = Application.objects.exclude(pk=pk)

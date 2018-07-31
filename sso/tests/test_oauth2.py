@@ -176,4 +176,7 @@ class TestIntrospectView:
         response = api_client.get(self.OAUTH2_INTROSPECTION_URL + f'?token={token.token}')
 
         assert response.status_code == 200
-        assert response.json().get('cross_client_token') == 'yes'
+
+        response_json = response.json()
+        assert response_json['cross_client_token'] == 'yes'
+        assert response_json['peer_token'] == introspect_token.application.client_id
