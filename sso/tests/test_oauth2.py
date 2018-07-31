@@ -153,30 +153,31 @@ class TestIntrospectView:
 
         assert response.status_code == 401
 
-    def test_peered_applications(self, api_client):
-        application1 = ApplicationFactory()
-        application2 = ApplicationFactory()
-        application2.peer_applications.add(application1)
+    def test_application_peer(self, api_client):
+        application = ApplicationFactory()
+        peer_application = ApplicationFactory()
+
+        application.peer_applications.add(peer_application)
 
         introspect_user = UserFactory()
         user = UserFactory(email='test@bbb.com')
 
-        introspect_token = AccessTokenFactory(
-            application=application1,
+        application_token = AccessTokenFactory(
+            application=application,
             user=introspect_user,
             scope='introspection read'
         )
 
-        token = AccessTokenFactory(
-            application=application2,
+        peer_token = AccessTokenFactory(
+            application=peer_application,
             user=user
         )
 
-        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + introspect_token.token)
-        response = api_client.get(self.OAUTH2_INTROSPECTION_URL + f'?token={token.token}')
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + application_token.token)
+        response = api_client.get(self.OAUTH2_INTROSPECTION_URL + f'?token={peer_token.token}')
 
         assert response.status_code == 200
 
         response_json = response.json()
         assert response_json['cross_client_token'] == 'yes'
-        assert response_json['peer_token'] == introspect_token.application.client_id
+        assert response_json['peer_token'] == peer_application.client_id
