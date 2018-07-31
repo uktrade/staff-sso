@@ -2,12 +2,14 @@
 
 set -e
 
+# Release tag on repo
+XMLSEC_VERSION_TAG=1.2.26
 XML_SEC_BUILD_DIR="."
-ZIP_PATH=https://github.com/uktrade/heroku-buildpack-xmlsec/raw/master/xmlsec.tar.gz
+
+ZIP_PATH=https://github.com/uktrade/heroku-buildpack-xmlsec/raw/${XMLSEC_VERSION}/xmlsec.tar.gz
+
 # Create the install directory
-
 INSTALL_PATH="${XML_SEC_BUILD_DIR}/xmlsec1"
-
 mkdir -p $INSTALL_PATH
 
 # copy binary
