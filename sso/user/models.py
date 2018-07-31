@@ -147,8 +147,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_application_username(self, application=None):
         """
-        Convenience method
-
         :param application:  application or None
         :return:  result of get_emails_for_application or get_username if application is None
         """
