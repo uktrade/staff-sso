@@ -1,4 +1,5 @@
 import pytest
+
 try:
     from django.urls import reverse
 except ImportError:
@@ -57,13 +58,14 @@ class TestApplication:
 class TestIntrospectView:
     OAUTH2_INTROSPECTION_URL = reverse('oauth2:introspect')
 
-    def test_introspect_view_with_email_priority_list(self, api_client):
+    def test_with_email_priority_list(self, api_client):
         application = ApplicationFactory(email_ordering='vvv.com, ddd.com, ccc.com, bbb.com')
+        username = 'test@vvv.com'
 
         introspect_user = UserFactory()
         user = UserFactory(email='test@bbb.com', email_list=['test@ccc.com', 'test@ddd.com', 'test@vvv.com'])
 
-        intospect_token = AccessTokenFactory(
+        introspect_token = AccessTokenFactory(
             application=application,
             user=introspect_user,
             scope='introspection read'
@@ -74,13 +76,24 @@ class TestIntrospectView:
             user=user
         )
 
-        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + intospect_token.token)
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + introspect_token.token)
         response = api_client.get(self.OAUTH2_INTROSPECTION_URL + f'?token={token.token}')
 
         assert response.status_code == 200
-        assert response.json()['username'] == 'test@vvv.com'
+        assert response.json()['username'] == username
 
-    def test_introspect_view_with_immutable_email(self, api_client):
+        response_json = response.json()
+        del response_json['exp']  # don't test expire time here
+
+        assert response_json == {
+            'access_type': 'client',
+            'client_id': application.client_id,
+            'username': username,
+            'active': True,
+            'scope': 'read'
+        }
+
+    def test_with_immutable_email(self, api_client):
         application = ApplicationFactory(
             email_ordering='vvv.com, ddd.com, ccc.com, bbb.com',
             provide_immutable_email=True)
@@ -88,7 +101,7 @@ class TestIntrospectView:
         introspect_user = UserFactory()
         user = UserFactory(email='test@bbb.com', email_list=['test@ccc.com', 'test@ddd.com', 'test@vvv.com'])
 
-        intospect_token = AccessTokenFactory(
+        introspect_token = AccessTokenFactory(
             application=application,
             user=introspect_user,
             scope='introspection read'
@@ -99,24 +112,20 @@ class TestIntrospectView:
             user=user
         )
 
-        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + intospect_token.token)
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + introspect_token.token)
         response = api_client.get(self.OAUTH2_INTROSPECTION_URL + f'?token={token.token}')
 
         assert response.status_code == 200
         assert response.json()['username'] == 'test@bbb.com'
 
-    def test_can_only_introspect_tokens_belonging_to_same_application(self, api_client):
-        """
-        An introspect token for app1 should not be able to introspect tokens issued to app2.
-        """
-
+    def test_fail_with_other_application_token(self, api_client):
         application1 = ApplicationFactory()
         application2 = ApplicationFactory()
 
         introspect_user = UserFactory()
         user = UserFactory(email='test@bbb.com')
 
-        intospect_token = AccessTokenFactory(
+        introspect_token = AccessTokenFactory(
             application=application1,
             user=introspect_user,
             scope='introspection read'
@@ -127,12 +136,12 @@ class TestIntrospectView:
             user=user
         )
 
-        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + intospect_token.token)
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + introspect_token.token)
         response = api_client.get(self.OAUTH2_INTROSPECTION_URL + f'?token={token.token}')
 
         assert response.status_code == 401
 
-    def test_introspect_with_invalid_token(self, api_client):
+    def test_fail_with_invalid_token(self, api_client):
         """
         An introspect view should return {active: False} for invalid tokens
         """
@@ -142,18 +151,18 @@ class TestIntrospectView:
         introspect_user = UserFactory()
         UserFactory(email='test@bbb.com')
 
-        intospect_token = AccessTokenFactory(
+        introspect_token = AccessTokenFactory(
             application=application,
             user=introspect_user,
             scope='introspection read'
         )
 
-        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + intospect_token.token)
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + introspect_token.token)
         response = api_client.get(self.OAUTH2_INTROSPECTION_URL + f'?token=invalid-token')
 
         assert response.status_code == 401
 
-    def test_allowed_application(self, api_client):
+    def test_from_allowed_application(self, api_client):
         application = ApplicationFactory()
         other_application = ApplicationFactory()
 
