@@ -2,6 +2,11 @@
 Staff SSO
 =========
 
+Staff SSO (also known as Authbroker / ABC) provides integration between applications
+and identify providers.
+
+Fine grained permissions are down to each app, SSO points users to apps.
+
 
 Dependencies
 ------------
