@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -ex
+set -e
 
 # Release tag on repo
 XMLSEC_VERSION_TAG=1.2.26
