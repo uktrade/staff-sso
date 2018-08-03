@@ -3,7 +3,6 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from oauth2_provider.models import AbstractApplication
 
-
 class Application(AbstractApplication):
     default_access_allowed = models.BooleanField(
         _('default access allowed'),
@@ -44,6 +43,8 @@ class Application(AbstractApplication):
              'user\'s list of emails')
         )
     )
+
+    allow_tokens_from = models.ManyToManyField('self', blank=True, symmetrical=False)
 
     def get_email_order(self):
         ordering = self.email_ordering or getattr(settings, 'DEFAULT_EMAIL_ORDER', '')

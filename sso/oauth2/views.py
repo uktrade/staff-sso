@@ -93,28 +93,33 @@ class CustomIntrospectTokenView(IntrospectTokenView):
             token = get_access_token_model().objects.get(token=token_value)
         except ObjectDoesNotExist:
             return self._access_denied()
-        else:
-            if token.is_valid():
-                data = {
-                    'active': True,
-                    'scope': token.scope,
-                    'exp': int(calendar.timegm(token.expires.timetuple())),
-                }
-                if not token.application:
-                    self._access_denied()
-                else:
-                    data['client_id'] = token.application.client_id
 
-                if introspecting_application != token.application:
-                    return self._access_denied()
+        if not token.is_valid():
+            return HttpResponse(content=json.dumps({
+                'active': False,
+            }), status=200, content_type='application/json')
 
-                if token.user:
-                    if not token.application:
-                        data['username'] = token.user.get_username()
-                    else:
-                        data['username'], _ = token.user.get_emails_for_application(token.application)
-                return HttpResponse(content=json.dumps(data), status=200, content_type='application/json')
-            else:
-                return HttpResponse(content=json.dumps({
-                    'active': False,
-                }), status=200, content_type='application/json')
+        assert token.application is not None  # Added 2018-08-03... Remove after 2018-09-03 if this not asserted.
+        result = {}
+        if token.application == introspecting_application:
+            result['access_type'] = 'client'
+        elif token.application in introspecting_application.allow_tokens_from.all():
+            result.update({
+                'access_type': 'cross_client',
+                'source_name': introspecting_application.name,
+                'source_client_id': introspecting_application.client_id
+            })
+        elif token.application is not None:
+            # An unknown token
+            return self._access_denied()
+
+        result.update({
+            'active': True,
+            'scope': token.scope,
+            'exp': int(calendar.timegm(token.expires.timetuple())),
+            'client_id': token.application.client_id
+        })
+        if token.user:
+            result['username'] = token.user.get_application_username(token.application)
+
+        return HttpResponse(content=json.dumps(result), status=200, content_type='application/json')
