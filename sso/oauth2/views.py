@@ -110,16 +110,13 @@ class CustomIntrospectTokenView(IntrospectTokenView):
             # An unknown token
             return self._access_denied()
 
-        if token.application:
-            result['client_id'] = token.application.client_id
-
-        if token.user:
-            result['username'] = token.user.get_application_username(token.application)
-
         result.update({
             'active': True,
             'scope': token.scope,
             'exp': int(calendar.timegm(token.expires.timetuple())),
+            'client_id': token.application.client_id
         })
+        if token.user:
+            result['username'] = token.user.get_application_username(token.application)
 
         return HttpResponse(content=json.dumps(result), status=200, content_type='application/json')
