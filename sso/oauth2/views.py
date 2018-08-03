@@ -96,6 +96,7 @@ class CustomIntrospectTokenView(IntrospectTokenView):
                 'active': False,
             }), status=200, content_type='application/json')
 
+        assert token.application is not None  # Added 2018-08-03... Remove after 2018-09-03 if this not asserted.
         result = {}
         if token.application == introspecting_application:
             result['access_type'] = 'client'
