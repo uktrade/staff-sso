@@ -17,7 +17,8 @@ if os.path.exists(ENV_FILE):
 env = environ.Env(
     DEBUG=(bool, False),
     RESTRICT_ADMIN=(bool, False),
-    RESTRICT_ADMIN_BY_IPS=(str,'127.0.0.1')
+    RESTRICT_ADMIN_BY_IPS=(str,'127.0.0.1'),
+    XMLSEC1=(str, shutil.which('xmlsec1'))
 )
 
 SECRET_KEY = env('SECRET_KEY')
@@ -172,13 +173,14 @@ if env('SAML_PRIVATE_KEY', default=None) and env('SAML_PUBLIC_CERT', default=Non
 # domain the metadata will refer to
 SAML_REDIRECT_RETURN_HOST = env('SAML_REDIRECT_RETURN_HOST')
 SAML_ACS_URL = SAML_REDIRECT_RETURN_HOST + '/saml2/acs/'
+XMLSEC1 = env('XMLSEC1')
 
 SAML_CONFIG = {
     # full path to the xmlsec1 binary, latter is where it ends up in Heroku
     # on ubuntu install with `apt-get install xmlsec`
     # to get this into Heroku, add the following buildpack on settings page:
     # https://github.com/uktrade/heroku-buildpack-xmlsec
-    'xmlsec_binary': shutil.which('xmlsec1'),
+    'xmlsec_binary': XMLSEC1,
 
     # note not a real url, just a global identifier per SAML recommendations
     'entityid': 'https://sso.staff.service.trade.gov.uk/sp',
