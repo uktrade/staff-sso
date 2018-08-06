@@ -20,7 +20,7 @@ tar -zxf xmlsec.tar.gz -C $INSTALL_PATH
 
 echo "-----> Exporting path"
 
-PROFILE_PATH="$HOME/.profile.d/xmlsec1.sh"
+PROFILE_PATH="$HOME/profile.d/xmlsec1.sh"
 mkdir -p $(dirname $PROFILE_PATH)
 echo 'export PATH="$PATH:'${INSTALL_PATH}'/bin"' >> $PROFILE_PATH
 echo 'export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:'${INSTALL_PATH}'/lib"' >> $PROFILE_PATH
