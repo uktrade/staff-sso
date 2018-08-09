@@ -1,7 +1,10 @@
+import datetime
 from unittest import mock
 
 import pytest
+from freezegun import freeze_time
 
+from sso.user.middleware import UpdatedLastAccessedMiddleware
 from sso.user.models import User
 
 from .factories.oauth import ApplicationFactory
@@ -403,3 +406,23 @@ class TestUser:
 
         assert user.emails.count() == 2
         assert user.emails.last().email == 'upper@case.com'
+
+    @pytest.mark.django_db
+    @freeze_time('2017-06-22 15:50:00.000000+00:00')
+    def test_user_last_accessed_field_updates(self, rf):
+        user = UserFactory(email='goblin@example.com')
+        middleware = UpdatedLastAccessedMiddleware(get_response=None)
+
+        request = rf.get('/')
+        request.user = user
+
+        from django.http import HttpResponse
+        response = HttpResponse()
+
+        assert user.last_accessed is None
+        middleware.process_response(request, response)
+
+        assert request.user.last_accessed == datetime.datetime.now(tz=datetime.timezone.utc)
+
+        _user = User.objects.get(pk=user.pk)
+        assert _user.last_accessed == datetime.datetime.now(tz=datetime.timezone.utc)
