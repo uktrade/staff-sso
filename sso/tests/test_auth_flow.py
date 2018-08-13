@@ -353,8 +353,8 @@ class TestSAMLLogin:
         MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
         MockCryptoBackendXmlSec1().validate_signature.return_value = False
 
-        with pytest.raises(SignatureError):
-            client.post(SAML_ACS_URL, data)
+        response = client.post(SAML_ACS_URL, data)
+        assert response.status_code == 403
 
 
 class TestOAuthToken:
