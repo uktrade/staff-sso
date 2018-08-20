@@ -46,11 +46,22 @@ jobs:
 
       - run:
           name: Check prod SAML config
-          command: ENV_NAME=prod python manage.py check_saml_config --disable_key_checks
+          command: python manage.py check_saml_config --disable_key_checks
+          environment:
+             ENV_NAME: prod
+             SECRET_KEY: secret
+             SAML_REDIRECT_RETURN_HOST: http://localhost:8000
+             EMAIL_TOKEN_DOMAIN_WHITELIST: "@example.com"
 
       - run:
           name: Check uat SAML config
-          command: ENV_NAME=staging python manage.py check_saml_config --disable_key_checks
+          command: python manage.py check_saml_config --disable_key_checks
+          environment:
+             ENV_NAME: staging
+             SECRET_KEY: secret
+             SAML_REDIRECT_RETURN_HOST: http://localhost:8000
+             EMAIL_TOKEN_DOMAIN_WHITELIST: "@example.com"
+
 
       - store_test_results:
           path: test-reports
