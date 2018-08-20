@@ -44,5 +44,13 @@ jobs:
           name: Run tests
           command: python -m pytest --cov -s --junitxml=test-reports/junit.xml sso
 
+      - run:
+          name: Check prod SAML config
+          command: ENV_NAME=prod python manage.py check_saml_config --disable_key_checks
+
+      - run:
+          name: Check uat SAML config
+          command: ENV_NAME=staging python manage.py check_saml_config --disable_key_checks
+
       - store_test_results:
           path: test-reports
