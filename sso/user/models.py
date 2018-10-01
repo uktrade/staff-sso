@@ -56,6 +56,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     def is_staff(self):
         return self.is_superuser
 
+    @property
+    def username(self):
+        return self.email
+
     def save(self, *args, **kwargs):
         """
         Ensure that emails are lower cased and that the primary email address

@@ -41,11 +41,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'djangosaml2',
+    'djangosaml2idp',
     'govuk_template',
     'oauth2_provider',
     'rest_framework',
     'axes',
     'raven.contrib.django.raven_compat',
+    #'sso.saml_idp',
 
     'sso.core',
     'sso.user',
@@ -204,7 +206,7 @@ SAML_CONFIG = {
                 ]
             },
             # this is the name id format Core responds with
-            'name_id_format': saml2.saml.NAMEID_FORMAT_UNSPECIFIED1,
+            'name_id_format': saml2.saml.NAMEID_FORMAT_UNSPECIFIED,
         },
     },
 
@@ -351,3 +353,75 @@ ZENDESK_TICKET_SUBJECT = 'AuthBroker: Support request'
 
 SECURE_BROWSER_XSS_FILTER = env.bool('SECURE_BROWSER_XSS_FILTER', True)
 SECURE_CONTENT_TYPE_NOSNIFF = env.bool('SECURE_CONTENT_TYPE_NOSNIFF', True)
+
+
+# IdP config
+
+import saml2
+from saml2.saml import NAMEID_FORMAT_EMAILADDRESS, NAMEID_FORMAT_UNSPECIFIED
+#from saml2.sigver import get_xmlsec_binary
+
+
+# DON"T SET THIS HERE
+BASE_URL = 'https://sso.trade.uat.uktrade.io'
+
+
+SAML_IDP_CONFIG_DIR = os.path.join(
+    BASE_DIR,
+    'config',
+    'saml-idp',
+    ENV_NAME
+)
+
+SAML_IDP_CONFIG = {
+    'debug' : DEBUG,
+    'xmlsec_binary': XMLSEC1, #get_xmlsec_binary(['/opt/local/bin', '/usr/bin/xmlsec1']),
+    'entityid': os.path.join(BASE_URL, 'idp/metadata'),
+    'description': 'Example IdP setup',
+
+    'service': {
+        'idp': {
+            'name': 'Django localhost IdP',
+            'endpoints': {
+                'single_sign_on_service': [
+                    (os.path.join(BASE_URL, 'idp/sso/post'), saml2.BINDING_HTTP_POST),
+                    (os.path.join(BASE_URL, 'idp/sso/redirect'), saml2.BINDING_HTTP_REDIRECT),
+                ],
+            },
+            'name_id_format': [NAMEID_FORMAT_EMAILADDRESS, NAMEID_FORMAT_UNSPECIFIED],
+            'sign_response': True,
+            'sign_assertion': True,
+
+            "policy": {
+                "default": {
+                    "lifetime": {"minutes": 15},
+                    "attribute_restrictions": None,
+                }
+            }
+        },
+    },
+
+    'metadata': {
+        'local': [
+            os.path.join(SAML_IDP_CONFIG_DIR, 'sp_metadata.xml'),
+            os.path.join(SAML_IDP_CONFIG_DIR, 'aws-metadata.xml')],    # test metadata
+    },
+    # Signing
+    'key_file': SAML_PRIVATE_KEY_PATH,      # temporarily reusing key/cert from sp config
+    'cert_file': SAML_PUBLIC_CERT_PATH,
+    # Encryption
+    'encryption_keypairs': [{
+        'key_file': SAML_PRIVATE_KEY_PATH,  # temporarily reusing key/cert from sp config
+        'cert_file': SAML_PUBLIC_CERT_PATH,
+    }],
+    'valid_for': 365 * 24,
+}
+
+
+SAML_IDP_SPCONFIG = {
+    'urn:amazon:webservices': {
+        'processor': 'sso.saml_idp.processors.AWSProcessor',
+        'attribute_mapping': {
+        }
+    }
+}

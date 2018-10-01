@@ -20,3 +20,5 @@ config/saml/prod/*.crt
 .direnv/
 .envrc
 
+.pytest_cache/
+
