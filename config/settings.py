@@ -47,8 +47,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'axes',
     'raven.contrib.django.raven_compat',
-    #'sso.saml_idp',
-
     'sso.core',
     'sso.user',
     'sso.samlauth',
@@ -388,9 +386,10 @@ SAML_IDP_CONFIG = {
                     (os.path.join(BASE_URL, 'idp/sso/redirect'), saml2.BINDING_HTTP_REDIRECT),
                 ],
             },
-            'name_id_format': [NAMEID_FORMAT_EMAILADDRESS, NAMEID_FORMAT_UNSPECIFIED],
+            'name_id_format': [NAMEID_FORMAT_EMAILADDRESS], #, NAMEID_FORMAT_UNSPECIFIED],
             'sign_response': True,
             'sign_assertion': True,
+            'want_authn_requests_signed': False,
 
             "policy": {
                 "default": {
@@ -404,7 +403,9 @@ SAML_IDP_CONFIG = {
     'metadata': {
         'local': [
             os.path.join(SAML_IDP_CONFIG_DIR, 'sp_metadata.xml'),
-            os.path.join(SAML_IDP_CONFIG_DIR, 'aws-metadata.xml')],    # test metadata
+            os.path.join(SAML_IDP_CONFIG_DIR, 'sp_google_metadata.xml'),
+            os.path.join(SAML_IDP_CONFIG_DIR, 'aws-metadata.xml')
+        ],
     },
     # Signing
     'key_file': SAML_PRIVATE_KEY_PATH,      # temporarily reusing key/cert from sp config
@@ -421,6 +422,11 @@ SAML_IDP_CONFIG = {
 SAML_IDP_SPCONFIG = {
     'urn:amazon:webservices': {
         'processor': 'sso.saml_idp.processors.AWSProcessor',
+        'attribute_mapping': {
+        }
+    },
+    'google.com': {
+        'processor': 'djangosaml2idp.processors.BaseProcessor',
         'attribute_mapping': {
         }
     }
