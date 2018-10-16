@@ -192,6 +192,7 @@ SAML_CONFIG = {
     'service': {
         'sp': {
             'allow_unsolicited': False,
+            'want_response_signed': False,
             'authn_requests_signed': True,
             'want_assertions_signed': True,
             'name': 'DIT SP',
