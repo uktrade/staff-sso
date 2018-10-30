@@ -26,6 +26,9 @@
                 {% elif name == 'd-google' %}
                     <a class="button"  href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Digital Team</a>
                     <span>username ends with @digital.trade.gov.uk</span>
+                {% elif name == 'z-google' %}
+                    <a class="button"  href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Google Test Login</a>
+                    <span>Test login</span>
                 {% else %}
                     <a class="button" href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">{{ name }}</a>
                 {% endif %}
