@@ -121,5 +121,6 @@ class CustomIntrospectTokenView(IntrospectTokenView):
         })
         if token.user:
             result['username'] = token.user.get_application_username(token.application)
+            result['unique_id'] = token.user.unique_id
 
         return HttpResponse(content=json.dumps(result), status=200, content_type='application/json')
