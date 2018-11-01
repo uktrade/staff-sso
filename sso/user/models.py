@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+import uuid
 
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser
@@ -15,6 +16,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         _('email'), unique=True,
         help_text=_('Warning: editing this field may cause user profiles to break in Digital Workspace')
     )
+    unique_id = models.UUIDField(
+        _('unique id'), unique=True,
+        default=uuid.uuid4
+    )
+
     first_name = models.CharField(
         _('first name'), max_length=50, blank=True
     )
