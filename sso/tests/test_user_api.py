@@ -52,7 +52,7 @@ class TestAPIGetUserMe:
         assert response.status_code == 200
         assert response.json() == {
             'email': 'user1@example.com',
-            'unique_id': str(user.unique_id),
+            'user_id': str(user.user_id),
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': [],
@@ -153,7 +153,7 @@ class TestApiUserIntrospect:
         assert response.status_code == 200
         assert response.json() == {
             'email': 'user1@example.com',
-            'unique_id': str(user.unique_id),
+            'user_id': str(user.user_id),
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': [],
@@ -172,7 +172,7 @@ class TestApiUserIntrospect:
         assert response.status_code == 200
         assert response.json() == {
             'email': 'user1@example.com',
-            'unique_id': str(user.unique_id),
+            'user_id': str(user.user_id),
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': ['test@bbb.com', 'test@aaa.com'],
