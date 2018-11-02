@@ -44,7 +44,7 @@ class TestAPIGetUserMe:
         """
         Test that with a valid token you can get the details of the logged in user.
         """
-        _, token = get_oauth_token()
+        user, token = get_oauth_token()
 
         api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
         response = api_client.get(self.GET_USER_ME_URL)
@@ -52,6 +52,7 @@ class TestAPIGetUserMe:
         assert response.status_code == 200
         assert response.json() == {
             'email': 'user1@example.com',
+            'user_id': str(user.user_id),
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': [],
@@ -152,6 +153,7 @@ class TestApiUserIntrospect:
         assert response.status_code == 200
         assert response.json() == {
             'email': 'user1@example.com',
+            'user_id': str(user.user_id),
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': [],
@@ -170,6 +172,7 @@ class TestApiUserIntrospect:
         assert response.status_code == 200
         assert response.json() == {
             'email': 'user1@example.com',
+            'user_id': str(user.user_id),
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': ['test@bbb.com', 'test@aaa.com'],
