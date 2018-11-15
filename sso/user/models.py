@@ -222,6 +222,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         else:
             return self.get_emails_for_application(application)[0]
 
+    def get_permitted_applications(self):
+        """Return a list of applications that this user has access to"""
+
+        return [app.application_key for app in self.oauth2_application.all()]
+
 
 class EmailAddress(models.Model):
     user = models.ForeignKey(User, related_name='emails', on_delete=models.CASCADE)

@@ -5,6 +5,11 @@ from oauth2_provider.models import AbstractApplication
 
 
 class Application(AbstractApplication):
+    application_key = models.SlugField(
+        _('unique text id'),
+        max_length=50,
+        unique=True)
+
     default_access_allowed = models.BooleanField(
         _('default access allowed'),
         default=False,
