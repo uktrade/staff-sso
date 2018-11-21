@@ -14,6 +14,9 @@ class ApplicationFactory(factory.django.DjangoModelFactory):
     authorization_grant_type = Application.GRANT_AUTHORIZATION_CODE
     skip_authorization = True
     name = 'Test oauth app'
+    application_key = factory.Sequence(lambda n: 'app-{}'.format(n))
+    display_name = 'a test app'
+    start_url = 'http://example.org'
 
     class Meta:
         model = Application

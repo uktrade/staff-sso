@@ -226,10 +226,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         """Return a list of applications that this user has access to"""
 
         return [{
-                    'id': app.application_key,
+                    'key': app.application_key,
                     'url': app.start_url,
                     'name': app.display_name
-                } for app in self.oauth2_application.all()]
+                } for app in self.permitted_applications.all()]
 
 
 class EmailAddress(models.Model):
