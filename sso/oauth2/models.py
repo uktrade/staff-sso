@@ -10,6 +10,16 @@ class Application(AbstractApplication):
         max_length=50,
         unique=True)
 
+    display_name = models.CharField(
+        _('the name of the application displayed to end users'),
+        max_length=100,
+    )
+
+    start_url = models.CharField(
+        _('the start url for the application'),
+        max_length=255,
+    )
+
     default_access_allowed = models.BooleanField(
         _('default access allowed'),
         default=False,
