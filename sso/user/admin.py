@@ -12,7 +12,7 @@ class EmailInline(admin.TabularInline):
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    search_fields = ('emails__email',)
+    search_fields = ('emails__email', 'email', 'first_name', 'last_name')
     list_filter = (ApplicationFilter, 'is_superuser')
     fields = ('user_id', 'email', 'first_name', 'last_name', 'is_superuser',
               'date_joined', 'last_login', 'last_accessed', 'permitted_applications')
