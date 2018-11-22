@@ -84,10 +84,14 @@ class CustomIntrospectTokenView(IntrospectTokenView):
             content_type='application/json'
         )
 
+    def get_introspecting_application(self):
+        token = self.request.META['HTTP_AUTHORIZATION'][7:]
+
+        return get_access_token_model().objects.get(token=token).application
+
     def get_token_response(self, token_value=None):
 
-        introspecting_application = \
-            self.request.resource_owner.oauth2_provider_accesstoken.first().application
+        introspecting_application = self.get_introspecting_application()
 
         try:
             token = get_access_token_model().objects.get(token=token_value)
@@ -99,7 +103,8 @@ class CustomIntrospectTokenView(IntrospectTokenView):
                 'active': False,
             }), status=200, content_type='application/json')
 
-        assert token.application is not None  # Added 2018-08-03... Remove after 2018-09-03 if this not asserted.
+        assert token.application is not None
+
         result = {}
         if token.application == introspecting_application:
             result['access_type'] = 'client'
@@ -109,8 +114,7 @@ class CustomIntrospectTokenView(IntrospectTokenView):
                 'source_name': introspecting_application.name,
                 'source_client_id': introspecting_application.client_id
             })
-        elif token.application is not None:
-            # An unknown token
+        else:
             return self._access_denied()
 
         result.update({

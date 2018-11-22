@@ -21,3 +21,6 @@ config/saml/prod/*.crt
 .envrc
 .pytest_cache
 
+*.swp
+
+.pytest_cache
