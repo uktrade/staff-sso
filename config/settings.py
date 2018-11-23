@@ -143,7 +143,10 @@ LOGIN_REDIRECT_URL = '/saml2/logged-in/'
 SAML_USER_MODEL = 'user.user'
 
 # Allows us to use the NameID field for some IdPs
-SAML_IDPS_USE_NAME_ID_AS_USERNAME = ['http://adfsmobile.azurecore.com/adfs/services/trust', 'https://adfs.mobile.ukti.gov.uk/adfs/services/trust']
+SAML_IDPS_USE_NAME_ID_AS_USERNAME = [
+    'http://adfsmobile.azurecore.com/adfs/services/trust',
+    'https://adfs.mobile.ukti.gov.uk/adfs/services/trust'
+]
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
@@ -194,6 +197,7 @@ SAML_CONFIG = {
             'allow_unsolicited': False,
             'authn_requests_signed': True,
             'want_assertions_signed': True,
+            'want_response_signed': False,
             'name': 'DIT SP',
             'endpoints': {
                 'assertion_consumer_service': [
@@ -204,7 +208,7 @@ SAML_CONFIG = {
                 ]
             },
             # this is the name id format Core responds with
-            'name_id_format': saml2.saml.NAMEID_FORMAT_UNSPECIFIED1,
+            'name_id_format': saml2.saml.NAMEID_FORMAT_UNSPECIFIED,
         },
     },
 
