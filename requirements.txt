@@ -32,7 +32,7 @@ pysaml2==4.6.2            # via djangosaml2
 python-dateutil==2.7.3    # via pysaml2, zenpy
 pytz==2018.5              # via django, django-axes, pysaml2, zenpy
 raven==6.9.0
-requests==2.19.1          # via django-oauth-toolkit, pysaml2, zenpy
+requests==2.20.1
 six==1.11.0               # via cryptography, pyopenssl, pysaml2, python-dateutil
 urllib3==1.23             # via requests
 waitress==1.1.0
