@@ -7,6 +7,7 @@ djangorestframework
 django-admin-tools
 zenpy
 requests==2.20.1
+defusedxml==0.5.0
 
 waitress
 whitenoise
