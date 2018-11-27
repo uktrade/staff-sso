@@ -5,7 +5,7 @@ import pytest
 from freezegun import freeze_time
 
 from sso.user.middleware import UpdatedLastAccessedMiddleware
-from sso.user.models import User
+from sso.user.models import User, AccessProfile
 
 from .factories.oauth import ApplicationFactory
 from .factories.user import UserFactory
@@ -230,6 +230,17 @@ class TestUser:
         assert not user.can_access(app)
 
     @pytest.mark.django_db
+    def test_can_access_with_access_profile(self):
+
+        app = ApplicationFactory()
+        user = UserFactory()
+        ap = AccessProfile.objects.create(name='test profile')
+        ap.oauth2_applications.add(app)
+        user.access_profiles.add(ap)
+
+        assert user.can_access(app)
+
+    @pytest.mark.django_db
     def test_can_access_with_app_default_access(self):
         """
         Test that `can_access()` returns True when user is not assigned to an app but the app allows default access
@@ -426,3 +437,22 @@ class TestUser:
 
         _user = User.objects.get(pk=user.pk)
         assert _user.last_accessed == datetime.datetime.now(tz=datetime.timezone.utc)
+
+
+class TestAccessProfile:
+    @pytest.mark.django_db
+    def test_is_allowed_true(self):
+        app = ApplicationFactory()
+
+        ap = AccessProfile.objects.create()
+        ap.oauth2_applications.add(app)
+
+        assert ap.is_allowed(app)
+
+    @pytest.mark.django_db
+    def test_is_access_allowed_false(self):
+        app = ApplicationFactory()
+
+        ap = AccessProfile.objects.create()
+
+        assert not ap.is_allowed(app)

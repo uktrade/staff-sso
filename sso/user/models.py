@@ -9,6 +9,33 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from .managers import UserManager
+from sso.oauth2.models import Application as OAuth2Application
+
+
+class AccessProfile(models.Model):
+    """This model defines a list of applications that a user can access"""
+    name = models.CharField(
+        _('name'),
+        max_length=50,
+    )
+
+    description = models.TextField(
+        _('description'),
+        null=True,
+        blank=True,
+        help_text=_('for internal use only')
+    )
+
+    oauth2_applications = models.ManyToManyField(
+        OAuth2Application,
+        _('access_profiles'),
+    )
+
+    def __str__(self):
+        return self.name
+
+    def is_allowed(self, application: OAuth2Application):
+        return application in self.oauth2_applications.all()
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -44,7 +71,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text=_(
             'Applications that this user is permitted to access'
         ),
-        blank=True
+        blank=True,
+    )
+
+    access_profiles = models.ManyToManyField(
+        AccessProfile,
+        related_name='users',
+        blank=True,
     )
 
     last_accessed = models.DateTimeField(blank=True, null=True)
@@ -118,8 +151,10 @@ class User(AbstractBaseUser, PermissionsMixin):
             _remove_username(email): email for email in self.emails.all().values_list('email', flat=True)
         }
 
-    def can_access(self, application):
-        """Can this user access the application?"""
+    def _is_user_permitted_to_access_application(self, application):
+        """Can this user access the application?
+            This uses `self.permitted_applications` and is not
+            `AccessProfile` aware"""
 
         if application.default_access_allowed:
             return True
@@ -127,6 +162,22 @@ class User(AbstractBaseUser, PermissionsMixin):
             return True
         else:
             return application in self.permitted_applications.all()
+
+    def can_access(self, application: OAuth2Application):
+        """ Can the user access this application?"""
+
+        # check if an AccessProfile gives the user access
+        for profile in self.access_profiles.all():
+            if profile.is_allowed(application):
+                return True
+
+        # check if the user is directly granted access via self.permitted_applications or
+        # application configuration: default_access_allowed or allow_access_by_email_suffix
+        if self._is_user_permitted_to_access_application(application):
+            return True
+
+        return False
+
 
     def get_emails_for_application(self, application):
         """
