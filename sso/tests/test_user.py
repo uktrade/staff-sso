@@ -219,7 +219,7 @@ class TestUser:
         assert user.can_access(app)
 
     @pytest.mark.django_db
-    def test_can_access_without_perms(self):
+    def test_cannot_access_without_perms(self):
         """
         Test that `can_access()` returns False when user is not assigned to app
         """
@@ -238,6 +238,54 @@ class TestUser:
         ap.oauth2_applications.add(app)
         user.access_profiles.add(ap)
 
+        assert user.can_access(app)
+
+    @pytest.mark.django_db
+    def test_cant_access_with_access_profile_that_does_not_include_application(self):
+        """The user has an access profile but it doesn't provide access to the app"""
+
+        app = ApplicationFactory()
+        user = UserFactory()
+        ap = AccessProfile.objects.create(name='test profile')
+        ap.oauth2_applications.add(app)
+        ap2 = AccessProfile.objects.create(name='test profile 2')
+        user.access_profiles.add(ap2)
+
+        assert not user.can_access(app)
+
+    @pytest.mark.django_db
+    def test_user_has_multiple_profiles_can_access_application(self):
+        """The user has multiple profiles, only one grants them access to the application"""
+
+        app = ApplicationFactory()
+        user = UserFactory()
+        ap = AccessProfile.objects.create(name='test profile')
+        ap.oauth2_applications.add(app)
+        ap2 = AccessProfile.objects.create(name='test profile 2')
+        user.access_profiles.add(ap)
+        user.access_profiles.add(ap2)
+
+        assert user.can_access(app)
+
+    @pytest.mark.django_db
+    def test_user_permitted_application_but_not_profile(self):
+        """User is permitted to access an application directly but does not have profile based access"""
+
+        user = UserFactory()
+        app = ApplicationFactory(users=[user])
+        ap = AccessProfile.objects.create(name='test profile')
+        user.access_profiles.add(ap)
+        assert user.can_access(app)
+
+    @pytest.mark.django_db
+    def test_user_permitted_application_but_permitted_via_profile(self):
+        """User is not granted direct access (permitted_applications) but has profile based access"""
+
+        user = UserFactory()
+        app = ApplicationFactory()
+        ap = AccessProfile.objects.create(name='test profile')
+        ap.oauth2_applications.add(app)
+        user.access_profiles.add(ap)
         assert user.can_access(app)
 
     @pytest.mark.django_db

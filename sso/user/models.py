@@ -151,33 +151,23 @@ class User(AbstractBaseUser, PermissionsMixin):
             _remove_username(email): email for email in self.emails.all().values_list('email', flat=True)
         }
 
-    def _is_user_permitted_to_access_application(self, application):
-        """Can this user access the application?
-            This uses `self.permitted_applications` and is not
-            `AccessProfile` aware"""
-
-        if application.default_access_allowed:
-            return True
-        elif self._is_allowed_email(application):
-            return True
-        else:
-            return application in self.permitted_applications.all()
-
     def can_access(self, application: OAuth2Application):
         """ Can the user access this application?"""
 
-        # check if an AccessProfile gives the user access
+        # does the application grant access?
+        if application.default_access_allowed or self._is_allowed_email(application):
+            return True
+
+        # is the user permitted to access the application directly?
+        if application in self.permitted_applications.all():
+            return True
+
+        # is the user granted access by an access profile?
         for profile in self.access_profiles.all():
             if profile.is_allowed(application):
                 return True
 
-        # check if the user is directly granted access via self.permitted_applications or
-        # application configuration: default_access_allowed or allow_access_by_email_suffix
-        if self._is_user_permitted_to_access_application(application):
-            return True
-
         return False
-
 
     def get_emails_for_application(self, application):
         """
