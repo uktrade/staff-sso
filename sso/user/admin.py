@@ -1,9 +1,29 @@
 from django import forms
 from django.contrib import admin
+from django.forms.widgets import CheckboxSelectMultiple
+from django.forms import ModelForm
+
 from oauth2_provider.admin import ApplicationAdmin as OAuth2ApplicationAdmin, Application
 
 from .filter import ApplicationFilter
 from .models import EmailAddress, User, AccessProfile
+from sso.oauth2.models import Application
+
+
+class UserForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['permitted_applications'].widget = CheckboxSelectMultiple()
+        self.fields['permitted_applications'].queryset = Application.objects.all()
+        self.fields['permitted_applications'].help_text = ''
+        self.fields['access_profiles'].widget = CheckboxSelectMultiple()
+        self.fields['access_profiles'].queryset = AccessProfile.objects.all()
+        self.fields['access_profiles'].help_text = ''
+
+    class Meta:
+        model = User
+        fields = '__all__'
 
 
 class EmailInline(admin.TabularInline):
@@ -21,6 +41,10 @@ class UserAdmin(admin.ModelAdmin):
     inlines = [
         EmailInline
     ]
+
+    def get_form(self, request, obj=None, **kwargs):
+        kwargs['form'] = UserForm
+        return super().get_form(request, obj, **kwargs)
 
     def permitted_apps(self, obj):
         return ', '.join(obj.permitted_applications.all().values_list('name', flat=True))
