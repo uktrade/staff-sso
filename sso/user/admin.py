@@ -37,7 +37,8 @@ class UserAdmin(admin.ModelAdmin):
     fields = ('user_id', 'email', 'first_name', 'last_name', 'is_superuser',
               'date_joined', 'last_login', 'last_accessed', 'access_profiles', 'permitted_applications')
     readonly_fields = ('date_joined', 'last_login', 'last_accessed', 'user_id')
-    list_display = ('email', 'email_list', 'is_superuser', 'last_login', 'last_accessed', 'permitted_apps')
+    list_display = ('email', 'email_list', 'is_superuser', 'last_login', 'last_accessed', 'list_permitted_applications',
+                    'list_access_profiles')
     inlines = [
         EmailInline
     ]
@@ -46,8 +47,15 @@ class UserAdmin(admin.ModelAdmin):
         kwargs['form'] = UserForm
         return super().get_form(request, obj, **kwargs)
 
-    def permitted_apps(self, obj):
+    def list_permitted_applications(self, obj):
         return ', '.join(obj.permitted_applications.all().values_list('name', flat=True))
+
+    list_permitted_applications.short_description = 'permitted applications'
+
+    def list_access_profiles(self, obj):
+        return ', '.join(obj.access_profiles.all().values_list('name', flat=True))
+
+    list_access_profiles.short_description = 'access profiles'
 
     def email_list(self, obj):
         return ', '.join(obj.emails.all().values_list('email', flat=True))
