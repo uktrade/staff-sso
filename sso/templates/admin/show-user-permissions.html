@@ -1,0 +1,31 @@
+{% extends 'sso/base.html' %}
+
+{% block inner_content %}
+
+<div class="container">
+    <h1 class="heading-large">User permissions</h1>
+
+    <h2>User: {{ user.get_full_name }}</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <td>Application</td>
+                <td>Permitted?</td>
+            </tr>
+        </thead>
+        <tbody>
+        {% for app in applications %}
+            <tr>
+                <td>{{ app.name }}</td>
+                <td>{{ app.access|yesno }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <p style="text-align: right; margin-top: 50px;">
+        <a href="javascript: window.close();" class="button">Close Window</a>
+    </p>
+</div>
+
+{% endblock %}

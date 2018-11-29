@@ -1,9 +1,6 @@
 import pytest
 
-try:
-    from django.urls import reverse, reverse_lazy
-except ImportError:
-    from django.core.urlresolvers import reverse, reverse_lazy
+from django.urls import reverse
 
 from .test_auth_flow import log_user_in
 
@@ -46,4 +43,5 @@ class TestSubmission:
         assert create_ticket_mock.tickets.create.called
 
         ticket = create_ticket_mock.tickets.create.call_args[0][0]
-        assert ticket.description == 'Name: Mr Smith\nTeam: webops\nEmail: user1@example.com\nApplication: TestApplication123\n'
+        assert ticket.description == \
+            'Name: Mr Smith\nTeam: webops\nEmail: user1@example.com\nApplication: TestApplication123\n'

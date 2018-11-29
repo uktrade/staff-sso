@@ -1,16 +1,12 @@
-from zenpy import Zenpy
-from zenpy.lib.api_objects import Ticket, User as ZendeskUser, CustomField
-
-from django.views.generic.edit import FormView
-from django.shortcuts import render
 from django.conf import settings
+from django.shortcuts import render
+from django.urls import reverse_lazy
+from django.views.generic.edit import FormView
+
+from zenpy import Zenpy
+from zenpy.lib.api_objects import CustomField, Ticket, User as ZendeskUser
 
 from .forms import RequestAccessForm
-
-try:
-    from django.urls import reverse, reverse_lazy
-except ImportError:
-    from django.core.urlresolvers import reverse, reverse_lazy
 
 
 class AccessDeniedView(FormView):

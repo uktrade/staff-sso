@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+
 import uuid
 
 from django.conf import settings
@@ -8,7 +9,34 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
+from sso.oauth2.models import Application as OAuth2Application
 from .managers import UserManager
+
+
+class AccessProfile(models.Model):
+    """This model defines a list of applications that a user can access"""
+    name = models.CharField(
+        _('name'),
+        max_length=50,
+    )
+
+    description = models.TextField(
+        _('description'),
+        null=True,
+        blank=True,
+        help_text=_('for internal use only')
+    )
+
+    oauth2_applications = models.ManyToManyField(
+        OAuth2Application,
+        _('access_profiles'),
+    )
+
+    def __str__(self):
+        return self.name
+
+    def is_allowed(self, application: OAuth2Application):
+        return application in self.oauth2_applications.all()
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -44,7 +72,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text=_(
             'Applications that this user is permitted to access'
         ),
-        blank=True
+        blank=True,
+    )
+
+    access_profiles = models.ManyToManyField(
+        AccessProfile,
+        related_name='users',
+        blank=True,
     )
 
     last_accessed = models.DateTimeField(blank=True, null=True)
@@ -118,15 +152,23 @@ class User(AbstractBaseUser, PermissionsMixin):
             _remove_username(email): email for email in self.emails.all().values_list('email', flat=True)
         }
 
-    def can_access(self, application):
-        """Can this user access the application?"""
+    def can_access(self, application: OAuth2Application):
+        """ Can the user access this application?"""
 
-        if application.default_access_allowed:
+        # does the application grant access?
+        if application.default_access_allowed or self._is_allowed_email(application):
             return True
-        elif self._is_allowed_email(application):
+
+        # is the user permitted to access the application directly?
+        if application in self.permitted_applications.all():
             return True
-        else:
-            return application in self.permitted_applications.all()
+
+        # is the user granted access by an access profile?
+        for profile in self.access_profiles.all():
+            if profile.is_allowed(application):
+                return True
+
+        return False
 
     def get_emails_for_application(self, application):
         """
