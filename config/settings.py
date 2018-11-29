@@ -197,6 +197,7 @@ SAML_CONFIG = {
             'allow_unsolicited': False,
             'authn_requests_signed': True,
             'want_assertions_signed': True,
+            'want_response_signed': False,
             'name': 'DIT SP',
             'endpoints': {
                 'assertion_consumer_service': [
@@ -207,7 +208,7 @@ SAML_CONFIG = {
                 ]
             },
             # this is the name id format Core responds with
-            'name_id_format': saml2.saml.NAMEID_FORMAT_UNSPECIFIED1,
+            'name_id_format': saml2.saml.NAMEID_FORMAT_UNSPECIFIED,
         },
     },
 
