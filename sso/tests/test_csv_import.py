@@ -1,9 +1,9 @@
 import pytest
+
 from django.core.exceptions import ValidationError
 
 from sso.user.data_import import UserAliasImport, UserMergeImport
 from sso.user.models import User
-
 from .factories.oauth import ApplicationFactory
 from .factories.user import UserFactory
 
@@ -23,11 +23,11 @@ class TestUserMergeImport:
         assert emails == ['test@aaa.com', 'test@bbb.com', 'test@ccc.com']
 
     @pytest.mark.parametrize(
-         'row', (
-              ['', 'Smith', 'test@test.com'],
-              ['John', 'Smith', ''],
-              ['John', 'Smith', 'not-an-email']
-         )
+        'row', (
+            ['', 'Smith', 'test@test.com'],
+            ['John', 'Smith', ''],
+            ['John', 'Smith', 'not-an-email']
+        )
     )
     def test_extract_row_data_invalid_data(self, row):
         with pytest.raises(ValidationError):

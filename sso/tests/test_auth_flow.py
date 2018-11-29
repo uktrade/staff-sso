@@ -2,8 +2,8 @@ import base64
 import os
 import re
 from functools import lru_cache
-from urllib.parse import parse_qs, quote, urlencode
 from unittest.mock import Mock
+from urllib.parse import parse_qs, quote, urlencode
 
 import pytest
 from django.conf import settings

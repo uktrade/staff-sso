@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+
 import uuid
 
 from django.conf import settings
@@ -8,8 +9,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
-from .managers import UserManager
 from sso.oauth2.models import Application as OAuth2Application
+from .managers import UserManager
 
 
 class AccessProfile(models.Model):

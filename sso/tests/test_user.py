@@ -5,7 +5,7 @@ import pytest
 from freezegun import freeze_time
 
 from sso.user.middleware import UpdatedLastAccessedMiddleware
-from sso.user.models import User, AccessProfile
+from sso.user.models import AccessProfile, User
 
 from .factories.oauth import ApplicationFactory
 from .factories.user import UserFactory

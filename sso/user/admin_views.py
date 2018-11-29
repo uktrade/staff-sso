@@ -4,16 +4,16 @@ from io import StringIO
 from django.contrib.admin.views.decorators import staff_member_required
 
 from django.http.response import StreamingHttpResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.utils.decorators import method_decorator
 from django.views.generic import FormView
 from django.views.generic.base import View
 
+from sso.oauth2.models import Application
 from .data_export import UserDataExport, UserPermissionExport
 from .data_import import UserAliasImport, UserMergeImport
 from .forms import AdminUserAddAliasForm, AdminUserUploadForm
 from .models import User
-from sso.oauth2.models import Application
 
 
 class Echo(object):

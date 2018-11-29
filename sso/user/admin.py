@@ -1,15 +1,15 @@
 from django import forms
 from django.contrib import admin
-from django.forms.widgets import CheckboxSelectMultiple
 from django.forms import ModelForm
-from django.utils.safestring import mark_safe
+from django.forms.widgets import CheckboxSelectMultiple
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 
-from oauth2_provider.admin import ApplicationAdmin as OAuth2ApplicationAdmin, Application
+from oauth2_provider.admin import ApplicationAdmin as OAuth2ApplicationAdmin
 
-from .filter import ApplicationFilter
-from .models import EmailAddress, User, AccessProfile
 from sso.oauth2.models import Application
+from .filter import ApplicationFilter
+from .models import AccessProfile, EmailAddress, User
 
 
 class UserForm(ModelForm):
@@ -39,8 +39,8 @@ class UserAdmin(admin.ModelAdmin):
     fields = ('user_id', 'email', 'first_name', 'last_name', 'is_superuser',
               'date_joined', 'last_login', 'last_accessed', 'access_profiles', 'permitted_applications')
     readonly_fields = ('date_joined', 'last_login', 'last_accessed', 'user_id')
-    list_display = ('email', 'email_list', 'is_superuser', 'last_login', 'last_accessed', 'list_permitted_applications',
-                    'list_access_profiles', 'show_permissions_link')
+    list_display = ('email', 'email_list', 'is_superuser', 'last_login', 'last_accessed',
+                    'list_permitted_applications', 'list_access_profiles', 'show_permissions_link')
     inlines = [
         EmailInline
     ]
@@ -83,6 +83,8 @@ class ApplicationForm(forms.ModelForm):
 
 
 admin.site.unregister(Application)
+
+
 @admin.register(Application)
 class ApplicationAdmin(OAuth2ApplicationAdmin):
     form = ApplicationForm

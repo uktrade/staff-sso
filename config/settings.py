@@ -17,7 +17,7 @@ if os.path.exists(ENV_FILE):
 env = environ.Env(
     DEBUG=(bool, False),
     RESTRICT_ADMIN=(bool, False),
-    RESTRICT_ADMIN_BY_IPS=(str,'127.0.0.1'),
+    RESTRICT_ADMIN_BY_IPS=(str, '127.0.0.1'),
     XMLSEC1=(str, shutil.which('xmlsec1'))
 )
 
@@ -143,7 +143,10 @@ LOGIN_REDIRECT_URL = '/saml2/logged-in/'
 SAML_USER_MODEL = 'user.user'
 
 # Allows us to use the NameID field for some IdPs
-SAML_IDPS_USE_NAME_ID_AS_USERNAME = ['http://adfsmobile.azurecore.com/adfs/services/trust', 'https://adfs.mobile.ukti.gov.uk/adfs/services/trust']
+SAML_IDPS_USE_NAME_ID_AS_USERNAME = [
+    'http://adfsmobile.azurecore.com/adfs/services/trust',
+    'https://adfs.mobile.ukti.gov.uk/adfs/services/trust'
+]
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',

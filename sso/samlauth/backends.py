@@ -1,8 +1,8 @@
 import logging
 
 from django.conf import settings
-from djangosaml2.backends import get_saml_user_model, Saml2Backend
 from django.core.exceptions import ObjectDoesNotExist
+from djangosaml2.backends import Saml2Backend
 
 from djangosaml2.signals import pre_user_save
 
@@ -37,7 +37,7 @@ class MultiEmailSaml2Backend(Saml2Backend):
             settings, 'SAML_USE_NAME_ID_AS_USERNAME', False)
 
         django_user_main_attribute = settings.SAML_DJANGO_USER_MAIN_ATTRIBUTE
-        django_user_main_attribute_lookup =settings.SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP
+        django_user_main_attribute_lookup = settings.SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP
 
         # Selectively use the nameid field for IdPs in this list.
         ids_use_name_id_as_username = getattr(

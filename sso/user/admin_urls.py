@@ -3,9 +3,9 @@ from django.conf.urls import url
 from .admin_views import (
     AdminUserAliasAddImportView,
     AdminUserMergeImportView,
-    UserDataExportView,
-    UserPermissionExportView,
     ShowUserPermissionsView,
+    UserDataExportView,
+    UserPermissionExportView
 )
 
 urlpatterns = [

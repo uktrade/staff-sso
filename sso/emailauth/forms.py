@@ -3,16 +3,12 @@ from urllib.parse import parse_qs, quote_plus, urlparse
 from django import forms
 from django.conf import settings
 from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
+from django.template.loader import render_to_string
+from django.urls import reverse
 
 from .models import EmailToken
 
-try:
-    from django.urls import reverse
-except ImportError:
-    from django.core.urlresolvers import reverse
 
 class EmailForm(forms.Form):
     username = forms.CharField(

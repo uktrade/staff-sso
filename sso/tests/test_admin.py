@@ -1,13 +1,14 @@
 import re
+
 import pytest
 
+from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import reverse
 
 from sso.user.admin_views import ShowUserPermissionsView
 
 from .factories.oauth import ApplicationFactory
 from .factories.user import UserFactory
-from django.contrib.auth.models import AnonymousUser
 
 
 pytestmark = [
@@ -43,8 +44,8 @@ class TestShowUserPermissionsView:
         admin_user = UserFactory(first_name='admin', last_name='admin', is_superuser=True)
         user = UserFactory(first_name='Bill', last_name='Smith')
 
-        app1 = ApplicationFactory(name='app1')
-        app2 = ApplicationFactory(name='app2', users=[user])
+        ApplicationFactory(name='app1')
+        ApplicationFactory(name='app2', users=[user])
 
         request = rf.get(reverse('show-permissions-view', kwargs={'user_id': user.id}))
         request.user = admin_user
@@ -56,5 +57,3 @@ class TestShowUserPermissionsView:
         assert response.status_code == 200
         assert re.search(r'<td>app1</td>\n\s*<td>no</td>', content)
         assert re.search(r'<td>app2</td>\n\s*<td>yes</td>', content)
-
-
