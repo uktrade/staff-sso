@@ -2,6 +2,8 @@ from django import forms
 from django.contrib import admin
 from django.forms.widgets import CheckboxSelectMultiple
 from django.forms import ModelForm
+from django.utils.safestring import mark_safe
+from django.urls import reverse
 
 from oauth2_provider.admin import ApplicationAdmin as OAuth2ApplicationAdmin, Application
 
@@ -38,7 +40,7 @@ class UserAdmin(admin.ModelAdmin):
               'date_joined', 'last_login', 'last_accessed', 'access_profiles', 'permitted_applications')
     readonly_fields = ('date_joined', 'last_login', 'last_accessed', 'user_id')
     list_display = ('email', 'email_list', 'is_superuser', 'last_login', 'last_accessed', 'list_permitted_applications',
-                    'list_access_profiles')
+                    'list_access_profiles', 'show_permissions_link')
     inlines = [
         EmailInline
     ]
@@ -59,6 +61,13 @@ class UserAdmin(admin.ModelAdmin):
 
     def email_list(self, obj):
         return ', '.join(obj.emails.all().values_list('email', flat=True))
+
+    def show_permissions_link(self, obj):
+        return mark_safe('<a href="{}" target="_blank">show perms</a>'.format(
+            reverse('show-permissions-view', kwargs={'user_id': obj.id})
+        ))
+
+    show_permissions_link.short_description = ' '
 
 
 class ApplicationForm(forms.ModelForm):

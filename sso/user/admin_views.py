@@ -4,7 +4,7 @@ from io import StringIO
 from django.contrib.admin.views.decorators import staff_member_required
 
 from django.http.response import StreamingHttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.generic import FormView
 from django.views.generic.base import View
@@ -12,6 +12,8 @@ from django.views.generic.base import View
 from .data_export import UserDataExport, UserPermissionExport
 from .data_import import UserAliasImport, UserMergeImport
 from .forms import AdminUserAddAliasForm, AdminUserUploadForm
+from .models import User
+from sso.oauth2.models import Application
 
 
 class Echo(object):
@@ -93,3 +95,21 @@ class AdminUserAliasAddImportView(CSVImportView):
     form_class = AdminUserAddAliasForm
     template_name = 'admin/user-alias-import.html'
     import_class = UserAliasImport
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class ShowUserPermissionsView(View):
+
+    template_name = 'admin/show-user-permissions.html'
+
+    def get(self, request, *args, **kwargs):
+        user = get_object_or_404(User, pk=kwargs['user_id'])
+
+        apps = [{'name': app.name, 'access': user.can_access(app)} for app in Application.objects.all()]
+
+        context = {
+            'user': user,
+            'applications': apps,
+        }
+
+        return render(request, self.template_name, context)
