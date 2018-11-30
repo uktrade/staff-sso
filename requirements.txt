@@ -4,6 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
+-e git+https://github.com/lgarvey/djangosaml2idp.git@master#egg=djangosaml2idp
 asn1crypto==0.24.0        # via cryptography
 cachetools==2.1.0         # via zenpy
 certifi==2018.4.16        # via requests
