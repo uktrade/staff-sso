@@ -9,16 +9,16 @@ class ModelProcessor(BaseProcessor):
     """
 
     def __init__(self, entity_id, *args, **kwargs):
-        self._application = SamlApplication.models.get(entity_id=entity_id)
+        self._application = SamlApplication.objects.get(entity_id=entity_id)
 
     def has_access(self, user):
         return user.can_access(self._application)
 
 
 class AWSProcessor(ModelProcessor):
-    def create_identity(self, user, sp_mapping):
+    def create_identity(self, user, sp_mapping, **extra_config):
 
-        role_arn = sp_mapping.pop('role', None)
+        role_arn = extra_config.pop('role', None)
 
         assert role_arn, 'missing saml2 application role arns'
         # See: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_saml_assertions.html

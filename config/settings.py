@@ -6,6 +6,7 @@ import sys
 import dj_database_url
 import environ
 import saml2
+from saml2 import saml
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -212,7 +213,7 @@ SAML_CONFIG = {
                 ]
             },
             # this is the name id format Core responds with
-            'name_id_format': saml2.saml.NAMEID_FORMAT_UNSPECIFIED,
+            'name_id_format': saml.NAMEID_FORMAT_UNSPECIFIED,
         },
     },
 
@@ -429,12 +430,11 @@ SAML_IDP_CONFIG = {
     'valid_for': 365 * 24,
 }
 
-
 SAML_IDP_SPCONFIG = {
     'urn:amazon:webservices': {
         'processor': 'sso.samlidp.processors.AWSProcessor',
         'attribute_mapping': {},
-        'extra_data': {
+        'extra_config': {
             'role': env('SAML2_AWS_ROLE_ARN')
         }
     },
