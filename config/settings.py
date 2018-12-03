@@ -443,3 +443,5 @@ SAML_IDP_SPCONFIG = {
         'attribute_mapping': {}
     }
 }
+
+SAML_IDP_ERROR_VIEW_CLASS = 'sso.samlidp.views.CustomSamlIDPErrorView'
