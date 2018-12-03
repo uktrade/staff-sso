@@ -10,6 +10,7 @@ from django.views.generic import FormView
 from django.views.generic.base import View
 
 from sso.oauth2.models import Application
+from sso.samlidp.models import SamlApplication
 from .data_export import UserDataExport, UserPermissionExport
 from .data_import import UserAliasImport, UserMergeImport
 from .forms import AdminUserAddAliasForm, AdminUserUploadForm
@@ -105,11 +106,13 @@ class ShowUserPermissionsView(View):
     def get(self, request, *args, **kwargs):
         user = get_object_or_404(User, pk=kwargs['user_id'])
 
-        apps = [{'name': app.name, 'access': user.can_access(app)} for app in Application.objects.all()]
+        oauth_apps = [{'name': app.name, 'access': user.can_access(app)} for app in Application.objects.all()]
+        saml_apps = [{'name': app.name, 'access': user.can_access(app)} for app in SamlApplication.objects.all()]
 
         context = {
             'user': user,
-            'applications': apps,
+            'oauth_apps': oauth_apps,
+            'saml_apps': saml_apps,
         }
 
         return render(request, self.template_name, context)
