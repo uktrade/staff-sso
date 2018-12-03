@@ -8,10 +8,8 @@ __py_cache__/
 .cache/
 .coverage
 
-config/saml/staging/*.key
-config/saml/staging/*.crt
-config/saml/prod/*.key
-config/saml/prod/*.crt
+**/*.key
+**/*.crt
 
 *.iml
 .idea
@@ -23,4 +21,5 @@ config/saml/prod/*.crt
 
 *.swp
 
-.pytest_cache
+.pytest_cache/
+

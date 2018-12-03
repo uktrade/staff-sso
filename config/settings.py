@@ -5,10 +5,11 @@ import sys
 
 import dj_database_url
 import environ
-import saml2.saml
+import saml2
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 # Set up .env
 ENV_FILE = os.path.join(BASE_DIR, '.env')
@@ -21,6 +22,8 @@ env = environ.Env(
     ALLOWED_ADMIN_IP_RANGES=(str, ''),
     XMLSEC1=(str, shutil.which('xmlsec1'))
 )
+
+BASE_URL = env('SAML_REDIRECT_RETURN_HOST')
 
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG', default=False)
@@ -177,8 +180,7 @@ if env('SAML_PRIVATE_KEY', default=None) and env('SAML_PUBLIC_CERT', default=Non
         f.write(base64.b64decode(env('SAML_PUBLIC_CERT')))
 
 # domain the metadata will refer to
-SAML_REDIRECT_RETURN_HOST = env('SAML_REDIRECT_RETURN_HOST')
-SAML_ACS_URL = SAML_REDIRECT_RETURN_HOST + '/saml2/acs/'
+SAML_ACS_URL = BASE_URL + '/saml2/acs/'
 XMLSEC1 = env('XMLSEC1')
 
 SAML_CONFIG = {
@@ -206,7 +208,7 @@ SAML_CONFIG = {
                     (SAML_ACS_URL, saml2.BINDING_HTTP_POST),
                 ],
                 'single_logout_service': [
-                    (SAML_REDIRECT_RETURN_HOST + '/saml2/ls/post/', saml2.BINDING_HTTP_POST),
+                    (BASE_URL + '/saml2/ls/post/', saml2.BINDING_HTTP_POST),
                 ]
             },
             # this is the name id format Core responds with
@@ -359,3 +361,85 @@ ZENDESK_TICKET_SUBJECT = 'AuthBroker: Support request'
 
 SECURE_BROWSER_XSS_FILTER = env.bool('SECURE_BROWSER_XSS_FILTER', True)
 SECURE_CONTENT_TYPE_NOSNIFF = env.bool('SECURE_CONTENT_TYPE_NOSNIFF', True)
+
+# Saml2 IdP config
+
+SAML_IDP_PRIVATE_KEY_PATH = os.path.join(SAML_CONFIG_DIR, 'sp.private.key')
+SAML_IDP_PUBLIC_CERT_PATH = os.path.join(SAML_CONFIG_DIR, 'sp.public.crt')
+
+if env('SAML_PRIVATE_KEY', default=None) and env('SAML_PUBLIC_CERT', default=None):
+    # if the key/crt are passed in as env vars => save it to a file
+    with open(SAML_IDP_PRIVATE_KEY_PATH, 'wb') as f:
+        f.write(base64.b64decode(env('SAML_IDP_PRIVATE_KEY')))
+
+    with open(SAML_IDP_PUBLIC_CERT_PATH, 'wb') as f:
+        f.write(base64.b64decode(env('SAML_IDP_PUBLIC_CERT')))
+
+SAML_IDP_CONFIG_DIR = os.path.join(
+    BASE_DIR,
+    'config',
+    'saml-idp',
+    ENV_NAME,
+)
+
+SAML_IDP_CONFIG = {
+    'debug' : DEBUG,
+    'xmlsec_binary': XMLSEC1,
+    'entityid': os.path.join(BASE_URL, 'idp/metadata'),
+    'description': 'DIT Internal SSO',
+    'service': {
+        'idp': {
+            'name': 'SSO Saml2 Idenitty Provider',
+            'endpoints': {
+                'single_sign_on_service': [
+                    (os.path.join(BASE_URL, 'idp/sso/post'), saml2.BINDING_HTTP_POST),
+                    (os.path.join(BASE_URL, 'idp/sso/redirect'), saml2.BINDING_HTTP_REDIRECT),
+                ],
+            },
+            'name_id_format': [saml2.saml.NAMEID_FORMAT_EMAILADDRESS],
+            'sign_response': True,
+            'sign_assertion': True,
+            'want_authn_requests_signed': False,
+
+            "policy": {
+                "default": {
+                    "lifetime": {"minutes": 15},
+                    "attribute_restrictions": None,
+                }
+            }
+        },
+    },
+
+    'metadata': {
+        'local': [
+            os.path.join(SAML_IDP_CONFIG_DIR, 'sp_metadata.xml'),
+            os.path.join(SAML_IDP_CONFIG_DIR, 'sp_google_metadata.xml'),
+            os.path.join(SAML_IDP_CONFIG_DIR, 'aws-metadata.xml')
+        ],
+    },
+    # Signing
+    'key_file': SAML_IDP_PRIVATE_KEY_PATH,
+    'cert_file': SAML_IDP_PUBLIC_CERT_PATH,
+
+    # Encryption
+    'encryption_keypairs': [{
+        'key_file': SAML_IDP_PRIVATE_KEY_PATH,
+        'cert_file': SAML_IDP_PUBLIC_CERT_PATH,
+    }],
+    'valid_for': 365 * 24,
+}
+
+
+SAML_IDP_SPCONFIG = {
+    'urn:amazon:webservices': {
+        'processor': 'sso.samlidp.processors.AWSProcessor',
+        'attribute_mapping': {},
+        'extra_data': {
+            'role': env('SAML2_AWS_ROLE_ARN')
+        }
+    },
+    'google.com': {
+        'processor': 'sso.samlidp.processors.ModelProcessor',
+        'attribute_mapping': {}
+    }
+}
