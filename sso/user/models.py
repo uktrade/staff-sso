@@ -32,11 +32,13 @@ class AccessProfile(models.Model):
     oauth2_applications = models.ManyToManyField(
         OAuthApplication,
         _('access_profiles'),
+        blank=True,
     )
 
     saml2_applications = models.ManyToManyField(
         SamlApplication,
         _('access_profiles'),
+        blank=True,
     )
 
     def __str__(self):
