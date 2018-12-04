@@ -1,3 +1,5 @@
+from django.core.exceptions import ImproperlyConfigured
+
 from djangosaml2idp.processors import BaseProcessor
 
 from .models import SamlApplication
@@ -20,7 +22,8 @@ class AWSProcessor(ModelProcessor):
 
         role_arn = extra_config.pop('role', None)
 
-        assert role_arn, 'missing saml2 application role arns'
+        assert role_arn, 'missing AWS role arn'
+
         # See: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_saml_assertions.html
         # The role and saml arns should be added to `settings.SAML_IDP_SPCONFIG['{saml2-entity-id}']['role']
 

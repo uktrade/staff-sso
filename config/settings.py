@@ -19,8 +19,8 @@ if os.path.exists(ENV_FILE):
 env = environ.Env(
     DEBUG=(bool, False),
     RESTRICT_ADMIN=(bool, False),
-    ALLOWED_ADMIN_IPS=(str, '127.0.0.1'),
-    ALLOWED_ADMIN_IP_RANGES=(str, ''),
+    ALLOWED_ADMIN_IPS=(list, ['127.0.0.1']),
+    ALLOWED_ADMIN_IP_RANGES=(list, ['127.0.0.1']),
     XMLSEC1=(str, shutil.which('xmlsec1'))
 )
 
@@ -72,7 +72,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'sso.core.middleware.NeverCacheMiddleware',
-    'admin_ip_restrictor.middleware.AdminIPRestrictorMiddleware',
+    'sso.core.middleware.AdminIpRestrictionMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -435,7 +435,7 @@ SAML_IDP_SPCONFIG = {
         'processor': 'sso.samlidp.processors.AWSProcessor',
         'attribute_mapping': {},
         'extra_config': {
-            'role': env('SAML2_AWS_ROLE_ARN')
+            'role': env('SAML2_APPSTREAM_AWS_ROLE_ARN', default='')
         }
     },
     'google.com': {

@@ -14,5 +14,4 @@ waitress
 whitenoise
 dj-database-url
 django-axes==4.4.0
-django-admin-ip-restrictor
 raven

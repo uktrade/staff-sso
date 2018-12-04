@@ -24,18 +24,15 @@ class TestModelProcessor:
 
 
 class TestAWSProcessor:
-    def test_create_identity_role_is_provided(self):
+    def test_create_identity_role_is_provided(self, settings):
         user = UserFactory()
 
-        app = SamlApplicationFactory(entity_id='an_entity_id', extra_data={'role': 'test_role'})
+        app = SamlApplicationFactory(entity_id='an_entity_id')
         processor = AWSProcessor(entity_id='an_entity_id')
 
-        identity = processor.create_identity(user, {})
+        identity = processor.create_identity(user, {}, role='test_role')
 
         assert identity['https://aws.amazon.com/SAML/Attributes/Role'] == 'test_role'
-
-    def test_create_identity_role_not_provided_raises_exception(self):
-        pass
 
     def test_create_identity_user_id_is_provided(self):
         user = UserFactory()
@@ -43,8 +40,8 @@ class TestAWSProcessor:
         app = SamlApplicationFactory(entity_id='an_entity_id')
         processor = AWSProcessor(entity_id='an_entity_id')
 
-        identity = processor.create_identity(user, {})
+        identity = processor.create_identity(user, {}, role='test_role')
 
-        assert identity['https://aws.amazon.com/SAML/Attributes/RoleSessionName'] == user
+        assert identity['https://aws.amazon.com/SAML/Attributes/RoleSessionName'] == str(user.user_id)
 
 
