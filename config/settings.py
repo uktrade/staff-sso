@@ -365,8 +365,15 @@ SECURE_CONTENT_TYPE_NOSNIFF = env.bool('SECURE_CONTENT_TYPE_NOSNIFF', True)
 
 # Saml2 IdP config
 
-SAML_IDP_PRIVATE_KEY_PATH = os.path.join(SAML_CONFIG_DIR, 'sp.private.key')
-SAML_IDP_PUBLIC_CERT_PATH = os.path.join(SAML_CONFIG_DIR, 'sp.public.crt')
+SAML_IDP_CONFIG_DIR = os.path.join(
+    BASE_DIR,
+    'config',
+    'saml-idp',
+    ENV_NAME,
+)
+
+SAML_IDP_PRIVATE_KEY_PATH = os.path.join(SAML_IDP_CONFIG_DIR, 'idp.private.key')
+SAML_IDP_PUBLIC_CERT_PATH = os.path.join(SAML_IDP_CONFIG_DIR, 'idp.public.crt')
 
 if env('SAML_PRIVATE_KEY', default=None) and env('SAML_PUBLIC_CERT', default=None):
     # if the key/crt are passed in as env vars => save it to a file
@@ -375,13 +382,6 @@ if env('SAML_PRIVATE_KEY', default=None) and env('SAML_PUBLIC_CERT', default=Non
 
     with open(SAML_IDP_PUBLIC_CERT_PATH, 'wb') as f:
         f.write(base64.b64decode(env('SAML_IDP_PUBLIC_CERT')))
-
-SAML_IDP_CONFIG_DIR = os.path.join(
-    BASE_DIR,
-    'config',
-    'saml-idp',
-    ENV_NAME,
-)
 
 SAML_IDP_CONFIG = {
     'debug' : DEBUG,
