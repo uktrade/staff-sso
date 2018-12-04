@@ -24,7 +24,7 @@ def AdminIpRestrictionMiddleware(get_response):
         if resolve(request.path).app_name == 'admin':
             if settings.RESTRICT_ADMIN:
                 try:
-                    remote_address = request.META['HTTP_X_FORWARDED_FOR'].split(',')[-2].strip()  # noqa: E501
+                    remote_address = request.META['HTTP_X_FORWARDED_FOR'].split(',')[-3].strip()  # noqa: E501
                 except (IndexError, KeyError):
                     logger.warning(
                         'X-Forwarded-For header is missing or does not '
