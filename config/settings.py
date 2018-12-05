@@ -390,7 +390,7 @@ SAML_IDP_CONFIG = {
     'description': 'DIT Internal SSO',
     'service': {
         'idp': {
-            'name': 'SSO Saml2 Idenitty Provider',
+            'name': 'SSO Saml2 Identity Provider',
             'endpoints': {
                 'single_sign_on_service': [
                     (os.path.join(BASE_URL, 'idp/sso/post'), saml2.BINDING_HTTP_POST),
@@ -445,3 +445,4 @@ SAML_IDP_SPCONFIG = {
 }
 
 SAML_IDP_ERROR_VIEW_CLASS = 'sso.samlidp.views.CustomSamlIDPErrorView'
+SAML_IDP_DJANGO_USER_MAIN_ATTRIBUTE = 'user_id'
