@@ -6,6 +6,7 @@ from freezegun import freeze_time
 
 from sso.emailauth.forms import EmailForm
 from sso.emailauth.models import EmailToken
+from sso.emailauth.views import EmailAuthView, InvalidToken
 
 from .factories.user import UserFactory
 
@@ -122,7 +123,26 @@ class TestEmailTokenForm:
 
 
 class TestEmailAuthView:
-    def test_invalid_token(self, client):
+    def test_get_token_object_invalid_token(self):
+
+        eav = EmailAuthView()
+        with pytest.raises(InvalidToken):
+            eav.get_token_object('non-existent-token-id')
+
+    def test_get_token_object_expired_token(self):
+        initial_datetime = dt.datetime.now()
+        expired_datetime = initial_datetime + dt.timedelta(settings.EMAIL_TOKEN_TTL + 1)
+
+        with freeze_time(initial_datetime) as frozen_time:
+
+            token = EmailToken.objects.create_token('test@test.com')
+            frozen_time.move_to(expired_datetime)
+
+            eav = EmailAuthView()
+            with pytest.raises(InvalidToken):
+                eav.get_token_object(token)
+
+    def test_invalid_token_get(self, client):
 
         token = 'aninvalidtoken'
 
@@ -130,8 +150,23 @@ class TestEmailAuthView:
 
         response = client.get(url)
 
-        assert response.status_code == 302
-        assert response.url == '/email/invalid-token/'
+        template_names = map(lambda el: el.name, response.templates)
+
+        assert response.status_code == 200
+        assert 'emailauth/invalid-token.html' in template_names
+
+    def test_invalid_token_post(self, client):
+
+        token = 'aninvalidtoken'
+
+        url = reverse('emailauth:email-auth-signin', kwargs=dict(token=token))
+
+        response = client.post(url)
+
+        template_names = map(lambda el: el.name, response.templates)
+
+        assert response.status_code == 200
+        assert 'emailauth/invalid-token.html' in template_names
 
     def test_expired_token(self, client):
 
@@ -148,8 +183,10 @@ class TestEmailAuthView:
 
             response = client.get(url)
 
-            assert response.status_code == 302
-            assert response.url == '/email/invalid-token/'
+            template_names = map(lambda el: el.name, response.templates)
+
+            assert response.status_code == 200
+            assert 'emailauth/invalid-token.html' in template_names
 
     def test_next_url(self, client):
 
@@ -160,7 +197,7 @@ class TestEmailAuthView:
             'https://myapp.com'
         )
 
-        response = client.get(url)
+        response = client.post(url)
 
         assert response.status_code == 302
         assert response.url == 'https://myapp.com'
@@ -174,9 +211,39 @@ class TestEmailAuthView:
             'https://myapp.com'
         )
 
-        client.get(url)
+        client.post(url)
 
         assert '_auth_user_id' in client.session
+
+    def test_user_is_not_authenticated_and_token_is_not_invalidated_with_get_request(self, client):
+
+        token = EmailToken.objects.create_token('test@test.com')
+
+        url = '{}?next={}'.format(
+            reverse('emailauth:email-auth-signin', kwargs=dict(token=token)),
+            'https://myapp.com'
+        )
+
+        client.get(url)
+
+        token = EmailToken.objects.get(token=token)
+
+        assert '_auth_user_id' not in client.session
+        assert not token.used
+
+    def test_token_is_invalidated_with_post_request(self, client):
+
+        token = EmailToken.objects.create_token('test@test.com')
+
+        url = '{}?next={}'.format(
+            reverse('emailauth:email-auth-signin', kwargs=dict(token=token)),
+            'https://myapp.com'
+        )
+
+        client.post(url)
+
+        token = EmailToken.objects.get(token=token)
+        assert token.used
 
     def test_authentication_with_alternative_email(self, client):
         """Test user can authenticate with an alternative email"""
@@ -191,6 +258,6 @@ class TestEmailAuthView:
             'https://myapp.com'
         )
 
-        client.get(url)
+        client.post(url)
 
         assert '_auth_user_id' in client.session
