@@ -1,5 +1,3 @@
-from django.core.exceptions import ImproperlyConfigured
-
 from djangosaml2idp.processors import BaseProcessor
 
 from .models import SamlApplication
