@@ -10,4 +10,3 @@ class CustomSamlIDPErrorView(SamlIDPErrorView):
         if 'PermissionDenied' in context['exception_type']:
             return redirect('contact:access-denied')
         return self.render_to_response(context)
-

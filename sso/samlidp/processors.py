@@ -14,6 +14,9 @@ class ModelProcessor(BaseProcessor):
     def has_access(self, user):
         return user.can_access(self._application)
 
+    def is_enabled(self, request):
+        return self._application.enabled and self._application.is_valid_ip(request)
+
 
 class AWSProcessor(ModelProcessor):
     def create_identity(self, user, sp_mapping, **extra_config):

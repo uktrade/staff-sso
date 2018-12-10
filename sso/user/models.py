@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
-from typing import Union
 import uuid
+from typing import Union
 
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser

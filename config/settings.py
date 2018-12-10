@@ -384,7 +384,7 @@ if env('SAML_PRIVATE_KEY', default=None) and env('SAML_PUBLIC_CERT', default=Non
         f.write(base64.b64decode(env('SAML_IDP_PUBLIC_CERT')))
 
 SAML_IDP_CONFIG = {
-    'debug' : DEBUG,
+    'debug': DEBUG,
     'xmlsec_binary': XMLSEC1,
     'entityid': os.path.join(BASE_URL, 'idp/metadata'),
     'description': 'DIT Internal SSO',
@@ -402,10 +402,10 @@ SAML_IDP_CONFIG = {
             'sign_assertion': True,
             'want_authn_requests_signed': False,
 
-            "policy": {
-                "default": {
-                    "lifetime": {"minutes": 15},
-                    "attribute_restrictions": None,
+            'policy': {
+                'default': {
+                    'lifetime': {'minutes': 15},
+                    'attribute_restrictions': None,
                 }
             }
         },

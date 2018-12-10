@@ -1,9 +1,9 @@
 import pytest
 
+from sso.samlidp.models import SamlApplication
+from sso.samlidp.processors import AWSProcessor, ModelProcessor
 from sso.tests.factories.saml import SamlApplicationFactory
 from sso.tests.factories.user import UserFactory
-from sso.samlidp.processors import ModelProcessor, AWSProcessor
-from sso.samlidp.models import SamlApplication
 
 
 pytestmark = [
@@ -22,12 +22,56 @@ class TestModelProcessor:
         with pytest.raises(SamlApplication.DoesNotExist):
             ModelProcessor('a_non_existent_entity_id')
 
+    def test_is_application_enabled_true(self):
+        SamlApplicationFactory(entity_id='an_entity_id', enabled=True)
+        processor = ModelProcessor('an_entity_id')
+
+        assert processor.is_enabled({})
+
+    def test_is_application_enabled_false(self):
+        SamlApplicationFactory(entity_id='an_entity_id', enabled=False)
+        processor = ModelProcessor('an_entity_id')
+
+        assert not processor.is_enabled({})
+
+    def test_is_valid_ip_with_ip_restriction_disabled(self, rf):
+        SamlApplicationFactory(entity_id='an_entity_id')
+        processor = ModelProcessor('an_entity_id')
+
+        request = rf.get('/whatever/')
+
+        assert processor.is_enabled(request)
+
+    def test_is_enabled_ip_restriction_no_x_forwarded_header(self, rf):
+        SamlApplicationFactory(entity_id='an_entity_id', ip_restriction='1.1.1.1')
+        processor = ModelProcessor('an_entity_id')
+
+        request = rf.get('/whatever/')
+
+        assert not processor.is_enabled(request)
+
+    def test_is_enabled_ip_restriction_valid_ip(self, rf):
+        SamlApplicationFactory(entity_id='an_entity_id', ip_restriction='1.1.1.1')
+        processor = ModelProcessor('an_entity_id')
+
+        request = rf.get('/whatever/', HTTP_X_FORWARDED_FOR='1.1.1.1, 2.2.2.2, 3.3.3.3')
+
+        assert processor.is_enabled(request)
+
+    def test__is_enabled_ip_restriction_ip_not_whitelisted(self, rf):
+        SamlApplicationFactory(entity_id='an_entity_id', ip_restriction='8.8.8.8')
+        processor = ModelProcessor('an_entity_id')
+
+        request = rf.get('/whatever/', HTTP_X_FORWARDED_FOR='1.1.1.1, 2.2.2.2, 3.3.3.3')
+
+        assert not processor.is_enabled(request)
+
 
 class TestAWSProcessor:
     def test_create_identity_role_is_provided(self, settings):
         user = UserFactory()
 
-        app = SamlApplicationFactory(entity_id='an_entity_id')
+        SamlApplicationFactory(entity_id='an_entity_id')
         processor = AWSProcessor(entity_id='an_entity_id')
 
         identity = processor.create_identity(user, {}, role='test_role')
@@ -37,11 +81,9 @@ class TestAWSProcessor:
     def test_create_identity_user_id_is_provided(self):
         user = UserFactory()
 
-        app = SamlApplicationFactory(entity_id='an_entity_id')
+        SamlApplicationFactory(entity_id='an_entity_id')
         processor = AWSProcessor(entity_id='an_entity_id')
 
         identity = processor.create_identity(user, {}, role='test_role')
 
         assert identity['https://aws.amazon.com/SAML/Attributes/RoleSessionName'] == str(user.user_id)
-
-

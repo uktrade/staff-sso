@@ -1,5 +1,11 @@
+import logging
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+
+from sso.core.ip_filter import get_client_ip
+
+logger = logging.getLogger(__file__)
 
 
 class SamlApplication(models.Model):
@@ -34,3 +40,14 @@ class SamlApplication(models.Model):
 
     def __str__(self):
         return self.name
+
+    def is_valid_ip(self, request):
+        if not self.ip_restriction.strip():
+            return True
+
+        client_ip = get_client_ip(request)
+
+        if not client_ip:
+            return False
+
+        return client_ip in self.ip_restriction
