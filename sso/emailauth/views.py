@@ -1,9 +1,6 @@
-from urllib.parse import quote_plus
-
 from django.contrib.auth import login
-from django.shortcuts import redirect
-from django.views.generic import TemplateView
-from django.views.generic.base import RedirectView
+from django.shortcuts import redirect, render
+from django.views.generic import View
 from django.views.generic.edit import FormView
 
 from .forms import EmailForm
@@ -13,6 +10,10 @@ try:
     from django.urls import reverse, reverse_lazy
 except ImportError:
     from django.core.urlresolvers import reverse, reverse_lazy
+
+
+class InvalidToken(Exception):
+    pass
 
 
 class EmailTokenView(FormView):
@@ -34,28 +35,27 @@ class EmailTokenView(FormView):
         return super().form_valid(form)
 
 
-class EmailAuthView(RedirectView):
+class EmailAuthView(View):
     permanent = False
     query_string = True
 
-    def get_redirect_url(self, *args, **kwargs):
-        next_url = self.request.GET.get('next')
+    invalid_token_template_name = 'emailauth/invalid-token.html'
+    valid_token_template_name = 'emailauth/signin.html'
 
-        invalid_token_url = reverse('emailauth:email-auth-invalid-token')
-
-        if next_url:
-            invalid_token_url = '{url}?next={qs}'.format(
-                url=invalid_token_url,
-                qs=quote_plus(next_url)
-            )
-
+    def get(self, request, *args, **kwargs):
         try:
-            token_obj = EmailToken.objects.get(token=kwargs['token'], used=False)
-        except EmailToken.DoesNotExist:
-            return invalid_token_url
+            token_obj = self.get_token_object(kwargs['token'])
+        except InvalidToken:
+            return render(request, self.invalid_token_template_name)
 
-        if token_obj.is_expired:
-            return invalid_token_url
+        return render(request, self.valid_token_template_name,
+                      {'user': token_obj.get_user().email})
+
+    def post(self, request, *args, **kwargs):
+        try:
+            token_obj = self.get_token_object(kwargs['token'])
+        except InvalidToken:
+            return render(request, self.invalid_token_template_name)
 
         user = token_obj.get_user()
         user.backend = 'django.contrib.auth.backends.ModelBackend'
@@ -64,18 +64,23 @@ class EmailAuthView(RedirectView):
 
         token_obj.mark_used()
 
+        return redirect(self.get_next_url())
+
+    def get_token_object(self, token):
+        try:
+            token_obj = EmailToken.objects.get(token=token, used=False)
+        except EmailToken.DoesNotExist:
+            raise InvalidToken
+
+        if token_obj.is_expired:
+            raise InvalidToken
+
+        return token_obj
+
+    def get_next_url(self):
+        next_url = self.request.GET.get('next')
+
         if next_url not in ['None', None]:
             return next_url
         else:
             return reverse('saml2_logged_in')
-
-
-class InvalidToken(TemplateView):
-    template_name = 'emailauth/invalid-token.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        context['next_url'] = self.request.GET.get('next', '')
-
-        return context

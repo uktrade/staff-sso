@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from django.views.generic import TemplateView
 
-from .views import EmailAuthView, EmailTokenView, InvalidToken
+from .views import EmailAuthView, EmailTokenView
 
 app_name = 'emailauth'
 
@@ -11,5 +11,4 @@ urlpatterns = [
     url(r'^token/success/$',
         TemplateView.as_view(template_name='emailauth/complete.html'),
         name='email-auth-initiate-success'),
-    url(r'^invalid-token/$', InvalidToken.as_view(), name='email-auth-invalid-token')
 ]
