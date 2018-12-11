@@ -17,7 +17,8 @@ if os.path.exists(ENV_FILE):
 env = environ.Env(
     DEBUG=(bool, False),
     RESTRICT_ADMIN=(bool, False),
-    RESTRICT_ADMIN_BY_IPS=(str, '127.0.0.1'),
+    ALLOWED_ADMIN_IPS=(str, '127.0.0.1'),
+    ALLOWED_ADMIN_IP_RANGES=(str, ''),
     XMLSEC1=(str, shutil.which('xmlsec1'))
 )
 
@@ -310,7 +311,9 @@ CACHES = {
 AXES_CACHE = 'axes_cache'
 
 # admin ip restriction
-RESTRICT_ADMIN_BY_IPS = env('RESTRICT_ADMIN_BY_IPS')
+RESTRICT_ADMIN = env('RESTRICT_ADMIN')
+ALLOWED_ADMIN_IPS = env('ALLOWED_ADMIN_IPS')
+ALLOWED_ADMIN_IP_RANGES = env('ALLOWED_ADMIN_IP_RANGES')
 
 # sentry config
 RAVEN_CONFIG = {
