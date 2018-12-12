@@ -375,7 +375,7 @@ SAML_IDP_CONFIG_DIR = os.path.join(
 SAML_IDP_PRIVATE_KEY_PATH = os.path.join(SAML_IDP_CONFIG_DIR, 'idp.private.key')
 SAML_IDP_PUBLIC_CERT_PATH = os.path.join(SAML_IDP_CONFIG_DIR, 'idp.public.crt')
 
-if env('SAML_PRIVATE_KEY', default=None) and env('SAML_PUBLIC_CERT', default=None):
+if env('SAML_IDP_PRIVATE_KEY', default=None) and env('SAML_IDP_PUBLIC_CERT', default=None):
     # if the key/crt are passed in as env vars => save it to a file
     with open(SAML_IDP_PRIVATE_KEY_PATH, 'wb') as f:
         f.write(base64.b64decode(env('SAML_IDP_PRIVATE_KEY')))
