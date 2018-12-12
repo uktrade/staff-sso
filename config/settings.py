@@ -435,14 +435,16 @@ SAML_IDP_SPCONFIG = {
         'processor': 'sso.samlidp.processors.AWSProcessor',
         'attribute_mapping': {},
         'extra_config': {
-            'role': env('SAML2_APPSTREAM_AWS_ROLE_ARN', default='')
+            'role': env('SAML2_APPSTREAM_AWS_ROLE_ARN')
         }
     },
     'google.com': {
-        'processor': 'sso.samlidp.processors.ModelProcessor',
+        'processor': 'sso.samlidp.processors.GoogleProcessor',
         'attribute_mapping': {}
     }
 }
 
 SAML_IDP_ERROR_VIEW_CLASS = 'sso.samlidp.views.CustomSamlIDPErrorView'
 SAML_IDP_DJANGO_USERNAME_FIELD = 'user_id'
+
+MI_GOOGLE_EMAIL_DOMAIN = env('MI_GOOGLE_EMAIL_DOMAIN')

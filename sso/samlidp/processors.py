@@ -1,6 +1,13 @@
+import logging
+
+from django.conf import settings
+
 from djangosaml2idp.processors import BaseProcessor
 
 from .models import SamlApplication
+
+
+logger = logging.getLogger(__name__)
 
 
 class ModelProcessor(BaseProcessor):
@@ -34,3 +41,16 @@ class AWSProcessor(ModelProcessor):
         identity['https://aws.amazon.com/SAML/Attributes/Role'] = role_arn
 
         return identity
+
+
+class GoogleProcessor(ModelProcessor):
+    def get_user_id(self, user):
+        user_id = super().get_user_id(user)
+
+        try:
+            return user.emails.filter(email__endswith=settings.MI_GOOGLE_EMAIL_DOMAIN)[0].email
+        except IndexError:
+            logger.debug('No %s email for user %s', settings.MI_GOOGLE_EMAIL_DOMAIN, user.id)
+            return user_id
+
+
