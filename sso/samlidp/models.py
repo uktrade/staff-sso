@@ -42,7 +42,7 @@ class SamlApplication(models.Model):
         return self.name
 
     def is_valid_ip(self, request):
-        if not self.ip_restriction.strip():
+        if not self.ip_restriction or not self.ip_restriction.strip():
             return True
 
         client_ip = get_client_ip(request)
