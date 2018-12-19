@@ -2,6 +2,7 @@ import hashlib
 import logging
 import random
 import string
+import secrets
 import time
 
 from django.conf import settings
@@ -114,7 +115,7 @@ class Command(BaseCommand):
 
     @http_retry()
     def _create_user(self, service, primary_email, user):
-        password = ''.join([random.choice(string.printable) for _ in range(random.randint(30, 50))]).encode('utf-8')
+        password = ''.join([secrets.choice(string.printable) for _ in range(random.randint(30, 50))]).encode('utf-8')
 
         template = {
             'primaryEmail': primary_email,
