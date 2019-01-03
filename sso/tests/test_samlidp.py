@@ -43,7 +43,7 @@ class TestModelProcessor:
         assert processor.is_enabled(request)
 
     def test_is_enabled_ip_restriction_no_x_forwarded_header(self, rf):
-        SamlApplicationFactory(entity_id='an_entity_id', ip_restriction='1.1.1.1')
+        SamlApplicationFactory(entity_id='an_entity_id', allowed_ips='1.1.1.1')
         processor = ModelProcessor('an_entity_id')
 
         request = rf.get('/whatever/')
@@ -51,7 +51,7 @@ class TestModelProcessor:
         assert not processor.is_enabled(request)
 
     def test_is_enabled_ip_restriction_valid_ip(self, rf):
-        SamlApplicationFactory(entity_id='an_entity_id', ip_restriction='1.1.1.1')
+        SamlApplicationFactory(entity_id='an_entity_id', allowed_ips='1.1.1.1')
         processor = ModelProcessor('an_entity_id')
 
         request = rf.get('/whatever/', HTTP_X_FORWARDED_FOR='1.1.1.1, 2.2.2.2, 3.3.3.3')
@@ -59,7 +59,7 @@ class TestModelProcessor:
         assert processor.is_enabled(request)
 
     def test__is_enabled_ip_restriction_ip_not_whitelisted(self, rf):
-        SamlApplicationFactory(entity_id='an_entity_id', ip_restriction='8.8.8.8')
+        SamlApplicationFactory(entity_id='an_entity_id', allowed_ips='8.8.8.8')
         processor = ModelProcessor('an_entity_id')
 
         request = rf.get('/whatever/', HTTP_X_FORWARDED_FOR='1.1.1.1, 2.2.2.2, 3.3.3.3')

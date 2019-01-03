@@ -25,8 +25,8 @@ class SamlApplication(models.Model):
         unique=True,
         help_text=_('The entity ID of the service provider. WARNING: changing this may break the integration.'),
     )
-    ip_restriction = models.CharField(
-        _('ip restriction'),
+    allowed_ips = models.CharField(
+        _('allowed ips'),
         help_text=_('A comma separated list of allowed ips. Leave blank to disable ip restriction.'),
         max_length=255,
         null=True,
@@ -42,7 +42,7 @@ class SamlApplication(models.Model):
         return self.name
 
     def is_valid_ip(self, request):
-        if not self.ip_restriction or not self.ip_restriction.strip():
+        if not self.allowed_ips or not self.allowed_ips.strip():
             return True
 
         client_ip = get_client_ip(request)
@@ -50,4 +50,4 @@ class SamlApplication(models.Model):
         if not client_ip:
             return False
 
-        return client_ip in self.ip_restriction
+        return client_ip in self.allowed_ips
