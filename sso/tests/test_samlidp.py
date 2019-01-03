@@ -90,22 +90,12 @@ class TestAWSProcessor:
 
 
 class TestGoogleProcessor:
-    def test_preferred_email_is_supplied(self, settings):
+    def test_correct_email_is_supplied(self, settings):
         SamlApplicationFactory(entity_id='an_entity_id')
-        settings.MI_GOOGLE_EMAIL_DOMAIN = '@test.com'
-
-        user = UserFactory(email='hello@world.com', email_list=['testing@test.com'])
-
-        processor = GoogleProcessor(entity_id='an_entity_id')
-
-        assert processor.get_user_id(user) == 'testing@test.com'
-
-    def test_preferred_email_provides_default_if_preferred_not_available(self, settings):
-        SamlApplicationFactory(entity_id='an_entity_id')
-        settings.SAML_IDP_DJANGO_USERNAME_FIELD = 'email'
+        settings.MI_GOOGLE_EMAIL_DOMAIN = 'test.com'
 
         user = UserFactory(email='hello@world.com')
 
         processor = GoogleProcessor(entity_id='an_entity_id')
+        assert processor.get_user_id(user) == 'hello@test.com'
 
-        assert processor.get_user_id(user) == 'hello@world.com'

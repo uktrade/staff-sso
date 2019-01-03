@@ -1,8 +1,8 @@
 import hashlib
 import logging
 import random
-import string
 import secrets
+import string
 import time
 
 from django.conf import settings
@@ -14,6 +14,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from httplib2 import Http
 from oauth2client import client, file, tools
+from sso.samlidp.processors import build_google_user_id
 
 
 logger = logging.getLogger(__name__)
@@ -81,6 +82,7 @@ def http_retry(max_attempts=5):
 class Command(BaseCommand):
     help = 'Sync user accounts with MI Google'
 
+    @http_retry()
     def _get_google_users(self, service):
 
         user_dict = {}
@@ -136,10 +138,7 @@ class Command(BaseCommand):
         The user entry in staff-sso needs to a suitable alternative email
         """
 
-        try:
-            return User.emails.filter(email__endswith=settings.MI_GOOGLE_EMAIL_DOMAIN)
-        except IndexError:
-            return None
+        return build_google_user_id(user.email)
 
     def handle(self, *args, **kwargs):
         start_time = time.time()
@@ -155,14 +154,9 @@ class Command(BaseCommand):
         for user in local_users:
             remote_email = self._get_email(user)
 
-            if not remote_email:
-                # A valid email address with a domain that matches the google account is required for us to proceed.
-                self.stdout.write('user {} does not have a {} email; doing nothing.'.format(
-                    str(user.email),
-                    settings.MI_GOOGLE_EMAIL_DOMAIN,
-                ))
+            logger.info('remote email: %s', remote_email)
 
-            elif remote_email not in google_users:
+            if remote_email not in google_users:
                 self.stdout.write('{} does not exist in staff-sso; deactivating'.format(user.email))
                 self._create_user(user, remote_email)
 

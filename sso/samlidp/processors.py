@@ -10,6 +10,16 @@ from .models import SamlApplication
 logger = logging.getLogger(__name__)
 
 
+def build_google_user_id(email):
+    """
+    Construct a google email address from the user's primary email.
+    """
+
+    return '{}@{}'.format(
+        email.split('@')[0],
+        settings.MI_GOOGLE_EMAIL_DOMAIN)
+
+
 class ModelProcessor(BaseProcessor):
     """
     Load an associated `sso.samlidp.models.SamlApplication` model
@@ -45,12 +55,6 @@ class AWSProcessor(ModelProcessor):
 
 class GoogleProcessor(ModelProcessor):
     def get_user_id(self, user):
-        user_id = super().get_user_id(user)
 
-        try:
-            return user.emails.filter(email__endswith=settings.MI_GOOGLE_EMAIL_DOMAIN)[0].email
-        except IndexError:
-            logger.debug('No %s email for user %s', settings.MI_GOOGLE_EMAIL_DOMAIN, user.id)
-            return user_id
-
+        return build_google_user_id(user.email)
 
