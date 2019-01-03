@@ -1,5 +1,6 @@
 import hashlib
 import logging
+import json
 import random
 import secrets
 import string
@@ -42,6 +43,12 @@ def get_google_client():
 
 
 def http_retry(max_attempts=5):
+    RETRY_REASONS = ['dailyLimitExceeded', 'userRateLimitExceeded', 'quotaExceeded']
+
+    def _extract_reason(ex):
+        if ex.resp.get('content-type', '').startswith('application/json'):
+            return json.loads(ex.content).get('error').get('errors')[0].get('reason')
+
     def decorator(func):
         def wrapper(*args, **kwargs):
             attempts = 0
@@ -51,7 +58,7 @@ def http_retry(max_attempts=5):
                     return func(*args, **kwargs)
                 except HttpError as ex:
                     attempts += 1
-                    if ex.resp.status == 403:
+                    if ex.resp.status == 403 and _extract_reason(ex) in RETRY_REASONS:
                         if attempts < max_attempts:
                             delay = 2.0 ** attempts + random.randint(0, 999) / 1000
                             logger.warning(
