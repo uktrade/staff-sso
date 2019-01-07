@@ -1,5 +1,6 @@
 import base64
 import os
+import json
 import shutil
 import sys
 
@@ -430,12 +431,14 @@ SAML_IDP_CONFIG = {
     'valid_for': 365 * 24,
 }
 
+SAML2_APPSTREAM_AWS_ROLE_ARN = env('SAML2_APPSTREAM_AWS_ROLE_ARN')
+
 SAML_IDP_SPCONFIG = {
     'urn:amazon:webservices': {
         'processor': 'sso.samlidp.processors.AWSProcessor',
         'attribute_mapping': {},
         'extra_config': {
-            'role': env('SAML2_APPSTREAM_AWS_ROLE_ARN')
+            'role': SAML2_APPSTREAM_AWS_ROLE_ARN,
         }
     },
     'google.com': {
@@ -446,7 +449,9 @@ SAML_IDP_SPCONFIG = {
 
 SAML_IDP_ERROR_VIEW_CLASS = 'sso.samlidp.views.CustomSamlIDPErrorView'
 SAML_IDP_DJANGO_USERNAME_FIELD = 'user_id'
-
 MI_GOOGLE_EMAIL_DOMAIN = env('MI_GOOGLE_EMAIL_DOMAIN')
-MI_USER_SYNC_ACCESS_PROFILE_NAME = env('MI_USER_SYNC_ACCESS_PROFILE_NAME')
-MI_GOOGLE_SERVICE_ACCOUNT_FILE_PATH = os.path.join(BASE_DIR, 'google_service.json')
+MI_GOOGLE_SERVICE_ACCOUNT_DATA = json.loads(
+    env('MI_GOOGLE_SERVICE_ACCOUNT_DATA').encode('utf-8').decode('unicode_escape'))
+MI_GOOGLE_SERVICE_ACCOUNT_DELEGATED_USER = env('MI_GOOGLE_SERVICE_ACCOUNT_DELEGATED_USER')
+MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_NAME = env('MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_NAME')
+

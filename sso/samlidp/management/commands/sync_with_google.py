@@ -13,8 +13,7 @@ from django.utils import timezone
 
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from httplib2 import Http
-from oauth2client import client, file, tools
+from google.oauth2 import service_account
 from sso.samlidp.processors import build_google_user_id
 
 
@@ -22,22 +21,17 @@ logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
-SCOPES = 'https://www.googleapis.com/auth/admin.directory.user'
+SCOPES = ['https://www.googleapis.com/auth/admin.directory.user']
 
 
 def get_google_client():
-    # TODO: migrate to a service account configuration
+    credentials = service_account.Credentials.from_service_account_info(
+        settings.MI_GOOGLE_SERVICE_ACCOUNT_DATA,
+        scopes=SCOPES,
+        subject=settings.MI_GOOGLE_SERVICE_ACCOUNT_DELEGATED_USER
+    )
 
-    # The file token.json stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first
-    # time.
-
-    store = file.Storage('token.json')
-    creds = store.get()
-    if not creds or creds.invalid:
-        flow = client.flow_from_clientsecrets('credentials.json', SCOPES)
-        creds = tools.run_flow(flow, store)
-    service = build('admin', 'directory_v1', http=creds.authorize(Http()))
+    service = build('admin', 'directory_v1', credentials=credentials, cache_discovery=False )
 
     return service
 
@@ -140,14 +134,8 @@ class Command(BaseCommand):
 
         service.users().insert(body=template).execute()
 
-    def _get_email(self, user):
-        """
-        The user entry in staff-sso needs to a suitable alternative email
-        """
-
-        return build_google_user_id(user.email)
-
     def handle(self, *args, **kwargs):
+
         start_time = time.time()
         self.stdout.write('Start time %s' % timezone.now().strftime('%X'))
 
@@ -156,10 +144,10 @@ class Command(BaseCommand):
         google_users = self._get_google_users(service)
 
         local_users = User.objects.filter(
-            access_profiles__name__in=[settings.MI_USER_SYNC_ACCESS_PROFILE_NAME])
+            access_profiles__name__in=[settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_NAME])
 
         for user in local_users:
-            remote_email = self._get_email(user)
+            remote_email = build_google_user_id(user.email)
 
             logger.info('remote email: %s', remote_email)
 
