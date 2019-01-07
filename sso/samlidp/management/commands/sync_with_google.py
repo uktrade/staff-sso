@@ -145,7 +145,7 @@ class Command(BaseCommand):
         google_users = self._get_google_users(service)
 
         local_users = User.objects.filter(
-            access_profiles__name__in=[settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_NAME])
+            access_profiles__slug__in=[settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_SLUG])
 
         for user in local_users:
             remote_email = build_google_user_id(user.email)

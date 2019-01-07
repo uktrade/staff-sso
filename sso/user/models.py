@@ -17,6 +17,9 @@ from .managers import UserManager
 
 class AccessProfile(models.Model):
     """This model defines a list of applications that a user can access"""
+
+    slug = models.SlugField(help_text="Used internally. Do not edit.")
+
     name = models.CharField(
         _('name'),
         max_length=50,
