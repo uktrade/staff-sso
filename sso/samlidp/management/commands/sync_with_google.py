@@ -1,6 +1,6 @@
 import hashlib
-import logging
 import json
+import logging
 import random
 import secrets
 import string
@@ -11,9 +11,10 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
+from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from google.oauth2 import service_account
+
 from sso.samlidp.processors import build_google_user_id
 
 
@@ -31,7 +32,7 @@ def get_google_client():
         subject=settings.MI_GOOGLE_SERVICE_ACCOUNT_DELEGATED_USER
     )
 
-    service = build('admin', 'directory_v1', credentials=credentials, cache_discovery=False )
+    service = build('admin', 'directory_v1', credentials=credentials, cache_discovery=False)
 
     return service
 

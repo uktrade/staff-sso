@@ -98,4 +98,3 @@ class TestGoogleProcessor:
 
         processor = GoogleProcessor(entity_id='an_entity_id')
         assert processor.get_user_id(user) == 'hello@test.com'
-

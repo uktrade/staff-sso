@@ -57,4 +57,3 @@ class GoogleProcessor(ModelProcessor):
     def get_user_id(self, user):
 
         return build_google_user_id(user.email)
-
