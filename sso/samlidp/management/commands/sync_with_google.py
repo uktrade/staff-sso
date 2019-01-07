@@ -27,7 +27,7 @@ SCOPES = ['https://www.googleapis.com/auth/admin.directory.user']
 
 def get_google_client():
     credentials = service_account.Credentials.from_service_account_info(
-        settings.MI_GOOGLE_SERVICE_ACCOUNT_DATA,
+        json.loads(settings.MI_GOOGLE_SERVICE_ACCOUNT_DATA),
         scopes=SCOPES,
         subject=settings.MI_GOOGLE_SERVICE_ACCOUNT_DELEGATED_USER
     )
