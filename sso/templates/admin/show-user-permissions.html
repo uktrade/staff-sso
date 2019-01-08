@@ -15,7 +15,19 @@
             </tr>
         </thead>
         <tbody>
-        {% for app in applications %}
+            <tr colspan="2">
+                <td>OAuth Applications</td>
+            </tr>
+        {% for app in oauth_apps %}
+            <tr>
+                <td>{{ app.name }}</td>
+                <td>{{ app.access|yesno }}</td>
+            </tr>
+        {% endfor %}
+            <tr colspan="2">
+                <td>Saml Applications</td>
+            </tr>
+        {% for app in saml_apps %}
             <tr>
                 <td>{{ app.name }}</td>
                 <td>{{ app.access|yesno }}</td>

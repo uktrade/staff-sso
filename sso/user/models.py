@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import uuid
+from typing import Union
 
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser
@@ -9,12 +10,16 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
-from sso.oauth2.models import Application as OAuth2Application
+from sso.oauth2.models import Application as OAuthApplication
+from sso.samlidp.models import SamlApplication
 from .managers import UserManager
 
 
 class AccessProfile(models.Model):
     """This model defines a list of applications that a user can access"""
+
+    slug = models.SlugField(help_text="Used internally. Do not edit.")
+
     name = models.CharField(
         _('name'),
         max_length=50,
@@ -28,15 +33,25 @@ class AccessProfile(models.Model):
     )
 
     oauth2_applications = models.ManyToManyField(
-        OAuth2Application,
+        OAuthApplication,
         _('access_profiles'),
+        blank=True,
+    )
+
+    saml2_applications = models.ManyToManyField(
+        SamlApplication,
+        _('access_profiles'),
+        blank=True,
     )
 
     def __str__(self):
         return self.name
 
-    def is_allowed(self, application: OAuth2Application):
-        return application in self.oauth2_applications.all()
+    def is_allowed(self, application: Union[OAuthApplication, SamlApplication]):
+        if isinstance(application, OAuthApplication):
+            return application in self.oauth2_applications.all()
+        else:
+            return application in self.saml2_applications.filter(enabled=True)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -152,16 +167,19 @@ class User(AbstractBaseUser, PermissionsMixin):
             _remove_username(email): email for email in self.emails.all().values_list('email', flat=True)
         }
 
-    def can_access(self, application: OAuth2Application):
+    def can_access(self, application: Union[OAuthApplication, SamlApplication]):
         """ Can the user access this application?"""
 
-        # does the application grant access?
-        if application.default_access_allowed or self._is_allowed_email(application):
-            return True
+        if isinstance(application, OAuthApplication):
+            # Saml permissions can only be granted via an AccessProfile
 
-        # is the user permitted to access the application directly?
-        if application in self.permitted_applications.all():
-            return True
+            # does the application grant access?
+            if application.default_access_allowed or self._is_allowed_email(application):
+                return True
+
+            # is the user permitted to access the application directly?
+            if application in self.permitted_applications.all():
+                return True
 
         # is the user granted access by an access profile?
         for profile in self.access_profiles.all():

@@ -4,6 +4,7 @@
 #
 #    pip-compile --output-file requirements-dev.txt requirements-dev.in
 #
+-e git+https://github.com/lgarvey/djangosaml2idp.git@master#egg=djangosaml2idp
 asn1crypto==0.24.0
 atomicwrites==1.1.5       # via pytest
 attrs==18.1.0             # via pytest
@@ -15,7 +16,6 @@ coverage==4.5.1           # via pytest-cov
 cryptography==2.3
 defusedxml==0.5.0
 dj-database-url==0.5.0
-django-admin-ip-restrictor==0.2.1
 django-admin-tools==0.8.1
 django-appconf==1.0.2
 django-axes==4.4.0
@@ -35,14 +35,21 @@ flake8-quotes==1.0.0
 flake8==3.5.0
 freezegun==0.3.10
 future==0.16.0
+google-api-python-client==1.7.6
+google-auth-httplib2==0.0.3
+google-auth==1.6.1
+httplib2==0.12.0
 idna==2.7
 lxml==4.2.4
 mccabe==0.6.1             # via flake8
 more-itertools==4.3.0     # via pytest
+oauth2client==4.1.3
 oauthlib==2.1.0
 pluggy==0.7.1             # via pytest
 psycopg2-binary==2.7.5
 py==1.5.4                 # via pytest
+pyasn1-modules==0.2.2
+pyasn1==0.4.4
 pycodestyle==2.3.1        # via flake8, flake8-debugger, flake8-import-order, flake8-print
 pycparser==2.18
 pyflakes==1.6.0           # via flake8
@@ -58,9 +65,11 @@ python-dateutil==2.7.3
 pytz==2018.5
 raven==6.9.0
 requests==2.20.1
+rsa==4.0
 six==1.11.0
 termcolor==1.1.0          # via pytest-sugar
 text-unidecode==1.2       # via faker
+uritemplate==3.0.0
 urllib3==1.23
 waitress==1.1.0
 whitenoise==3.3.1

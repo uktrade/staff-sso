@@ -8,6 +8,7 @@ from sso.user.middleware import UpdatedLastAccessedMiddleware
 from sso.user.models import AccessProfile, User
 
 from .factories.oauth import ApplicationFactory
+from .factories.saml import SamlApplicationFactory
 from .factories.user import UserFactory
 
 EMAIL = 'test@example.com'
@@ -230,6 +231,32 @@ class TestUser:
         assert not user.can_access(app)
 
     @pytest.mark.django_db
+    def test_can_access_saml2_with_access_profile(self):
+        app = SamlApplicationFactory()
+        user = UserFactory()
+        ap = AccessProfile.objects.create(name='test profile')
+        ap.saml2_applications.add(app)
+        user.access_profiles.add(ap)
+
+        assert user.can_access(app)
+
+    @pytest.mark.django_db
+    def test_can_access_saml2_without_access_profile_false(self):
+        app = SamlApplicationFactory()
+        user = UserFactory()
+        assert not user.can_access(app)
+
+    @pytest.mark.django_db
+    def test_can_access_saml2_if_app_disabled(self):
+        app = SamlApplicationFactory(enabled=False)
+        user = UserFactory()
+        ap = AccessProfile.objects.create(name='test profile')
+        ap.saml2_applications.add(app)
+        user.access_profiles.add(ap)
+
+        assert not user.can_access(app)
+
+    @pytest.mark.django_db
     def test_can_access_with_access_profile(self):
 
         app = ApplicationFactory()
@@ -241,7 +268,7 @@ class TestUser:
         assert user.can_access(app)
 
     @pytest.mark.django_db
-    def test_cant_access_with_access_profile_that_does_not_include_application(self):
+    def test_can_access_with_access_profile_that_does_not_include_application(self):
         """The user has an access profile but it doesn't provide access to the app"""
 
         app = ApplicationFactory()
@@ -312,7 +339,7 @@ class TestUser:
         assert not user.can_access(app)
 
     @pytest.mark.django_db
-    def test_can_access_with_email_(self):
+    def test_can_access_with_email(self):
         """
         Test that `can_access()` returns True when the user's email is in the
         `Application.allow_access_by_email_suffix` list
@@ -502,5 +529,33 @@ class TestAccessProfile:
         app = ApplicationFactory()
 
         ap = AccessProfile.objects.create()
+
+        assert not ap.is_allowed(app)
+
+    @pytest.mark.django_db
+    def test_saml2_is_access_alowed_true(self):
+        app = SamlApplicationFactory()
+
+        ap = AccessProfile.objects.create()
+        ap.saml2_applications.add(app)
+
+        assert ap.is_allowed(app)
+
+    @pytest.mark.django_db
+    def test_saml2_is_access_allowed_false(self):
+        app = SamlApplicationFactory()
+
+        ap = AccessProfile.objects.create()
+        ap.saml2_applications.add(app)
+
+        assert ap.is_allowed(app)
+
+    @pytest.mark.django_db
+    def test_saml2_is_access_allowed_if_app_is_disabled(self):
+
+        app = SamlApplicationFactory(enabled=False)
+
+        ap = AccessProfile.objects.create()
+        ap.saml2_applications.add(app)
 
         assert not ap.is_allowed(app)

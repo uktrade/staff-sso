@@ -1,5 +1,14 @@
+import logging
+
+from django.conf import settings
+from django.http import HttpResponse
+from django.urls import resolve
 from django.utils.cache import add_never_cache_headers
 from django.utils.deprecation import MiddlewareMixin
+
+from sso.core.ip_filter import get_client_ip
+
+logger = logging.getLogger(__name__)
 
 
 class NeverCacheMiddleware(MiddlewareMixin):
@@ -9,3 +18,18 @@ class NeverCacheMiddleware(MiddlewareMixin):
         """Set no-cache policy to response."""
         add_never_cache_headers(response)
         return response
+
+
+def AdminIpRestrictionMiddleware(get_response):
+
+    def middleware(request):
+        if resolve(request.path).app_name == 'admin':
+            if settings.RESTRICT_ADMIN:
+                client_ip = get_client_ip(request)
+
+                if not client_ip or client_ip not in settings.ALLOWED_ADMIN_IPS:
+                    return HttpResponse('Unauthorized', status=401)
+
+        return get_response(request)
+
+    return middleware

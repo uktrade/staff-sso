@@ -8,10 +8,12 @@ django-admin-tools
 zenpy
 requests==2.20.1
 defusedxml==0.5.0
+-e git+https://github.com/lgarvey/djangosaml2idp.git@master#egg=djangosaml2idp
+google-api-python-client
+oauth2client
 
 waitress
 whitenoise
 dj-database-url
 django-axes==4.4.0
-django-admin-ip-restrictor
 raven

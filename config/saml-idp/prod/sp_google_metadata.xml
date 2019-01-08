@@ -1,0 +1,85 @@
+<ns0:EntityDescriptor xmlns:ns0="urn:oasis:names:tc:SAML:2.0:metadata"
+                      xmlns:ns1="urn:oasis:names:tc:SAML:metadata:algsupport"
+                      xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" entityID="google.com"
+                      validUntil="2019-10-01T23:09:37Z">
+    <ns0:Extensions>
+        <ns1:DigestMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#md5"/>
+        <ns1:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#ripemd160"/>
+        <ns1:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+        <ns1:DigestMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#sha224"/>
+        <ns1:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+        <ns1:DigestMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#sha384"/>
+        <ns1:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"/>
+        <ns1:SigningMethod Algorithm="http://www.w3.org/2000/09/xmldsig#dsa-sha1"/>
+        <ns1:SigningMethod Algorithm="http://www.w3.org/2009/xmldsig11#dsa-sha256"/>
+        <ns1:SigningMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-md5"/>
+        <ns1:SigningMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-ripemd160"/>
+        <ns1:SigningMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+        <ns1:SigningMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha224"/>
+        <ns1:SigningMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+        <ns1:SigningMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha384"/>
+        <ns1:SigningMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha512"/>
+    </ns0:Extensions>
+    <ns0:SPSSODescriptor AuthnRequestsSigned="true" WantAssertionsSigned="true"
+                         protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+        <ns0:KeyDescriptor use="signing">
+            <ns2:KeyInfo>
+                <ns2:X509Data>
+                    <ns2:X509Certificate>
+                        MIIDdDCCAlygAwIBAgIGAWWF+dZYMA0GCSqGSIb3DQEBCwUAMHsxFDASBgNVBAoTC0dvb2dsZSBJ
+                        bmMuMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MQ8wDQYDVQQDEwZHb29nbGUxGDAWBgNVBAsTD0dv
+                        b2dsZSBGb3IgV29yazELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWEwHhcNMTgwODI5
+                        MTM1NzQ3WhcNMjMwODI4MTM1NzQ3WjB7MRQwEgYDVQQKEwtHb29nbGUgSW5jLjEWMBQGA1UEBxMN
+                        TW91bnRhaW4gVmlldzEPMA0GA1UEAxMGR29vZ2xlMRgwFgYDVQQLEw9Hb29nbGUgRm9yIFdvcmsx
+                        CzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A
+                        MIIBCgKCAQEAooAa6WDGxCOEzJUfTW9PQeOburDpbq5JqF+SWRbEwWXv4qAOsBf9YbwTlyu31iTi
+                        xHbard9Evmhyr6hEoqrN2MiZxtujdRd/wB1/yCcKNsBG/eUivs7qAj3Aqa2kEGqzu108KPPsd1g8
+                        Sz+zoUYJBd3NULjM251AtOoRsZ41P4aA/KUrKaJrSYK+utRMR6VDHm5EqsuW3UHaBgUbJU7TUw/x
+                        l2NvFDxq9ooVUat8c8v1SCLSGNxJbHgTEteYGXKtkZK/quuZRIl6PlZnOvIX7PXJieoRKzlyC8r1
+                        LmgVH5eTZU2gEcq6mOQzN6WoIow0V/AIoGnR0BApAMDNSejSgQIDAQABMA0GCSqGSIb3DQEBCwUA
+                        A4IBAQAZybzr9kk7W18Y9FG8vX6KF/SCmFaLwu2P4dLbXbMNa/8rfz7IBLDuj4piXKQSg6z82Nbe
+                        3VSMbr+Qa3W+4Jgv/xqjIzn6DykIccVFsminZoUZYnIbvEtQONhxGFD39rbPV4MjU9m4ZlIxgIbP
+                        EOA06i+oAO1cU1baa5X+LQWoxXxdsscxngRxxGYXYyJTKCs4WcLjD1zvGnQInpTTlp+DPWRIZlEV
+                        nChr8MiilukRlRGOnLZwe8gXzeatmgFit4le67bjkkA6TQd5Z4F9s1Ng/OgGC3gtHQrRpSe76NQt
+                        z/wJY0w8KNNvuBIgA8/1OE/yxIdAru+xb1Zx6uGkhddr
+                    </ns2:X509Certificate>
+                </ns2:X509Data>
+            </ns2:KeyInfo>
+        </ns0:KeyDescriptor>
+        <ns0:KeyDescriptor use="encryption">
+            <ns2:KeyInfo>
+                <ns2:X509Data>
+                    <ns2:X509Certificate>
+                        MIIDdDCCAlygAwIBAgIGAWWF+dZYMA0GCSqGSIb3DQEBCwUAMHsxFDASBgNVBAoTC0dvb2dsZSBJ
+                        bmMuMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MQ8wDQYDVQQDEwZHb29nbGUxGDAWBgNVBAsTD0dv
+                        b2dsZSBGb3IgV29yazELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWEwHhcNMTgwODI5
+                        MTM1NzQ3WhcNMjMwODI4MTM1NzQ3WjB7MRQwEgYDVQQKEwtHb29nbGUgSW5jLjEWMBQGA1UEBxMN
+                        TW91bnRhaW4gVmlldzEPMA0GA1UEAxMGR29vZ2xlMRgwFgYDVQQLEw9Hb29nbGUgRm9yIFdvcmsx
+                        CzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A
+                        MIIBCgKCAQEAooAa6WDGxCOEzJUfTW9PQeOburDpbq5JqF+SWRbEwWXv4qAOsBf9YbwTlyu31iTi
+                        xHbard9Evmhyr6hEoqrN2MiZxtujdRd/wB1/yCcKNsBG/eUivs7qAj3Aqa2kEGqzu108KPPsd1g8
+                        Sz+zoUYJBd3NULjM251AtOoRsZ41P4aA/KUrKaJrSYK+utRMR6VDHm5EqsuW3UHaBgUbJU7TUw/x
+                        l2NvFDxq9ooVUat8c8v1SCLSGNxJbHgTEteYGXKtkZK/quuZRIl6PlZnOvIX7PXJieoRKzlyC8r1
+                        LmgVH5eTZU2gEcq6mOQzN6WoIow0V/AIoGnR0BApAMDNSejSgQIDAQABMA0GCSqGSIb3DQEBCwUA
+                        A4IBAQAZybzr9kk7W18Y9FG8vX6KF/SCmFaLwu2P4dLbXbMNa/8rfz7IBLDuj4piXKQSg6z82Nbe
+                        3VSMbr+Qa3W+4Jgv/xqjIzn6DykIccVFsminZoUZYnIbvEtQONhxGFD39rbPV4MjU9m4ZlIxgIbP
+                        EOA06i+oAO1cU1baa5X+LQWoxXxdsscxngRxxGYXYyJTKCs4WcLjD1zvGnQInpTTlp+DPWRIZlEV
+                        nChr8MiilukRlRGOnLZwe8gXzeatmgFit4le67bjkkA6TQd5Z4F9s1Ng/OgGC3gtHQrRpSe76NQt
+                        z/wJY0w8KNNvuBIgA8/1OE/yxIdAru+xb1Zx6uGkhddr
+                    </ns2:X509Certificate>
+                </ns2:X509Data>
+            </ns2:KeyInfo>
+        </ns0:KeyDescriptor>
+        <ns0:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+                                 Location="http://sso.trade.gov.uk/idp/logout/"/>
+        <ns0:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+                                 Location="http://sso.trade.gov.uk/idp/logout/"/>
+        <ns0:NameIDFormat>
+            urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress
+        </ns0:NameIDFormat>
+        <ns0:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+                                      Location="https://www.google.com/a/data.trade.gov.uk/acs" index="1"/>
+        <ns0:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+                                      Location="https://www.google.com/a/data.trade.gov.uk//acs" index="1"/>
+    </ns0:SPSSODescriptor>
+</ns0:EntityDescriptor>

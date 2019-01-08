@@ -93,6 +93,7 @@ class ApplicationAdmin(OAuth2ApplicationAdmin):
 @admin.register(AccessProfile)
 class AccessProfileAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'list_oauth2_applications')
+    prepopulated_fields = {'slug': ('name',)}
 
     def list_oauth2_applications(self, obj):
         return ', '.join([str(app) for app in obj.oauth2_applications.all()])
