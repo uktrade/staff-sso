@@ -118,7 +118,7 @@ class Command(BaseCommand):
         service.users().update(userKey=id, body={'suspended': 'false'})
 
     @http_retry()
-    def _create_user(self, service, primary_email, user):
+    def _create_user(self, service, user, primary_email):
         password = ''.join([secrets.choice(string.printable) for _ in range(random.randint(30, 50))]).encode('utf-8')
 
         template = {
@@ -136,7 +136,6 @@ class Command(BaseCommand):
         service.users().insert(body=template).execute()
 
     def handle(self, *args, **kwargs):
-
         start_time = time.time()
         self.stdout.write('Start time %s' % timezone.now().strftime('%X'))
 
@@ -152,26 +151,28 @@ class Command(BaseCommand):
 
             logger.info('remote email: %s', remote_email)
 
-            if remote_email not in google_users:
-                self.stdout.write('{} does not exist in staff-sso; deactivating'.format(user.email))
-                self._create_user(user, remote_email)
+            remote_user = google_users.get(remote_email, None)
 
-            elif remote_email in google_users and google_users['remote_email']['is_admin']:
+            if not remote_user:
+                self.stdout.write('{} does not exist in google; creating'.format(user.email))
+                self._create_user(service, user, remote_email)
+
+            elif remote_user and remote_user['is_admin']:
                 self.stdout.write('{} is an admin; doing nothing.'.format(user.email))
 
-            elif google_users[remote_email]['suspended']:
+            elif remote_user['suspended']:
                 self.stdout.write('{} is enabled in staff-sso, but not not google; re-enabling account'.format(
                     user.email))
-                self._enable_user(user['id'])
+                self._enable_user(service, remote_user['id'])
 
-            if remote_email in google_users:
-                google_users[remote_email]['processed'] = True
+            if remote_user:
+                remote_user['processed'] = True
 
         # deactivate all users in google identity that aren't in staff-sso
-        for email, user in google_users.items():
-            if not user['processed'] and not user['is_admin']:
+        for email, remote_user in google_users.items():
+            if not remote_user['processed'] and not remote_user['is_admin']:
                 self.stdout.write('{} does not exist in staff-sso; deactivating'.format(email))
-                self._disable_user(user['id'])
+                self._disable_user(service, remote_user['id'])
 
         took = (time.time() - start_time)
         self.stdout.write('Took %0.2f' % took)

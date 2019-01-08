@@ -25,3 +25,38 @@ class UserFactory(factory.django.DjangoModelFactory):
         if extracted:
             for email in extracted:
                 self.emails.create(email=email)
+
+    @factory.post_generation
+    def add_access_profiles(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if extracted:
+            for profile in extracted:
+                self.access_profiles.add(profile)
+
+
+class AccessProfileFactory(factory.django.DjangoModelFactory):
+    slug = factory.Sequence(lambda n: f'access-profile-{n+1}')
+    name = factory.Sequence(lambda n: f'access profile {n+1}')
+
+    @factory.post_generation
+    def saml_apps_list(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if extracted:
+            for app in extracted:
+                self.saml2_applications.add(app)
+
+    @factory.post_generation
+    def oauth_apps_list(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if extracted:
+            for app in extracted:
+                self.oauth2_applications.add(app)
+
+    class Meta:
+        model = 'user.AccessProfile'
