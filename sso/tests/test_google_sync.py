@@ -185,6 +185,40 @@ class TestManagementCommand:
 
     @pytest.mark.django_db
     @patch('sso.samlidp.management.commands.sync_with_google.get_google_client')
+    def test_user_with_missing_name_is_created(self, mock_service, settings):
+
+        access_profile = AccessProfileFactory(slug='an-mi-user')
+        user = UserFactory(email='test.user@whatever.com', add_access_profiles=[access_profile],
+                           first_name='', last_name='')
+
+        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_SLUG = 'an-mi-user'
+        settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
+
+        mock_service.return_value.users.return_value.list.return_value.execute.return_value = {
+            'users': [
+            ],
+            'nextPageToken': '',
+        }
+
+        Command().handle()
+
+        inserts = [call for call in mock_service.mock_calls if call[0] == '().users().insert']
+
+        expected_call_args = {
+            'primaryEmail': '{}@{}'.format(user.email.split('@')[0], settings.MI_GOOGLE_EMAIL_DOMAIN),
+            'name': {'givenName': 'unspecified', 'familyName': 'unspecified', 'fullName': user.email},
+            'hashFunction': 'SHA-1',
+            'suspended': False
+        }
+
+        assert len(inserts) == 1
+        for key, value in expected_call_args.items():
+            assert inserts[0][2]['body'][key] == value
+
+        assert len(inserts[0][2]['body']['password']) == 40
+
+    @pytest.mark.django_db
+    @patch('sso.samlidp.management.commands.sync_with_google.get_google_client')
     def test_user_with_access_profile_but_disabled_in_google_is_reenabled(self, mock_service, settings):
 
         access_profile = AccessProfileFactory(slug='an-mi-user')
