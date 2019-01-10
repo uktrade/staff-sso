@@ -5,8 +5,8 @@ import pytest
 
 from googleapiclient.errors import HttpError
 
-from sso.samlidp.management.commands.sync_with_google import http_retry, Command
-from sso.tests.factories.user import UserFactory, AccessProfileFactory
+from sso.samlidp.management.commands.sync_with_google import Command, http_retry
+from sso.tests.factories.user import AccessProfileFactory, UserFactory
 
 
 def build_google_http_error(status=403, reason='userRateLimitExceeded'):
@@ -100,6 +100,30 @@ class TestHttpRetry:
         assert func() == 'testing123'
 
 
+def _build_google_create_user_dict(**kwargs):
+    data = {
+        'primaryEmail': 'test.user@data.test.com',
+        'id': 'fake-id',
+        'suspended': False,
+        'processed': False,
+        'isAdmin': False
+    }
+
+    data.update(kwargs)
+
+    return data
+
+
+def _configure_google_user_mock(mock_service, users=None):
+    """
+    Configure the mock so that mock.users().list().execute() returns the users arg
+    """
+    mock_service.return_value.users.return_value.list.return_value.execute.return_value = {
+        'users': users or [],
+        'nextPageToken': '',
+    }
+
+
 class TestManagementCommand:
     @pytest.mark.django_db
     @patch('sso.samlidp.management.commands.sync_with_google.get_google_client')
@@ -110,11 +134,7 @@ class TestManagementCommand:
         settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_SLUG = 'an-mi-user'
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
-        mock_service.return_value.users.return_value.list.return_value.execute.return_value = {
-            'users': [
-            ],
-            'nextPageToken': '',
-        }
+        _configure_google_user_mock(mock_service)
 
         Command().handle()
 
@@ -129,18 +149,7 @@ class TestManagementCommand:
         settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_SLUG = 'an-mi-user'
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
-        mock_service.return_value.users.return_value.list.return_value.execute.return_value = {
-            'users': [
-                {
-                    'primaryEmail': 'test.user@data.test.com',
-                    'id': 'fake-id',
-                    'suspended': True,
-                    'processed': False,
-                    'isAdmin': False
-                }
-            ],
-            'nextPageToken': '',
-        }
+        _configure_google_user_mock(mock_service, [_build_google_create_user_dict(suspended=True)])
 
         Command().handle()
 
@@ -160,11 +169,7 @@ class TestManagementCommand:
         settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_SLUG = 'an-mi-user'
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
-        mock_service.return_value.users.return_value.list.return_value.execute.return_value = {
-            'users': [
-            ],
-            'nextPageToken': '',
-        }
+        _configure_google_user_mock(mock_service)
 
         Command().handle()
 
@@ -185,6 +190,36 @@ class TestManagementCommand:
 
     @pytest.mark.django_db
     @patch('sso.samlidp.management.commands.sync_with_google.get_google_client')
+    def test_user_with_missing_name_is_created(self, mock_service, settings):
+
+        access_profile = AccessProfileFactory(slug='an-mi-user')
+        user = UserFactory(email='test.user@whatever.com', add_access_profiles=[access_profile],
+                           first_name='', last_name='')
+
+        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_SLUG = 'an-mi-user'
+        settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
+
+        _configure_google_user_mock(mock_service)
+
+        Command().handle()
+
+        inserts = [call for call in mock_service.mock_calls if call[0] == '().users().insert']
+
+        expected_call_args = {
+            'primaryEmail': '{}@{}'.format(user.email.split('@')[0], settings.MI_GOOGLE_EMAIL_DOMAIN),
+            'name': {'givenName': 'unspecified', 'familyName': 'unspecified', 'fullName': user.email},
+            'hashFunction': 'SHA-1',
+            'suspended': False
+        }
+
+        assert len(inserts) == 1
+        for key, value in expected_call_args.items():
+            assert inserts[0][2]['body'][key] == value
+
+        assert len(inserts[0][2]['body']['password']) == 40
+
+    @pytest.mark.django_db
+    @patch('sso.samlidp.management.commands.sync_with_google.get_google_client')
     def test_user_with_access_profile_but_disabled_in_google_is_reenabled(self, mock_service, settings):
 
         access_profile = AccessProfileFactory(slug='an-mi-user')
@@ -193,18 +228,7 @@ class TestManagementCommand:
         settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_SLUG = 'an-mi-user'
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
-        mock_service.return_value.users.return_value.list.return_value.execute.return_value = {
-            'users': [
-                {
-                    'primaryEmail': 'test.user@data.test.com',
-                    'id': 'fake-id',
-                    'suspended': True,
-                    'processed': False,
-                    'isAdmin': False
-                }
-            ],
-            'nextPageToken': '',
-        }
+        _configure_google_user_mock(mock_service, [_build_google_create_user_dict(suspended=True)])
 
         Command().handle()
 
@@ -223,18 +247,7 @@ class TestManagementCommand:
         settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_SLUG = 'an-mi-user'
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
-        mock_service.return_value.users.return_value.list.return_value.execute.return_value = {
-            'users': [
-                {
-                    'primaryEmail': 'test.user@data.test.com',
-                    'id': 'fake-id',
-                    'suspended': True,
-                    'processed': False,
-                    'isAdmin': True
-                }
-            ],
-            'nextPageToken': '',
-        }
+        _configure_google_user_mock(mock_service, [_build_google_create_user_dict(isAdmin=True)])
 
         Command().handle()
 

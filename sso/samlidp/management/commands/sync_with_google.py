@@ -124,9 +124,9 @@ class Command(BaseCommand):
         template = {
             'primaryEmail': primary_email,
             'name': {
-                'givenName': user.first_name,
-                'familyName': user.last_name,
-                'fullName': user.get_full_name()
+                'givenName': user.first_name or 'unspecified',
+                'familyName': user.last_name or 'unspecified',
+                'fullName': user.get_full_name(),
             },
             'password': hashlib.sha1(password).hexdigest(),
             'hashFunction': 'SHA-1',
