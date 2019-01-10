@@ -5,8 +5,8 @@ import pytest
 
 from googleapiclient.errors import HttpError
 
-from sso.samlidp.management.commands.sync_with_google import http_retry, Command
-from sso.tests.factories.user import UserFactory, AccessProfileFactory
+from sso.samlidp.management.commands.sync_with_google import Command, http_retry
+from sso.tests.factories.user import AccessProfileFactory, UserFactory
 
 
 def build_google_http_error(status=403, reason='userRateLimitExceeded'):
@@ -100,6 +100,30 @@ class TestHttpRetry:
         assert func() == 'testing123'
 
 
+def _build_google_create_user_dict(**kwargs):
+    data = {
+        'primaryEmail': 'test.user@data.test.com',
+        'id': 'fake-id',
+        'suspended': False,
+        'processed': False,
+        'isAdmin': False
+    }
+
+    data.update(kwargs)
+
+    return data
+
+
+def _configure_google_user_mock(mock_service, users=None):
+    """
+    Configure the mock so that mock.users().list().execute() returns the users arg
+    """
+    mock_service.return_value.users.return_value.list.return_value.execute.return_value = {
+        'users': users or [],
+        'nextPageToken': '',
+    }
+
+
 class TestManagementCommand:
     @pytest.mark.django_db
     @patch('sso.samlidp.management.commands.sync_with_google.get_google_client')
@@ -110,11 +134,7 @@ class TestManagementCommand:
         settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_SLUG = 'an-mi-user'
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
-        mock_service.return_value.users.return_value.list.return_value.execute.return_value = {
-            'users': [
-            ],
-            'nextPageToken': '',
-        }
+        _configure_google_user_mock(mock_service)
 
         Command().handle()
 
@@ -129,18 +149,7 @@ class TestManagementCommand:
         settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_SLUG = 'an-mi-user'
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
-        mock_service.return_value.users.return_value.list.return_value.execute.return_value = {
-            'users': [
-                {
-                    'primaryEmail': 'test.user@data.test.com',
-                    'id': 'fake-id',
-                    'suspended': True,
-                    'processed': False,
-                    'isAdmin': False
-                }
-            ],
-            'nextPageToken': '',
-        }
+        _configure_google_user_mock(mock_service, [_build_google_create_user_dict(suspended=True)])
 
         Command().handle()
 
@@ -160,11 +169,7 @@ class TestManagementCommand:
         settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_SLUG = 'an-mi-user'
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
-        mock_service.return_value.users.return_value.list.return_value.execute.return_value = {
-            'users': [
-            ],
-            'nextPageToken': '',
-        }
+        _configure_google_user_mock(mock_service)
 
         Command().handle()
 
@@ -194,11 +199,7 @@ class TestManagementCommand:
         settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_SLUG = 'an-mi-user'
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
-        mock_service.return_value.users.return_value.list.return_value.execute.return_value = {
-            'users': [
-            ],
-            'nextPageToken': '',
-        }
+        _configure_google_user_mock(mock_service)
 
         Command().handle()
 
@@ -227,18 +228,7 @@ class TestManagementCommand:
         settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_SLUG = 'an-mi-user'
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
-        mock_service.return_value.users.return_value.list.return_value.execute.return_value = {
-            'users': [
-                {
-                    'primaryEmail': 'test.user@data.test.com',
-                    'id': 'fake-id',
-                    'suspended': True,
-                    'processed': False,
-                    'isAdmin': False
-                }
-            ],
-            'nextPageToken': '',
-        }
+        _configure_google_user_mock(mock_service, [_build_google_create_user_dict(suspended=True)])
 
         Command().handle()
 
@@ -257,18 +247,7 @@ class TestManagementCommand:
         settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_SLUG = 'an-mi-user'
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
-        mock_service.return_value.users.return_value.list.return_value.execute.return_value = {
-            'users': [
-                {
-                    'primaryEmail': 'test.user@data.test.com',
-                    'id': 'fake-id',
-                    'suspended': True,
-                    'processed': False,
-                    'isAdmin': True
-                }
-            ],
-            'nextPageToken': '',
-        }
+        _configure_google_user_mock(mock_service, [_build_google_create_user_dict(isAdmin=True)])
 
         Command().handle()
 
