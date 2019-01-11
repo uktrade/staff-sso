@@ -151,7 +151,7 @@ class TestManagementCommand:
 
         _configure_google_user_mock(mock_service, [_build_google_create_user_dict(suspended=True)])
 
-        Command().handle()
+        Command().handle(inactive_account_action='disable')
 
         assert not [call for call in mock_service.mock_calls if call[0] == '().users().inserts']
         updates = [call for call in mock_service.mock_calls if call[0] == '().users().update']
@@ -196,7 +196,7 @@ class TestManagementCommand:
         user = UserFactory(email='test.user@whatever.com', add_access_profiles=[access_profile],
                            first_name='', last_name='')
 
-        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_SLUG = 'an-mi-user'
+        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILES = ['an-mi-user']
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
         _configure_google_user_mock(mock_service)
@@ -249,7 +249,41 @@ class TestManagementCommand:
 
         _configure_google_user_mock(mock_service, [_build_google_create_user_dict(isAdmin=True)])
 
-        Command().handle()
+        Command().handle(inactive_account_action='disable')
 
         assert not [call for call in mock_service.mock_calls if call[0] == '().users().inserts']
         assert not [call for call in mock_service.mock_calls if call[0] == '().users().update']
+
+    @pytest.mark.django_db
+    @patch('sso.samlidp.management.commands.sync_with_google.get_google_client')
+    def test_user_without_access_is_deleted(self, mock_service, settings):
+        AccessProfileFactory(slug='an-mi-user')
+
+        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILES = ['an-mi-user']
+        settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
+
+        _configure_google_user_mock(mock_service, [_build_google_create_user_dict(suspended=True)])
+
+        Command().handle(inactive_account_action='delete')
+
+        assert not [call for call in mock_service.mock_calls if call[0] == '().users().inserts']
+        assert not [call for call in mock_service.mock_calls if call[0] == '().users().update']
+        deletes = [call for call in mock_service.mock_calls if call[0] == '().users().delete']
+        assert len(deletes) == 1
+        assert deletes[0][2]['userKey'] == 'fake-id'
+
+    @pytest.mark.django_db
+    @patch('sso.samlidp.management.commands.sync_with_google.get_google_client')
+    def test_user_without_access_is_deleted(self, mock_service, settings):
+        AccessProfileFactory(slug='an-mi-user')
+
+        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILES = ['an-mi-user']
+        settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
+
+        _configure_google_user_mock(mock_service, [_build_google_create_user_dict(suspended=True)])
+
+        Command().handle(inactive_account_action='noop')
+
+        assert not [call for call in mock_service.mock_calls if call[0] == '().users().inserts']
+        assert not [call for call in mock_service.mock_calls if call[0] == '().users().update']
+        assert not [call for call in mock_service.mock_calls if call[0] == '().users().delete']

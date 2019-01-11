@@ -84,6 +84,17 @@ def http_retry(max_attempts=5):
 class Command(BaseCommand):
     help = 'Sync user accounts with MI Google'
 
+    def add_arguments(self, parser):
+
+        parser.add_argument(
+            '--inactive-accounts',
+            choices=['noop', 'disable', 'delete'],
+            dest='inactive_account_action',
+            default='noop',
+            help='What action to take with google accounts that exist '
+                 'in google but are not enabled in staff-sso (noop = do nothing, the default action)',
+        )
+
     @http_retry()
     def _get_google_users(self, service):
 
@@ -108,6 +119,10 @@ class Command(BaseCommand):
                 break
 
         return user_dict
+
+    @http_retry()
+    def _delete_user(self, service, id):
+        service.users().delete(userKey=id)
 
     @http_retry()
     def _disable_user(self, service, id):
@@ -135,7 +150,8 @@ class Command(BaseCommand):
 
         service.users().insert(body=template).execute()
 
-    def handle(self, *args, **kwargs):
+    def handle(self, *args, inactive_account_action='noop', **kwargs):
+
         start_time = time.time()
         self.stdout.write('Start time %s' % timezone.now().strftime('%X'))
 
@@ -171,8 +187,14 @@ class Command(BaseCommand):
         # deactivate all users in google identity that aren't in staff-sso
         for email, remote_user in google_users.items():
             if not remote_user['processed'] and not remote_user['is_admin']:
-                self.stdout.write('{} does not exist in staff-sso; deactivating'.format(email))
-                self._disable_user(service, remote_user['id'])
+                if inactive_account_action == 'disable':
+                    self.stdout.write('{} does not exist in staff-sso; disabling'.format(email))
+                    self._disable_user(service, remote_user['id'])
+                elif inactive_account_action == 'delete':
+                    self.stdout.write('{} does not exist in staff-sso; deleting'.format(email))
+                    self._delete_user(service, remote_user['id'])
+                else:
+                    self.stdout.write('{} does not exist in staff-sso; noop'.format(email))
 
         took = (time.time() - start_time)
         self.stdout.write('Took %0.2f' % took)
