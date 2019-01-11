@@ -122,15 +122,15 @@ class Command(BaseCommand):
 
     @http_retry()
     def _delete_user(self, service, id):
-        service.users().delete(userKey=id)
+        service.users().delete(userKey=id).execute()
 
     @http_retry()
     def _disable_user(self, service, id):
-        service.users().update(userKey=id, body={'suspended': 'true'})
+        service.users().update(userKey=id, body={'suspended': 'true'}).execute()
 
     @http_retry()
     def _enable_user(self, service, id):
-        service.users().update(userKey=id, body={'suspended': 'false'})
+        service.users().update(userKey=id, body={'suspended': 'false'}).execute()
 
     @http_retry()
     def _create_user(self, service, user, primary_email):
