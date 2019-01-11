@@ -131,7 +131,7 @@ class TestManagementCommand:
         AccessProfileFactory(slug='an-mi-user')
         UserFactory(email='test.user@whatever.com')
 
-        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_SLUG = 'an-mi-user'
+        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILES = ['an-mi-user']
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
         _configure_google_user_mock(mock_service)
@@ -146,7 +146,7 @@ class TestManagementCommand:
     def test_user_without_access_profile_and_in_google_is_disabled(self, mock_service, settings):
         AccessProfileFactory(slug='an-mi-user')
 
-        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_SLUG = 'an-mi-user'
+        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILES = ['an-mi-user']
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
         _configure_google_user_mock(mock_service, [_build_google_create_user_dict(suspended=True)])
@@ -166,7 +166,7 @@ class TestManagementCommand:
         access_profile = AccessProfileFactory(slug='an-mi-user')
         user = UserFactory(email='test.user@whatever.com', add_access_profiles=[access_profile])
 
-        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_SLUG = 'an-mi-user'
+        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILES = ['an-mi-user']
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
         _configure_google_user_mock(mock_service)
@@ -225,7 +225,7 @@ class TestManagementCommand:
         access_profile = AccessProfileFactory(slug='an-mi-user')
         UserFactory(email='test.user@whatever.com', add_access_profiles=[access_profile])
 
-        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_SLUG = 'an-mi-user'
+        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILES = ['an-mi-user']
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
         _configure_google_user_mock(mock_service, [_build_google_create_user_dict(suspended=True)])
@@ -244,7 +244,7 @@ class TestManagementCommand:
     def test_google_admin_user_is_not_disabled(self, mock_service, settings):
         AccessProfileFactory(slug='an-mi-user')
 
-        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILE_SLUG = 'an-mi-user'
+        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILES = ['an-mi-user']
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
         _configure_google_user_mock(mock_service, [_build_google_create_user_dict(isAdmin=True)])
