@@ -285,9 +285,11 @@ OAUTH2_PROVIDER = {
         'data-hub:internal-front-end': 'A datahub specific scope'
     },
     'DEFAULT_SCOPES': ['read', 'write', 'data-hub:internal-front-end'],
+    'REFRESH_TOKEN_EXPIRE_SECONDS': 24 * 60 * 60 * 2,
 }
 
 OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2.Application'
+
 
 LOGGING = {
     'version': 1,
