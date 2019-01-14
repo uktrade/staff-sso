@@ -3,7 +3,7 @@ import pytest
 from sso.samlidp.models import SamlApplication
 from sso.samlidp.processors import AWSProcessor, GoogleProcessor, ModelProcessor
 from sso.tests.factories.saml import SamlApplicationFactory
-from sso.tests.factories.user import UserFactory
+from sso.tests.factories.user import UserFactory, AccessProfileFactory
 
 
 pytestmark = [
@@ -22,49 +22,85 @@ class TestModelProcessor:
         with pytest.raises(SamlApplication.DoesNotExist):
             ModelProcessor('a_non_existent_entity_id')
 
-    def test_is_application_enabled_true(self):
-        SamlApplicationFactory(entity_id='an_entity_id', enabled=True)
+    def test_has_access_application_enabled(self, rf):
+        saml_app = SamlApplicationFactory(entity_id='an_entity_id', enabled=True)
+        ap = AccessProfileFactory(saml_apps_list=[saml_app])
         processor = ModelProcessor('an_entity_id')
 
-        assert processor.is_enabled({})
+        request = rf.get('/whatever/')
+        request.user = UserFactory(add_access_profiles=[ap])
 
-    def test_is_application_enabled_false(self):
-        SamlApplicationFactory(entity_id='an_entity_id', enabled=False)
+        assert processor.has_access(request)
+
+    def test_has_access_application_disabled(self, rf):
+        saml_app = SamlApplicationFactory(entity_id='an_entity_id', enabled=False)
+        ap = AccessProfileFactory(saml_apps_list=[saml_app])
         processor = ModelProcessor('an_entity_id')
 
-        assert not processor.is_enabled({})
+        request = rf.get('/whatever/')
+        request.user = UserFactory(add_access_profiles=[ap])
+
+        assert not processor.has_access(request)
 
     def test_is_valid_ip_with_ip_restriction_disabled(self, rf):
+        saml_app = SamlApplicationFactory(entity_id='an_entity_id')
+        ap = AccessProfileFactory(saml_apps_list=[saml_app])
+        processor = ModelProcessor('an_entity_id')
+
+        request = rf.get('/whatever/')
+        request.user = UserFactory(add_access_profiles=[ap])
+
+        assert processor.has_access(request)
+
+    def test_has_access_ip_restriction_no_x_forwarded_header(self, rf):
+        saml_app = SamlApplicationFactory(entity_id='an_entity_id', allowed_ips='1.1.1.1')
+        ap = AccessProfileFactory(saml_apps_list=[saml_app])
+        processor = ModelProcessor('an_entity_id')
+
+        request = rf.get('/whatever/')
+        request.user = UserFactory(add_access_profiles=[ap])
+
+        assert not processor.has_access(request)
+
+    def test_has_access_ip_restriction_valid_ip(self, rf):
+        saml_app = SamlApplicationFactory(entity_id='an_entity_id', allowed_ips='1.1.1.1')
+        ap = AccessProfileFactory(saml_apps_list=[saml_app])
+        processor = ModelProcessor('an_entity_id')
+
+        request = rf.get('/whatever/', HTTP_X_FORWARDED_FOR='1.1.1.1, 2.2.2.2, 3.3.3.3')
+        request.user = UserFactory(add_access_profiles=[ap])
+
+        assert processor.has_access(request)
+
+    def test_has_access_ip_restriction_ip_not_whitelisted(self, rf):
+        saml_app = SamlApplicationFactory(entity_id='an_entity_id', allowed_ips='8.8.8.8')
+        ap = AccessProfileFactory(saml_apps_list=[saml_app])
+        processor = ModelProcessor('an_entity_id')
+
+        request = rf.get('/whatever/', HTTP_X_FORWARDED_FOR='1.1.1.1, 2.2.2.2, 3.3.3.3')
+        request.user = UserFactory(add_access_profiles=[ap])
+
+        assert not processor.has_access(request)
+
+    def test_has_access_user_not_in_profile(self, rf):
         SamlApplicationFactory(entity_id='an_entity_id')
         processor = ModelProcessor('an_entity_id')
 
         request = rf.get('/whatever/')
+        request.user = UserFactory()
 
-        assert processor.is_enabled(request)
+        assert not processor.has_access(request)
 
-    def test_is_enabled_ip_restriction_no_x_forwarded_header(self, rf):
-        SamlApplicationFactory(entity_id='an_entity_id', allowed_ips='1.1.1.1')
+    def test_user_has_access(self, rf):
+        saml_app = SamlApplicationFactory(entity_id='an_entity_id')
+        ap = AccessProfileFactory(saml_apps_list=[saml_app])
+
         processor = ModelProcessor('an_entity_id')
 
         request = rf.get('/whatever/')
+        request.user = UserFactory(add_access_profiles=[ap])
 
-        assert not processor.is_enabled(request)
-
-    def test_is_enabled_ip_restriction_valid_ip(self, rf):
-        SamlApplicationFactory(entity_id='an_entity_id', allowed_ips='1.1.1.1')
-        processor = ModelProcessor('an_entity_id')
-
-        request = rf.get('/whatever/', HTTP_X_FORWARDED_FOR='1.1.1.1, 2.2.2.2, 3.3.3.3')
-
-        assert processor.is_enabled(request)
-
-    def test__is_enabled_ip_restriction_ip_not_whitelisted(self, rf):
-        SamlApplicationFactory(entity_id='an_entity_id', allowed_ips='8.8.8.8')
-        processor = ModelProcessor('an_entity_id')
-
-        request = rf.get('/whatever/', HTTP_X_FORWARDED_FOR='1.1.1.1, 2.2.2.2, 3.3.3.3')
-
-        assert not processor.is_enabled(request)
+        assert processor.has_access(request)
 
 
 class TestAWSProcessor:

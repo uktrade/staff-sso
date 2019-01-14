@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements-dev.txt requirements-dev.in
 #
--e git+https://github.com/lgarvey/djangosaml2idp.git@e310de6#egg=djangosaml2idp
+-e git+https://github.com/OTA-Insight/djangosaml2idp.git@v0.5.0#egg=djangosaml2idp
 asn1crypto==0.24.0
 atomicwrites==1.1.5       # via pytest
 attrs==18.1.0             # via pytest
