@@ -495,23 +495,19 @@ class TestUser:
 
     @pytest.mark.django_db
     @freeze_time('2017-06-22 15:50:00.000000+00:00')
-    def test_user_last_accessed_field_updates(self, rf):
+    def test_user_last_accessed_field_updates(self, rf, mocker):
+
         user = UserFactory(email='goblin@example.com')
-        middleware = UpdatedLastAccessedMiddleware(get_response=None)
+        middleware = UpdatedLastAccessedMiddleware(get_response=mocker.MagicMock())
 
         request = rf.get('/')
         request.user = user
 
-        from django.http import HttpResponse
-        response = HttpResponse()
-
         assert user.last_accessed is None
-        middleware.process_response(request, response)
+        middleware(request)
 
         assert request.user.last_accessed == datetime.datetime.now(tz=datetime.timezone.utc)
-
-        _user = User.objects.get(pk=user.pk)
-        assert _user.last_accessed == datetime.datetime.now(tz=datetime.timezone.utc)
+        assert User.objects.get(pk=user.pk).last_accessed == datetime.datetime.now(tz=datetime.timezone.utc)
 
 
 class TestAccessProfile:

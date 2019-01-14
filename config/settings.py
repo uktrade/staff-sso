@@ -62,7 +62,6 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'sso.user.middleware.UpdatedLastAccessedMiddleware',
     'sso.healthcheck.middleware.HealthCheckMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -73,6 +72,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'sso.core.middleware.NeverCacheMiddleware',
     'sso.core.middleware.AdminIpRestrictionMiddleware',
+    'sso.user.middleware.UpdatedLastAccessedMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
