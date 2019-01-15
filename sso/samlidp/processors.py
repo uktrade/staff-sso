@@ -28,11 +28,9 @@ class ModelProcessor(BaseProcessor):
     def __init__(self, entity_id, *args, **kwargs):
         self._application = SamlApplication.objects.get(entity_id=entity_id)
 
-    def has_access(self, user):
-        return user.can_access(self._application)
-
-    def is_enabled(self, request):
-        return self._application.enabled and self._application.is_valid_ip(request)
+    def has_access(self, request):
+        return request.user.can_access(self._application) and \
+               self._application.enabled and self._application.is_valid_ip(request)
 
 
 class AWSProcessor(ModelProcessor):
