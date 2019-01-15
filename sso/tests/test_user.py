@@ -509,6 +509,18 @@ class TestUser:
         assert request.user.last_accessed == datetime.datetime.now(tz=datetime.timezone.utc)
         assert User.objects.get(pk=user.pk).last_accessed == datetime.datetime.now(tz=datetime.timezone.utc)
 
+    @pytest.mark.django_db
+    @freeze_time('2017-06-22 15:50:00.000000+00:00')
+    def test_user_last_accessed_field_updates_integration_test(self, client):
+        user = UserFactory(email='goblin@example.com')
+        user.set_password('12345')
+        user.save()
+
+        client.login(email='goblin@example.com', password='12345')
+        response = client.get('/')
+
+        assert User.objects.get(pk=user.pk).last_accessed == datetime.datetime.now(tz=datetime.timezone.utc)
+
 
 class TestAccessProfile:
     @pytest.mark.django_db

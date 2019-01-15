@@ -71,8 +71,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'sso.core.middleware.NeverCacheMiddleware',
-    'sso.core.middleware.AdminIpRestrictionMiddleware',
     'sso.user.middleware.UpdatedLastAccessedMiddleware',
+    'sso.core.middleware.AdminIpRestrictionMiddleware',
+
 ]
 
 ROOT_URLCONF = 'config.urls'
