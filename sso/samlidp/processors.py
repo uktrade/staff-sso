@@ -4,20 +4,25 @@ from django.conf import settings
 
 from djangosaml2idp.processors import BaseProcessor
 
+
 from .models import SamlApplication
+from sso.user.models import EmailAddress
 
 
 logger = logging.getLogger(__name__)
 
 
-def build_google_user_id(email):
+def build_google_user_id(user):
     """
     Construct a google email address from the user's primary email.
     """
 
-    return '{}@{}'.format(
-        email.split('@')[0],
-        settings.MI_GOOGLE_EMAIL_DOMAIN)
+    try:
+        return user.emails.get(email__endswith='@'+settings.MI_GOOGLE_EMAIL_DOMAIN).email
+    except EmailAddress.DoesNotExist:
+        return '{}@{}'.format(
+            user.email.split('@')[0],
+            settings.MI_GOOGLE_EMAIL_DOMAIN)
 
 
 class ModelProcessor(BaseProcessor):
@@ -54,4 +59,4 @@ class AWSProcessor(ModelProcessor):
 class GoogleProcessor(ModelProcessor):
     def get_user_id(self, user):
 
-        return build_google_user_id(user.email)
+        return build_google_user_id(user)

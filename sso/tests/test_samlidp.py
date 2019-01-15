@@ -134,3 +134,14 @@ class TestGoogleProcessor:
 
         processor = GoogleProcessor(entity_id='an_entity_id')
         assert processor.get_user_id(user) == 'hello@test.com'
+
+    def test_email_can_be_overridden(self, settings):
+        SamlApplicationFactory(entity_id='an_entity_id')
+        settings.MI_GOOGLE_EMAIL_DOMAIN = 'test.com'
+
+        user = UserFactory(email='hello@world.com', email_list=[
+            'hello_world@' + settings.MI_GOOGLE_EMAIL_DOMAIN
+        ])
+
+        processor = GoogleProcessor(entity_id='an_entity_id')
+        assert processor.get_user_id(user) == 'hello_world@test.com'

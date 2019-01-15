@@ -163,7 +163,7 @@ class Command(BaseCommand):
             access_profiles__slug__in=settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILES)
 
         for user in local_users:
-            remote_email = build_google_user_id(user.email)
+            remote_email = build_google_user_id(user)
 
             logger.info('remote email: %s', remote_email)
 
