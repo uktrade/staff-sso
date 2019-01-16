@@ -6,11 +6,12 @@ class UpdatedLastAccessedMiddleware(object):
         self.get_response = get_response
 
     def __call__(self, request):
+
+        self.set_last_accessed_date(request)
+
         return self.get_response(request)
 
-    def process_response(self, request, response):
+    def set_last_accessed_date(self, request):
         if request.user.is_authenticated:
-            last_accessed = now()
-            request.user.last_accessed = last_accessed
+            request.user.last_accessed = now()
             request.user.save()
-        return response
