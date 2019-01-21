@@ -47,6 +47,15 @@ class Application(AbstractApplication):
 
     allow_tokens_from = models.ManyToManyField('self', blank=True, symmetrical=False)
 
+    def save(self, *args, **kwargs):
+
+        # these fields are not user configurable
+        self.client_type = 'confidential'
+        self.authorization_grant_type = 'authorization-code'
+        self.skip_authorization = True
+
+        super().save(*args, **kwargs)
+
     def get_email_order(self):
         ordering = self.email_ordering or getattr(settings, 'DEFAULT_EMAIL_ORDER', '')
 
