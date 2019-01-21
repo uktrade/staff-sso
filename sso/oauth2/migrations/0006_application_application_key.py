@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='application',
             name='application_key',
-            field=models.SlugField(default='hello', unique=False, verbose_name='unique text id'),
+            field=models.SlugField(default='', unique=False, verbose_name='unique text id'),
             preserve_default=False,
         ),
         migrations.RunPython(populate_application_key),
