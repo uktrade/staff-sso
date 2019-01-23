@@ -15,5 +15,5 @@ oauth2client
 waitress
 whitenoise
 dj-database-url
-django-axes==4.4.0
+django-axes==4.5.4
 raven

@@ -15,7 +15,7 @@ defusedxml==0.5.0
 dj-database-url==0.5.0
 django-admin-tools==0.8.1
 django-appconf==1.0.2     # via django-axes
-django-axes==4.4.0
+django-axes==4.5.4
 django-environ==0.4.5
 django-ipware==2.1.0      # via django-axes
 django-oauth-toolkit==1.1.0
