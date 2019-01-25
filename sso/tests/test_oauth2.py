@@ -6,6 +6,7 @@ except ImportError:
     from django.core.urlresolvers import reverse
 
 from .factories.oauth import AccessTokenFactory, ApplicationFactory, UserFactory
+from .factories.user import AccessProfileFactory
 
 pytestmark = [
     pytest.mark.django_db
@@ -91,7 +92,9 @@ class TestIntrospectView:
             'username': username,
             'active': True,
             'scope': 'read',
-            'user_id': str(user.user_id)
+            'user_id': str(user.user_id),
+            'permitted_applications': [],
+            'access_profiles': [],
         }
 
     def test_with_immutable_email(self, api_client):
@@ -192,3 +195,58 @@ class TestIntrospectView:
         assert response_json['access_type'] == 'cross_client'
         assert response_json['source_name'] == application.name
         assert response_json['source_client_id'] == application.client_id
+
+    def test_with_application_list(self, api_client):
+        user = UserFactory()
+        application = ApplicationFactory(email_ordering='vvv.com, ddd.com, ccc.com, bbb.com', users=[user])
+
+        introspect_user = UserFactory()
+
+        introspect_token = AccessTokenFactory(
+            application=application,
+            user=introspect_user,
+            scope='introspection read'
+        )
+
+        token = AccessTokenFactory(
+            application=application,
+            user=user
+        )
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + introspect_token.token)
+        response = api_client.get(self.OAUTH2_INTROSPECTION_URL + f'?token={token.token}')
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert response_json['permitted_applications'] == [{
+            'key': application.application_key,
+            'url': application.start_url,
+            'name': application.display_name,
+        }]
+
+    def test_access_profile_list(self, api_client):
+        ap = AccessProfileFactory(slug='testing-123')
+        user = UserFactory(add_access_profiles=[ap])
+        application = ApplicationFactory(email_ordering='vvv.com, ddd.com, ccc.com, bbb.com', users=[user])
+
+        introspect_user = UserFactory()
+
+        introspect_token = AccessTokenFactory(
+            application=application,
+            user=introspect_user,
+            scope='introspection read'
+        )
+
+        token = AccessTokenFactory(
+            application=application,
+            user=user
+        )
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + introspect_token.token)
+        response = api_client.get(self.OAUTH2_INTROSPECTION_URL + f'?token={token.token}')
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert response_json['access_profiles'] == [ap.slug]

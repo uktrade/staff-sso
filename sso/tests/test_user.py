@@ -567,3 +567,32 @@ class TestAccessProfile:
         ap.saml2_applications.add(app)
 
         assert not ap.is_allowed(app)
+
+    @pytest.mark.django_db
+    def test_user_get_permitted_applications(self):
+        user = UserFactory(email='goblin@example.com')
+
+        app1 = ApplicationFactory(
+            application_key='app-1',
+            display_name='Appplication 1',
+            start_url='https://application1.com',
+            users=[user])
+        app2 = ApplicationFactory(
+            application_key='app-2',
+            display_name='Appplication 2',
+            start_url='https://application2.com',
+            users=[user])
+
+        assert len(user.get_permitted_applications()) == 2
+        assert user.get_permitted_applications() == [
+            {
+                'key': app1.application_key,
+                'url': app1.start_url,
+                'name': app1.display_name
+            },
+            {
+                'key': app2.application_key,
+                'url': app2.start_url,
+                'name': app2.display_name
+            }
+        ]
