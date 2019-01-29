@@ -6,6 +6,10 @@ from . import api_urls
 
 app_name = 'staff_sso'
 
+admin.site.site_header = "Staff-SSO Admin Section"
+admin.site.site_title = ''
+admin.site.index_title = ''
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^admin/', include('sso.user.admin_urls')),
