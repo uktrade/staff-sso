@@ -11,9 +11,7 @@ from django.views.generic.base import View
 
 from sso.oauth2.models import Application
 from sso.samlidp.models import SamlApplication
-from .data_export import UserDataExport, UserPermissionExport
-from .data_import import UserAliasImport, UserMergeImport
-from .forms import AdminUserAddAliasForm, AdminUserUploadForm
+from .data_export import UserDataExport
 from .models import User
 
 
@@ -56,11 +54,6 @@ class UserDataExportView(CSVExportView):
     file_name = 'user_data.csv'
 
 
-class UserPermissionExportView(CSVExportView):
-    generator_object = UserPermissionExport()
-    file_name = 'user_permission_data.csv'
-
-
 @method_decorator(staff_member_required, name='dispatch')
 class CSVImportView(FormView):
     def form_valid(self, form):
@@ -84,18 +77,6 @@ class CSVImportView(FormView):
                 'form': self.get_form()
             }
         )
-
-
-class AdminUserMergeImportView(CSVImportView):
-    form_class = AdminUserUploadForm
-    template_name = 'admin/user-import.html'
-    import_class = UserMergeImport
-
-
-class AdminUserAliasAddImportView(CSVImportView):
-    form_class = AdminUserAddAliasForm
-    template_name = 'admin/user-alias-import.html'
-    import_class = UserAliasImport
 
 
 @method_decorator(staff_member_required, name='dispatch')
