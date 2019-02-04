@@ -9,7 +9,6 @@ import pytest
 from django.conf import settings
 from django.urls import reverse, reverse_lazy
 from freezegun import freeze_time
-from saml2.sigver import SignatureError
 
 from sso.user.models import User
 
@@ -100,6 +99,37 @@ class TestOAuthAuthorize:
             f'{SAML_LOGIN_URL}?next={OAUTH_AUTHORIZE_URL}'
         )
 
+    def test_x_application_log_is_created(self, client, mocker):
+        user = UserFactory()
+        application, authorize_params = create_oauth_application(users=[user])
+
+        mock_create_x_access_log = mocker.patch('sso.oauth2.views.create_x_access_log')
+
+        client.force_login(user)
+
+        client.get(OAUTH_AUTHORIZE_URL, data=authorize_params)
+
+        assert mock_create_x_access_log.called
+        request = mock_create_x_access_log.mock_calls[0][1][0]
+        mock_create_x_access_log.assert_called_once_with(
+            request, 200,
+            oauth2_application=application.name)
+
+    def test_x_application_log_is_created_on_access_denied(self, client, mocker):
+        user = UserFactory()
+        application, authorize_params = create_oauth_application()
+
+        mock_create_x_access_log = mocker.patch('sso.oauth2.views.create_x_access_log')
+
+        client.force_login(user)
+
+        client.get(OAUTH_AUTHORIZE_URL, data=authorize_params)
+
+        assert mock_create_x_access_log.called
+        request = mock_create_x_access_log.mock_calls[0][1][0]
+        mock_create_x_access_log.assert_called_once_with(
+            request, 403,
+            oauth2_application=application.name)
 
 class TestSAMLLogin:
     def test_valid_saml_login_form(self, client):
@@ -164,7 +194,7 @@ class TestSAMLLogin:
 
         assert User.objects.count() == 1
 
-        MockOutstandingQueriesCache = mocker.patch('djangosaml2.views.OutstandingQueriesCache')
+        MockOutstandingQueriesCache = mocker.patch('sso.samlauth.views.OutstandingQueriesCache')
         MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
 
         MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
@@ -192,6 +222,40 @@ class TestSAMLLogin:
         assert 'code' in authorize_qs
 
     @freeze_time('2017-06-22 15:50:00.000000+00:00')
+    def test_x_application_saml_log_message(self, client, mocker):
+        """
+        Test that an x-application log message is created
+        """
+
+        # we require an existing user with permissions to access the application
+        user = UserFactory(email='user1@example.com')
+
+        application, authorize_params = create_oauth_application(users=[user])
+        client.get(OAUTH_AUTHORIZE_URL, data=authorize_params)
+
+        data = {
+            'SAMLResponse': [base64.b64encode(get_saml_response(action='login'))],
+            'RelayState': f'{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}'
+        }
+
+        MockOutstandingQueriesCache = mocker.patch('sso.samlauth.views.OutstandingQueriesCache')
+        MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
+
+        MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
+        MockCryptoBackendXmlSec1().validate_signature.return_value = True
+
+        mock_create_x_access_log = mocker.patch('sso.samlauth.views.create_x_access_log')
+
+        client.post(SAML_ACS_URL, data)
+
+        assert mock_create_x_access_log.called
+        request = mock_create_x_access_log.mock_calls[0][1][0]
+        mock_create_x_access_log.assert_called_once_with(
+            request, 200,
+            entity_id='http://localhost:8080/simplesaml/saml2/idp/metadata.php',
+            message='Remote IdP Auth')
+
+    @freeze_time('2017-06-22 15:50:00.000000+00:00')
     def test_saml_login_using_name_id(self, client, mocker, settings):
         """
         Test that `settings.SAML_IDPS_USE_NAME_ID_AS_USERNAME` works correctly, and that the `User.email` field is not
@@ -208,7 +272,7 @@ class TestSAMLLogin:
             'RelayState': f'{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}'
         }
 
-        MockOutstandingQueriesCache = mocker.patch('djangosaml2.views.OutstandingQueriesCache')
+        MockOutstandingQueriesCache = mocker.patch('sso.samlauth.views.OutstandingQueriesCache')
         MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
 
         MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
@@ -244,7 +308,7 @@ class TestSAMLLogin:
 
         assert User.objects.count() == 0
 
-        MockOutstandingQueriesCache = mocker.patch('djangosaml2.views.OutstandingQueriesCache')
+        MockOutstandingQueriesCache = mocker.patch('sso.samlauth.views.OutstandingQueriesCache')
         MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
 
         MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
@@ -293,7 +357,7 @@ class TestSAMLLogin:
 
         assert User.objects.count() == 1
 
-        MockOutstandingQueriesCache = mocker.patch('djangosaml2.views.OutstandingQueriesCache')
+        MockOutstandingQueriesCache = mocker.patch('sso.samlauth.views.OutstandingQueriesCache')
         MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
 
         MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
@@ -325,7 +389,7 @@ class TestSAMLLogin:
             'SAMLResponse': [base64.b64encode(get_saml_response(action='login'))],
         }
 
-        MockOutstandingQueriesCache = mocker.patch('djangosaml2.views.OutstandingQueriesCache')
+        MockOutstandingQueriesCache = mocker.patch('sso.samlauth.views.OutstandingQueriesCache')
         MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
 
         MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
