@@ -81,6 +81,11 @@ class User(AbstractBaseUser, PermissionsMixin):
             'Designates that this user can log into the admin area and assign users to groups.'
         ),
     )
+    is_staff = models.BooleanField(
+        _('staff status'),
+        default=False,
+        help_text=_('Designates whether the user can log into this admin site.'),
+    )
     permitted_applications = models.ManyToManyField(
         settings.OAUTH2_PROVIDER_APPLICATION_MODEL,
         related_name='users',
@@ -105,10 +110,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
-
-    @property
-    def is_staff(self):
-        return self.is_superuser
 
     def save(self, *args, **kwargs):
         """
