@@ -36,8 +36,8 @@ class EmailInline(admin.TabularInline):
 class UserAdmin(admin.ModelAdmin):
     search_fields = ('emails__email', 'email', 'first_name', 'last_name')
     list_filter = (ApplicationFilter, 'is_superuser')
-    fields = ('user_id', 'email', 'first_name', 'last_name', 'is_superuser',
-              'date_joined', 'last_login', 'last_accessed', 'access_profiles', 'permitted_applications')
+    fields = ('user_id', 'email', 'first_name', 'last_name', 'date_joined', 'last_login', 'last_accessed',
+              'access_profiles', 'permitted_applications')
     readonly_fields = ('date_joined', 'last_login', 'last_accessed', 'user_id')
     list_display = ('email', 'email_list', 'is_superuser', 'last_login', 'last_accessed',
                     'list_permitted_applications', 'list_access_profiles', 'show_permissions_link')
@@ -48,6 +48,13 @@ class UserAdmin(admin.ModelAdmin):
     def get_form(self, request, obj=None, **kwargs):
         kwargs['form'] = UserForm
         return super().get_form(request, obj, **kwargs)
+
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj)
+
+        if request.user.is_superuser:
+            fields += ('is_staff', 'is_superuser', 'groups', 'user_permissions')
+        return fields
 
     def list_permitted_applications(self, obj):
         return ', '.join(obj.permitted_applications.all().values_list('name', flat=True))

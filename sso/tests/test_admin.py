@@ -6,6 +6,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import reverse
 
 from sso.user.admin_views import ShowUserPermissionsView
+from sso.user.admin import UserAdmin
 
 from .factories.oauth import ApplicationFactory
 from .factories.user import UserFactory
@@ -27,7 +28,7 @@ class TestShowUserPermissionsView:
         assert response.url.startswith('/admin/login/')
 
     def test_users_name_appears_on_page(self, rf):
-        admin_user = UserFactory(is_superuser=True)
+        admin_user = UserFactory(is_superuser=True, is_staff=True)
         user = UserFactory(first_name='Bill', last_name='Smith')
 
         request = rf.get(reverse('show-permissions-view', kwargs={'user_id': user.id}))
@@ -41,7 +42,7 @@ class TestShowUserPermissionsView:
         assert 'User: {}'.format(user.get_full_name()) in content
 
     def test_application_permissions(self, rf):
-        admin_user = UserFactory(first_name='admin', last_name='admin', is_superuser=True)
+        admin_user = UserFactory(first_name='admin', last_name='admin', is_superuser=True, is_staff=True)
         user = UserFactory(first_name='Bill', last_name='Smith')
 
         ApplicationFactory(name='app1')
@@ -57,3 +58,23 @@ class TestShowUserPermissionsView:
         assert response.status_code == 200
         assert re.search(r'<td>app1</td>\n\s*<td>no</td>', content)
         assert re.search(r'<td>app2</td>\n\s*<td>yes</td>', content)
+
+
+class TestUserAdmin:
+    def test_get_fields_as_superuser(self, rf):
+        user = UserFactory(is_staff=True, is_superuser=True)
+        request = rf.get('/whatever/')
+        request.user = user
+
+        fields = set(UserAdmin(user.__class__, {}).get_fields(request, None))
+
+        assert {'is_staff', 'is_superuser', 'groups', 'user_permissions'}.issubset(fields)
+
+    def test_get_fields_not_as_superuser(self, rf):
+        user = UserFactory(is_staff=True, is_superuser=False)
+        request = rf.get('/whatever/')
+        request.user = user
+
+        fields = set(UserAdmin(user.__class__, {}).get_fields(request, None))
+
+        assert {'is_staff', 'is_superuser', 'groups', 'user_permissions'}.isdisjoint(fields)
