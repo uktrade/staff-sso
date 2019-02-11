@@ -6,7 +6,6 @@ from unittest.mock import Mock
 from urllib.parse import parse_qs, quote, urlencode
 
 import pytest
-from django.conf import settings
 from django.urls import reverse, reverse_lazy
 from freezegun import freeze_time
 
@@ -131,8 +130,9 @@ class TestOAuthAuthorize:
             request, 403,
             oauth2_application=application.name)
 
+
 class TestSAMLLogin:
-    def test_valid_saml_login_form(self, client):
+    def test_valid_saml_login_form(self, client, settings):
         """
         Test that the saml login form includes the appropriate hidden values.
         """
@@ -538,7 +538,7 @@ class TestOAuthToken:
 
 
 class TestSAMLLogout:
-    def test_valid_saml_logout_form(self, client):
+    def test_valid_saml_logout_form(self, client, settings):
         """
         Test that the saml logout form includes the appropriate hidden values.
         """
@@ -631,9 +631,59 @@ class TestSessionLogout:
 
         assert list(client.session.keys()) == []
 
-    def test_logout_redirects_to_logged_out_url(self, client):
+    def test_logout_redirects_to_logged_out_url(self, client, settings):
         log_user_in(client)
 
         response = client.get(reverse('localauth:session-logout'))
         assert response.status_code == 302
         assert response.url == settings.LOGOUT_REDIRECT_URL
+
+
+class TestReAuth:
+    def test_login_cookie_not_set_results_in_wayf_template(self, client, settings):
+        settings.SAML_CONFIG['metadata']['local'] += [os.path.join(settings.SAML_CONFIG_DIR, 'idp_metadata_2.xml')]
+        login_url = f'{SAML_LOGIN_URL}'
+        response = client.get(login_url)
+
+        assert response.status_code == 200
+        assert response.templates[0].name == 'djangosaml2/wayf.html'
+
+    def test_login_cookie_set_to_incorrect_value_results_in_wayf_template(self, client, settings):
+        client.cookies.load({'last_login_idp': 'invalid-idp-entity-id'})
+        settings.SAML_CONFIG['metadata']['local'] += [os.path.join(settings.SAML_CONFIG_DIR, 'idp_metadata_2.xml')]
+        login_url = f'{SAML_LOGIN_URL}'
+        response = client.get(login_url)
+
+        assert response.status_code == 200
+        assert response.templates[0].name == 'djangosaml2/wayf.html'
+
+    def test_login_cookie_is_removed_at_login(self, client, settings):
+        client.cookies.load({'last_login_idp': 'http://entityid'})
+        settings.SAML_CONFIG['metadata']['local'] += [os.path.join(settings.SAML_CONFIG_DIR, 'idp_metadata_2.xml')]
+        login_url = f'{SAML_LOGIN_URL}'
+        response = client.get(login_url)
+
+        assert response.status_code == 200
+        assert response.templates[0].name == 'djangosaml2/post_binding_form.html'
+        assert response.cookies['last_login_idp'].value == ''
+
+    @freeze_time('2017-06-22 15:50:00.000000+00:00')
+    def test_acs_cookie_set_on_success(self, client, mocker):
+
+        application, authorize_params = create_oauth_application()
+
+        data = {
+            'SAMLResponse': [base64.b64encode(get_saml_response(action='login'))],
+            'RelayState': f'{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}'
+        }
+
+        MockOutstandingQueriesCache = mocker.patch('sso.samlauth.views.OutstandingQueriesCache')
+        MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
+
+        MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
+        MockCryptoBackendXmlSec1().validate_signature.return_value = True
+
+        response = client.post(SAML_ACS_URL, data)
+
+        assert response.status_code == 302
+        assert client.cookies['last_login_idp'].value == 'http://localhost:8080/simplesaml/saml2/idp/metadata.php'

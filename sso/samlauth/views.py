@@ -1,4 +1,5 @@
 import base64
+import datetime as dt
 import logging
 
 from django.conf import settings
@@ -104,18 +105,25 @@ def login(request,  # noqa: C901
     selected_idp = request.GET.get('idp', None)
     conf = get_config(config_loader_path, request)
 
+    last_login_idp = request.COOKIES.get('last_login_idp', None)
+
     # is a embedded wayf needed?
     idps = available_idps(conf)
     if selected_idp is None and len(idps) > 1:
-        logger.debug('A discovery process is needed')
+        if last_login_idp and last_login_idp in idps:
 
-        idps = sorted(idps.items(), key=lambda x: x[1])
-        return render(
-            request, wayf_template, {
-                'available_idps': idps,
-                'came_from': came_from,
-            }
-        )
+            logger.debug('Re-authenticating against: %s', last_login_idp)
+            selected_idp = last_login_idp
+
+        else:
+            logger.debug('A discovery process is needed')
+            idps = sorted(idps.items(), key=lambda x: x[1])
+            return render(
+                request, wayf_template, {
+                    'available_idps': idps,
+                    'came_from': came_from,
+                }
+            )
 
     # choose a binding to try first
     sign_requests = getattr(conf, '_sp_authn_requests_signed', False)
@@ -195,6 +203,11 @@ def login(request,  # noqa: C901
     logger.debug('Saving the session_id in the OutstandingQueries cache')
     oq_cache = OutstandingQueriesCache(request.session)
     oq_cache.set(session_id, came_from)
+
+    # Remove the last logged in cookie:
+    # this will be set again at the end of the ACS call, if the user successfully authenticates.
+    http_response.delete_cookie('last_login_idp')
+
     return http_response
 
 
@@ -294,8 +307,13 @@ def assertion_consumer_service(request,
     if not is_safe_url_compat(url=relay_state, allowed_hosts={request.get_host()}):
         relay_state = settings.LOGIN_REDIRECT_URL
     logger.debug('Redirecting to the RelayState: %s', relay_state)
-    return HttpResponseRedirect(relay_state)
 
+    http_response = HttpResponseRedirect(relay_state)
+
+    # remember the idp the user authenticated against
+    http_response.set_cookie('last_login_idp', session_info['issuer'], expires=dt.datetime.today()+dt.timedelta(days=7))
+
+    return http_response
 
 
 @login_required
