@@ -73,7 +73,7 @@ def login(request,  # noqa: C901
         came_from = settings.LOGIN_REDIRECT_URL
 
     # Ensure the user-originating redirection url is safe.
-    if not is_safe_url(url=came_from, host=request.get_host()):
+    if not is_safe_url(url=came_from, allowed_hosts=settings.ALLOWED_HOSTS):
         came_from = settings.LOGIN_REDIRECT_URL
 
     # if the user is already authenticated that maybe because of two reasons:
