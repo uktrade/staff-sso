@@ -296,7 +296,14 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console'],
-        'level': 'WARN'
+        'level': 'WARN',
+    },
+    'loggers': {
+        'x-auth': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
     }
 }
 

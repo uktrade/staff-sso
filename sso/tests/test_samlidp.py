@@ -102,6 +102,35 @@ class TestModelProcessor:
 
         assert processor.has_access(request)
 
+    def test_x_application_logging(self, rf, mocker):
+        saml_app = SamlApplicationFactory(entity_id='an_entity_id')
+        ap = AccessProfileFactory(saml_apps_list=[saml_app])
+
+        processor = ModelProcessor('an_entity_id')
+
+        request = rf.get('/whatever/')
+        request.user = UserFactory(add_access_profiles=[ap])
+
+        mock_create_x_access_log = mocker.patch('sso.samlidp.processors.create_x_access_log')
+
+        processor.has_access(request)
+
+        mock_create_x_access_log.assert_called_once_with(request, 200, application=saml_app.name)
+
+    def test_x_application_logging_without_access(self, rf, mocker):
+        saml_app = SamlApplicationFactory(entity_id='an_entity_id')
+
+        processor = ModelProcessor('an_entity_id')
+
+        request = rf.get('/whatever/')
+        request.user = UserFactory()
+
+        mock_create_x_access_log = mocker.patch('sso.samlidp.processors.create_x_access_log')
+
+        processor.has_access(request)
+
+        mock_create_x_access_log.assert_called_once_with(request, 403, application=saml_app.name)
+
 
 class TestAWSProcessor:
     def test_create_identity_role_is_provided(self, settings):
