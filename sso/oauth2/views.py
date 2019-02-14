@@ -126,7 +126,5 @@ class CustomIntrospectTokenView(IntrospectTokenView):
         if token.user:
             result['username'] = token.user.get_application_username(token.application)
             result['user_id'] = str(token.user.user_id)
-            result['permitted_applications'] = token.user.get_permitted_applications()
-            result['access_profiles'] = [profile.slug for profile in token.user.access_profiles.all()]
 
         return HttpResponse(content=json.dumps(result), status=200, content_type='application/json')
