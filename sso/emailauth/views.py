@@ -1,3 +1,6 @@
+import datetime as dt
+
+from django.conf import settings
 from django.contrib.auth import login
 from django.shortcuts import redirect, render
 from django.views.generic import View
@@ -32,7 +35,26 @@ class EmailTokenView(FormView):
 
         form.send_signin_email(self.request)
 
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        response.set_cookie('sso_auth_email', form.email, expires=dt.datetime.today()+dt.timedelta(days=30))
+
+        return response
+
+    def get_initial(self):
+
+        initial = super().get_initial()
+
+        email = self.request.COOKIES.get('sso_auth_email', None)
+
+        if email:
+            username, domain = email.split('@')
+            domain = '@' + domain
+
+            if domain in settings.EMAIL_TOKEN_DOMAIN_WHITELIST:
+                initial['username'] = username
+                initial['domain'] = domain
+
+        return initial
 
 
 class EmailAuthView(View):
