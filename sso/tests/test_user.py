@@ -152,17 +152,6 @@ class TestUserManager:
 
 
 class TestUser:
-    def test_is_staff_as_is_superuser(self):
-        """
-        Test that `is_staff` follows `is_superuser`.
-        """
-        user = User(email=EMAIL)
-
-        user.is_superuser = True
-        assert user.is_staff
-
-        user.is_superuser = False
-        assert not user.is_staff
 
     def test_get_full_name_with_first_last_name(self):
         """

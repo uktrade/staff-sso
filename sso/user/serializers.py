@@ -28,6 +28,8 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name': obj.last_name,
             'related_emails': related_emails,
             'groups': [],
+            'permitted_applications': obj.get_permitted_applications(),
+            'access_profiles': [profile.slug for profile in obj.access_profiles.all()]
         }
 
 

@@ -316,6 +316,106 @@ def assertion_consumer_service(request,
     return http_response
 
 
+@require_POST
+@csrf_exempt
+def assertion_consumer_service(request,
+                               config_loader_path=None,
+                               attribute_mapping=None,
+                               create_unknown_user=None):
+    """SAML Authorization Response endpoint
+
+    The IdP will send its response to this view, which
+    will process it with pysaml2 help and log the user
+    in using the custom Authorization backend
+    djangosaml2.backends.Saml2Backend that should be
+    enabled in the settings.py
+    """
+    attribute_mapping = attribute_mapping or get_custom_setting('SAML_ATTRIBUTE_MAPPING', {'uid': ('username', )})
+    create_unknown_user = create_unknown_user if create_unknown_user is not None else \
+                          get_custom_setting('SAML_CREATE_UNKNOWN_USER', True)
+    conf = get_config(config_loader_path, request)
+    try:
+        xmlstr = request.POST['SAMLResponse']
+    except KeyError:
+        logger.warning('Missing "SAMLResponse" parameter in POST data.')
+        raise SuspiciousOperation
+
+    client = Saml2Client(conf, identity_cache=IdentityCache(request.session))
+
+    oq_cache = OutstandingQueriesCache(request.session)
+    outstanding_queries = oq_cache.outstanding_queries()
+
+    try:
+        response = client.parse_authn_request_response(xmlstr, BINDING_HTTP_POST, outstanding_queries)
+    except (StatusError, ToEarly):
+        logger.exception("Error processing SAML Assertion.")
+        return fail_acs_response(request)
+    except ResponseLifetimeExceed:
+        logger.info("SAML Assertion is no longer valid. Possibly caused by network delay or replay attack.", exc_info=True)
+        return fail_acs_response(request)
+    except SignatureError:
+        logger.info("Invalid or malformed SAML Assertion.", exc_info=True)
+        return fail_acs_response(request)
+    except StatusAuthnFailed:
+        logger.info("Authentication denied for user by IdP.", exc_info=True)
+        return fail_acs_response(request)
+    except StatusRequestDenied:
+        logger.warning("Authentication interrupted at IdP.", exc_info=True)
+        return fail_acs_response(request)
+    except MissingKey:
+        logger.exception("SAML Identity Provider is not configured correctly: certificate key is missing!")
+        return fail_acs_response(request)
+    except UnsolicitedResponse:
+        logger.exception("Received SAMLResponse when no request has been made.")
+        return fail_acs_response(request)
+
+    if response is None:
+        logger.warning("Invalid SAML Assertion received (unknown error).")
+        return fail_acs_response(request, status=400, exc_class=SuspiciousOperation)
+
+    session_id = response.session_id()
+    oq_cache.delete(session_id)
+
+    # authenticate the remote user
+    session_info = response.session_info()
+
+    if callable(attribute_mapping):
+        attribute_mapping = attribute_mapping()
+    if callable(create_unknown_user):
+        create_unknown_user = create_unknown_user()
+
+    logger.debug('Trying to authenticate the user. Session info: %s', session_info)
+    user = auth.authenticate(request=request,
+                             session_info=session_info,
+                             attribute_mapping=attribute_mapping,
+                             create_unknown_user=create_unknown_user)
+    if user is None:
+        logger.warning("Could not authenticate user received in SAML Assertion. Session info: %s", session_info)
+        raise PermissionDenied
+
+    auth.login(request, user)
+    _set_subject_id(request.session, session_info['name_id'])
+    logger.debug("User %s authenticated via SSO.", user)
+
+    create_x_access_log(request, 200, message='Remote IdP Auth', entity_id=session_info['issuer'])
+
+    logger.debug('Sending the post_authenticated signal')
+    post_authenticated.send_robust(sender=user, session_info=session_info)
+
+    # redirect the user to the view where he came from
+    default_relay_state = get_custom_setting('ACS_DEFAULT_REDIRECT_URL',
+                                             settings.LOGIN_REDIRECT_URL)
+    relay_state = request.POST.get('RelayState', default_relay_state)
+    if not relay_state:
+        logger.warning('The RelayState parameter exists but is empty')
+        relay_state = default_relay_state
+    if not is_safe_url_compat(url=relay_state, allowed_hosts={request.get_host()}):
+        relay_state = settings.LOGIN_REDIRECT_URL
+    logger.debug('Redirecting to the RelayState: %s', relay_state)
+    return HttpResponseRedirect(relay_state)
+
+
+
 @login_required
 def logged_in(request):
     """

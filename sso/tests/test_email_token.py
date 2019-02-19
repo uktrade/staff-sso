@@ -261,3 +261,36 @@ class TestEmailAuthView:
         client.post(url)
 
         assert '_auth_user_id' in client.session
+
+    def test_email_saved_in_cookie(self, client):
+
+        form_data = {
+            'username': 'john.smith',
+            'domain': '@digital.trade.gov.uk',
+        }
+
+        client.post(reverse('emailauth:email-auth-initiate'), form_data)
+
+        assert client.cookies['sso_auth_email'].value == 'john.smith@digital.trade.gov.uk'
+
+    def test_email_is_remembered(self, client):
+
+        client.cookies['sso_auth_email'] = 'john.smith@digital.trade.gov.uk'
+
+        response = client.get(reverse('emailauth:email-auth-initiate'))
+
+        content = response.content.decode('utf-8')
+
+        assert '<option value="@digital.trade.gov.uk" selected>' in content
+        assert '<input type="text" name="username" value="john.smith"' in content
+
+    def test_invalid_email_is_ignored(self, client):
+
+        client.cookies['sso_auth_email'] = 'richard.jones@invalid-not-in-whitelist.gov.uk'
+
+        response = client.get(reverse('emailauth:email-auth-initiate'))
+
+        content = response.content.decode('utf-8')
+
+        assert 'richard.jones' not in content
+        assert '@invalid-not-in-whitelist.gov.uk' not in content
