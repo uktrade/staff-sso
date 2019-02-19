@@ -18,7 +18,7 @@ logger = logging.getLogger('djangosaml2')
 
 class MultiEmailSaml2Backend(Saml2Backend):
 
-    def authenticate(self, session_info=None, attribute_mapping=None,
+    def authenticate(self, request, session_info=None, attribute_mapping=None,
                      create_unknown_user=True, **kwargs):
 
         if session_info is None or attribute_mapping is None:
