@@ -350,6 +350,7 @@ EMAIL_FROM = env('EMAIL_FROM', default='test@example.com')
 # session settings
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_AGE = 24 * 60 * 60
+SESSION_COOKIE_SAMESITE = None
 
 # google analytics
 GOOGLE_ANALYTICS_CODE = env('GOOGLE_ANALYTICS_CODE', default=None)
