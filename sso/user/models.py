@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
@@ -226,11 +227,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_permitted_applications(self):
         """Return a list of applications that this user has access to"""
 
+        apps = OAuthApplication.objects.filter(
+            Q(users__in=[self]) | Q(access_profiles__users__in=[self])).distinct()
+
         return [{
                     'key': app.application_key,
                     'url': app.start_url,
                     'name': app.display_name
-                } for app in self.permitted_applications.all()]
+                } for app in apps]
 
 
 class EmailAddress(models.Model):
