@@ -559,7 +559,8 @@ class TestAccessProfile:
 
     @pytest.mark.django_db
     def test_user_get_permitted_applications(self):
-        user = UserFactory(email='goblin@example.com')
+        ap = AccessProfile.objects.create()
+        user = UserFactory(email='goblin@example.com', add_access_profiles=[ap])
 
         app1 = ApplicationFactory(
             application_key='app-1',
@@ -571,9 +572,19 @@ class TestAccessProfile:
             display_name='Appplication 2',
             start_url='https://application2.com',
             users=[user])
+        app3 = ApplicationFactory(
+            application_key='app-3',
+            display_name='Appplication 3',
+            start_url='https://application3.com',
+            users=[user])
 
-        assert len(user.get_permitted_applications()) == 2
-        assert user.get_permitted_applications() == [
+        ap.oauth2_applications.add(app1)
+        ap.oauth2_applications.add(app3)
+
+        permitted_applications = user.get_permitted_applications()
+
+        assert len(permitted_applications) == 3
+        assert sorted(permitted_applications, key=lambda x: x['key']) == [
             {
                 'key': app1.application_key,
                 'url': app1.start_url,
@@ -583,5 +594,10 @@ class TestAccessProfile:
                 'key': app2.application_key,
                 'url': app2.start_url,
                 'name': app2.display_name
+            },
+            {
+                'key': app3.application_key,
+                'url': app3.start_url,
+                'name': app3.display_name
             }
         ]
