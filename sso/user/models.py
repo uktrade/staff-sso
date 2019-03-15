@@ -227,8 +227,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_permitted_applications(self):
         """Return a list of applications that this user has access to"""
 
-        apps = OAuthApplication.objects.filter(
-            Q(users__in=[self]) | Q(access_profiles__users__in=[self])).distinct()
+        apps = set(self.permitted_applications.all())
+
+        for ap in self.access_profiles.all():
+            apps.update(set(ap.oauth2_applications.all()))
 
         return [{
                     'key': app.application_key,
