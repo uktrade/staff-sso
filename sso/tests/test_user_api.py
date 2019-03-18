@@ -231,7 +231,26 @@ class TestApiUserIntrospect:
             'access_profiles': []
         }
 
-    def test_requires_email(self, api_client):
+    def test_with_user_id(self, api_client):
+        user, token = get_oauth_token(scope='introspection')
+
+        app = ApplicationFactory(users=[user])
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.get(self.GET_USER_INTROSPECT_URL + '?user_id={}'.format(str(user.user_id)))
+
+        assert response.status_code == 200
+        assert response.json() == {
+            'email': 'user1@example.com',
+            'user_id': str(user.user_id),
+            'first_name': 'John',
+            'last_name': 'Doe',
+            'related_emails': [],
+            'groups': [],
+            'permitted_applications': [{'key': app.application_key, 'name': app.display_name, 'url': app.start_url}],
+            'access_profiles': []
+        }
+
+    def test_requires_email_or_user_id(self, api_client):
         user, token = get_oauth_token(scope='introspection')
 
         api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
