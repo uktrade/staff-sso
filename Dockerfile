@@ -1,14 +1,23 @@
-FROM python:3.6-slim
+FROM python:3.6
 
 MAINTAINER tools@digital.trade.gov.uk
 
-RUN apt-get update && apt-get install -qq build-essential libpq-dev python3-dev libffi-dev libssl-dev xmlsec1
+RUN apt-get update && apt-get install -qq build-essential \
+                                          libpq-dev \
+                                          python3-dev \
+                                          libffi-dev \
+                                          libssl-dev \
+                                          xmlsec1 \
+                                          git \
+                                          postgresql-client
 
 WORKDIR /app
-ADD requirements*.txt /app/
-ADD requirements*.in /app/
 
-RUN pip install -U pip pip-tools && pip-sync requirements.txt requirements-dev.txt && pip install honcho
-ADD . /app
+COPY . /app
+
+RUN pip install -r /app/requirements-dev.txt
+
+RUN pip install honcho
+
 CMD honcho start
 

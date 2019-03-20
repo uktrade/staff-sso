@@ -14,27 +14,30 @@ services:
     volumes:
      - staffsso-data:/var/lib/postgresql/data
     ports:
-     - 2002:5432
+     - 5432:5432
   idp:
     build: ./extras/saml-idp-test/
     ports:
-     - 8080:80
-     - 8443:443
+     - 8080:8080
+     - 443:443
     environment:
      - SIMPLESAMLPHP_SP_ENTITY_ID=https://sso.staff.service.trade.gov.uk/sp
      - SIMPLESAMLPHP_SECRET_SALT=secret-salt
 
   web:
+    build: .
+    stdin_open: true
+    tty: true
     env_file:
       - .env
     environment:
+      - PYTHONUNBUFFERED=0
       - PORT=8000
-    build: .
+    volumes:
+      - .:/app
     ports:
-     - 2000:8000
+      - 8000:8000
     depends_on:
-     - db
-     - idp
-    command: python3 manage.py runserver 0.0.0.0:8000
-
-
+      - db
+      - idp
+    command: python3 /app/manage.py runserver 0.0.0.0:8000
