@@ -35,11 +35,11 @@ services:
     environment:
       - PYTHONUNBUFFERED=0
       - PORT=8000
-    volumes:
-      - .:/app
     ports:
       - 8000:8000
     depends_on:
       - db
       - idp
-    command: python3 /app/manage.py runserver 0.0.0.0:8000
+    command: >
+      bash -c "python3 manage.py migrate 
+      && python3 manage.py runserver 0.0.0.0:8000"

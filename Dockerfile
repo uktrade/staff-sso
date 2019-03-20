@@ -1,7 +1,5 @@
 FROM python:3.6
-
 MAINTAINER tools@digital.trade.gov.uk
-
 RUN apt-get update && apt-get install -qq build-essential \
                                           libpq-dev \
                                           python3-dev \
@@ -10,14 +8,9 @@ RUN apt-get update && apt-get install -qq build-essential \
                                           xmlsec1 \
                                           git \
                                           postgresql-client
-
 WORKDIR /app
-
-COPY . /app
-
-RUN pip install -r /app/requirements-dev.txt
-
+COPY requirements-dev.txt .
+RUN pip install -r requirements-dev.txt
 RUN pip install honcho
-
+COPY . .
 CMD honcho start
-
