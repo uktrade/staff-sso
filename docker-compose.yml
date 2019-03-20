@@ -11,6 +11,8 @@ services:
     restart: always
     environment:
       - POSTGRESS_PASSWORD=does-it-really-matter
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=staff-sso
     volumes:
      - staffsso-data:/var/lib/postgresql/data
     ports:
