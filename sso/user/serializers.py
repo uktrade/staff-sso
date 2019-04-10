@@ -33,5 +33,13 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
 
-class EmailParamSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+class UserParamSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=False, default=None)
+    user_id = serializers.UUIDField(required=False, default=None)
+
+    def validate(self, data):
+        if not data['email'] and not data['user_id']:
+            raise serializers.ValidationError('Either an email or a user_id is required')
+
+        return data
+
