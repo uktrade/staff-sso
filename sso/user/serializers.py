@@ -28,8 +28,18 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name': obj.last_name,
             'related_emails': related_emails,
             'groups': [],
+            'permitted_applications': obj.get_permitted_applications(),
+            'access_profiles': [profile.slug for profile in obj.access_profiles.all()]
         }
 
 
-class EmailParamSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+class UserParamSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=False, default=None)
+    user_id = serializers.UUIDField(required=False, default=None)
+
+    def validate(self, data):
+        if not data['email'] and not data['user_id']:
+            raise serializers.ValidationError('Either an email or a user_id is required')
+
+        return data
+

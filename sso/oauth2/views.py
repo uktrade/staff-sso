@@ -14,6 +14,8 @@ from oauth2_provider.views.base import AuthorizationView
 from oauth2_provider.views.introspect import IntrospectTokenView
 from oauthlib.oauth2.rfc6749.errors import AccessDeniedError
 
+from sso.core.logging import create_x_access_log
+
 log = logging.getLogger('oauth2_provider')
 
 
@@ -24,6 +26,7 @@ class CustomAuthorizationView(AuthorizationView):
         Overridden django-oauth-toolkit authorization view which checks that authenticated users are in the correct
         group to access the resource.
         """
+
         try:
             scopes, credentials = self.validate_authorization_request(request)
         except OAuthToolkitError as error:
@@ -67,9 +70,14 @@ class CustomAuthorizationView(AuthorizationView):
                 request=self.request, scopes=' '.join(scopes),
                 credentials=credentials, allow=allow)
 
+            create_x_access_log(request, 200, oauth2_application=application.name)
+
             return redirect(uri)
         except OAuthToolkitError as error:
             if isinstance(error.oauthlib_error, AccessDeniedError):
+
+                create_x_access_log(request, 403, oauth2_application=application.name)
+
                 return redirect('contact:access-denied')
             else:
                 return self.error_response(error, application)
@@ -126,7 +134,5 @@ class CustomIntrospectTokenView(IntrospectTokenView):
         if token.user:
             result['username'] = token.user.get_application_username(token.application)
             result['user_id'] = str(token.user.user_id)
-            result['permitted_applications'] = token.user.get_permitted_applications()
-            result['access_profiles'] = [profile.slug for profile in token.user.access_profiles.all()]
 
         return HttpResponse(content=json.dumps(result), status=200, content_type='application/json')

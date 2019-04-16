@@ -7,6 +7,7 @@ from djangosaml2idp.processors import BaseProcessor
 
 from .models import SamlApplication
 from sso.user.models import EmailAddress
+from sso.core.logging import create_x_access_log
 
 
 logger = logging.getLogger(__name__)
@@ -34,8 +35,17 @@ class ModelProcessor(BaseProcessor):
         self._application = SamlApplication.objects.get(entity_id=entity_id)
 
     def has_access(self, request):
-        return request.user.can_access(self._application) and \
-               self._application.enabled and self._application.is_valid_ip(request)
+
+        access = request.user.can_access(self._application) and \
+                 self._application.enabled and self._application.is_valid_ip(request)
+
+        create_x_access_log(
+            request,
+            200 if access else 403,
+            application=self._application.name
+        )
+
+        return access
 
 
 class AWSProcessor(ModelProcessor):

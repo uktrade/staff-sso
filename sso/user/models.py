@@ -81,6 +81,11 @@ class User(AbstractBaseUser, PermissionsMixin):
             'Designates that this user can log into the admin area and assign users to groups.'
         ),
     )
+    is_staff = models.BooleanField(
+        _('staff status'),
+        default=False,
+        help_text=_('Designates whether the user can log into this admin site.'),
+    )
     permitted_applications = models.ManyToManyField(
         settings.OAUTH2_PROVIDER_APPLICATION_MODEL,
         related_name='users',
@@ -105,10 +110,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
-
-    @property
-    def is_staff(self):
-        return self.is_superuser
 
     def save(self, *args, **kwargs):
         """
@@ -225,11 +226,16 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_permitted_applications(self):
         """Return a list of applications that this user has access to"""
 
+        apps = set(self.permitted_applications.all())
+
+        for ap in self.access_profiles.all():
+            apps.update(set(ap.oauth2_applications.all()))
+
         return [{
                     'key': app.application_key,
                     'url': app.start_url,
                     'name': app.display_name
-                } for app in self.permitted_applications.all()]
+                } for app in apps]
 
 
 class EmailAddress(models.Model):

@@ -7,7 +7,7 @@ from django.utils import timezone
 from sso.oauth2.models import Application
 
 from .factories.oauth import AccessTokenFactory, ApplicationFactory
-from .factories.user import GroupFactory, UserFactory
+from .factories.user import GroupFactory, UserFactory, AccessProfileFactory
 
 pytestmark = [
     pytest.mark.django_db
@@ -56,7 +56,9 @@ class TestAPIGetUserMe:
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': [],
-            'groups': []
+            'groups': [],
+            'permitted_applications': [],
+            'access_profiles': []
         }
 
     def test_fails_with_invalid_token(self, api_client):
@@ -157,7 +159,9 @@ class TestApiUserIntrospect:
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': [],
-            'groups': []
+            'groups': [],
+            'permitted_applications': [],
+            'access_profiles': []
         }
 
     def test_with_valid_token_and_email_alias(self, api_client):
@@ -176,10 +180,77 @@ class TestApiUserIntrospect:
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': ['test@bbb.com', 'test@aaa.com'],
-            'groups': []
+            'groups': [],
+            'permitted_applications': [],
+            'access_profiles': []
         }
 
-    def test_requires_email(self, api_client):
+    def test_with_valid_token_and_access_profile(self, api_client):
+        ap = AccessProfileFactory()
+        user, token = get_oauth_token(scope='introspection')
+        user.access_profiles.add(ap)
+
+        user.emails.create(email='test@aaa.com')
+        user.emails.create(email='test@bbb.com')
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.get(self.GET_USER_INTROSPECT_URL + '?email=test@aaa.com')
+
+        assert response.status_code == 200
+        assert response.json() == {
+            'email': 'user1@example.com',
+            'user_id': str(user.user_id),
+            'first_name': 'John',
+            'last_name': 'Doe',
+            'related_emails': ['test@bbb.com', 'test@aaa.com'],
+            'groups': [],
+            'permitted_applications': [],
+            'access_profiles': [ap.slug]
+        }
+
+    def test_with_valid_token_and_permitted_applications(self, api_client):
+        user, token = get_oauth_token(scope='introspection')
+
+        app = ApplicationFactory(users=[user])
+
+        user.emails.create(email='test@aaa.com')
+        user.emails.create(email='test@bbb.com')
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.get(self.GET_USER_INTROSPECT_URL + '?email=test@aaa.com')
+
+        assert response.status_code == 200
+        assert response.json() == {
+            'email': 'user1@example.com',
+            'user_id': str(user.user_id),
+            'first_name': 'John',
+            'last_name': 'Doe',
+            'related_emails': ['test@bbb.com', 'test@aaa.com'],
+            'groups': [],
+            'permitted_applications': [{'key': app.application_key, 'name': app.display_name, 'url': app.start_url}],
+            'access_profiles': []
+        }
+
+    def test_with_user_id(self, api_client):
+        user, token = get_oauth_token(scope='introspection')
+
+        app = ApplicationFactory(users=[user])
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.get(self.GET_USER_INTROSPECT_URL + '?user_id={}'.format(str(user.user_id)))
+
+        assert response.status_code == 200
+        assert response.json() == {
+            'email': 'user1@example.com',
+            'user_id': str(user.user_id),
+            'first_name': 'John',
+            'last_name': 'Doe',
+            'related_emails': [],
+            'groups': [],
+            'permitted_applications': [{'key': app.application_key, 'name': app.display_name, 'url': app.start_url}],
+            'access_profiles': []
+        }
+
+    def test_requires_email_or_user_id(self, api_client):
         user, token = get_oauth_token(scope='introspection')
 
         api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
