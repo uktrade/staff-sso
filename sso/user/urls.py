@@ -6,7 +6,8 @@ urlpatterns = [
     url(
         r'^me/$',
         UserRetrieveViewSet.as_view({
-            'get': 'retrieve'
+            'get': 'retrieve',
+            'patch': 'partial_update',
         }),
         name='me'
     ),

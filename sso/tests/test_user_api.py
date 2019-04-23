@@ -142,6 +142,95 @@ class TestAPIGetUserMe:
 
         assert set(data['related_emails']) == set(emails)
 
+    def test_patch_user_details(self, api_client):
+        """Test email first_name and last_name keys are updated correctly on a patch request"""
+        email = 'test@qqq.com'
+
+        user = UserFactory(email=email)
+
+        _, token = get_oauth_token(user=user)
+
+        assert Application.objects.count() == 1
+
+        app = Application.objects.first()
+        app.provide_immutable_email = True
+        app.save()
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.patch(self.GET_USER_ME_URL, {
+            'first_name': 'Jane',
+            'last_name': 'Dough',
+            'contact_email': 'jd@test.qqq'
+        }, format='json')
+
+        assert response.status_code == 202
+
+    def test_patch_user_first_name(self, api_client):
+        """Test first_name is updated correctly on a patch request"""
+        email = 'test@qqq.com'
+
+        user = UserFactory(email=email)
+
+        _, token = get_oauth_token(user=user)
+
+        assert Application.objects.count() == 1
+
+        app = Application.objects.first()
+        app.provide_immutable_email = True
+        app.save()
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.patch(self.GET_USER_ME_URL, {
+            'first_name': 'Jane',
+        }, format='json')
+
+        assert response.status_code == 202
+
+    def test_patch_user_with_valid_email(self, api_client):
+        """Test email is updated correctly on a patch request"""
+        email = 'test@qqq.com'
+
+        user = UserFactory(email=email)
+
+        _, token = get_oauth_token(user=user)
+
+        assert Application.objects.count() == 1
+
+        app = Application.objects.first()
+        app.provide_immutable_email = True
+        app.save()
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.patch(self.GET_USER_ME_URL, {
+            'contact_email': 'jd@test.qqq',
+        }, format='json')
+
+        assert response.status_code == 202
+
+    def test_patch_user_with_invalid_contact_email(self, api_client):
+        """Test invalid email is handled correctly on a patch request"""
+        email = 'test@qqq.com'
+
+        user = UserFactory(email=email)
+
+        _, token = get_oauth_token(user=user)
+
+        assert Application.objects.count() == 1
+
+        app = Application.objects.first()
+        app.provide_immutable_email = True
+        app.save()
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.patch(self.GET_USER_ME_URL, {
+            'contact_email': 'not_an_email',
+        }, format='json')
+
+        assert response.status_code == 400
+
+        data = response.json()
+        assert data['contact_email'] == ['Enter a valid email address.']
+
 
 class TestApiUserIntrospect:
     GET_USER_INTROSPECT_URL = reverse_lazy('api-v1:user:user-introspect')
