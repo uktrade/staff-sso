@@ -1,12 +1,8 @@
 from django.contrib.auth import get_user_model
-from django.views.generic.base import View
-from django.shortcuts import get_object_or_404, render
-from django.http import HttpResponse, Http404
 
 from oauth2_provider.contrib.rest_framework import TokenHasScope
 from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.response import Response
-from rest_framework import generics
 
 from .serializers import UserSerializer, UserParamSerializer, UserDetailsSerializer
 from .models import User
@@ -25,27 +21,19 @@ class UserRetrieveViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         if serializer.is_valid(raise_exception=True):
             try:
                 self.update_details(serializer.data)
-            except RuntimeError as re:
-                raise Http404(re)
+            except User.DoesNotExist:
+                return Response(status=status.HTTP_404_NOT_FOUND)
 
         return Response(status=status.HTTP_202_ACCEPTED)
 
     def update_details(self, data):
         my_user_id = self.request.user.user_id
-        first_name = data['first_name']
-        last_name = data['last_name']
-        contact_email = data['contact_email']
 
         user = User.objects.get(user_id=my_user_id)
 
-        if contact_email:
-            user.contact_email = contact_email
-
-        if first_name:
-            user.first_name = first_name
-
-        if last_name:
-            user.last_name = last_name
+        for field, value in data.items():
+            if value:
+                setattr(user, field, value)
 
         user.save()
 
@@ -75,5 +63,3 @@ class UserIntrospectViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 
         serializer = UserSerializer(selected_user, context=dict(request=request))
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-

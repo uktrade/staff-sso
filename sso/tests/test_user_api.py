@@ -143,7 +143,7 @@ class TestAPIGetUserMe:
         assert set(data['related_emails']) == set(emails)
 
     def test_patch_user_details(self, api_client):
-        """Test email first_name and last_name keys are updated correctly on a patch request"""
+        """Test contact_email first_name and last_name keys are updated correctly on a patch request"""
         email = 'test@qqq.com'
 
         user = UserFactory(email=email)
@@ -186,8 +186,8 @@ class TestAPIGetUserMe:
 
         assert response.status_code == 202
 
-    def test_patch_user_with_valid_email(self, api_client):
-        """Test email is updated correctly on a patch request"""
+    def test_patch_user_with_valid_contact_email(self, api_client):
+        """Test contact_email is updated correctly on a patch request"""
         email = 'test@qqq.com'
 
         user = UserFactory(email=email)
@@ -208,7 +208,7 @@ class TestAPIGetUserMe:
         assert response.status_code == 202
 
     def test_patch_user_with_invalid_contact_email(self, api_client):
-        """Test invalid email is handled correctly on a patch request"""
+        """Test invalid contact_email is handled correctly on a patch request"""
         email = 'test@qqq.com'
 
         user = UserFactory(email=email)
