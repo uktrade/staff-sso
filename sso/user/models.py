@@ -101,6 +101,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=True,
     )
 
+    contact_email = models.EmailField(
+        max_length=254, blank=True
+    )
+
     last_accessed = models.DateTimeField(blank=True, null=True)
 
     objects = UserManager()

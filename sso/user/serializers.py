@@ -43,3 +43,15 @@ class UserParamSerializer(serializers.Serializer):
 
         return data
 
+
+class UserDetailsSerializer(serializers.Serializer):
+    contact_email = serializers.EmailField(required=False, default=None)
+    first_name = serializers.CharField(required=False, default=None)
+    last_name = serializers.CharField(required=False, default=None)
+
+    def validate(self, data):
+        if not data['contact_email'] and not data['first_name'] and not data['last_name']:
+            raise serializers.ValidationError('Either a contact_email, first_name or last_name is required')
+
+        return data
+

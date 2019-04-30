@@ -1,9 +1,11 @@
 from django.contrib.auth import get_user_model
+
 from oauth2_provider.contrib.rest_framework import TokenHasScope
 from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.response import Response
 
-from .serializers import UserSerializer, UserParamSerializer
+from .serializers import UserSerializer, UserParamSerializer, UserDetailsSerializer
+from .models import User
 
 
 class UserRetrieveViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -12,6 +14,28 @@ class UserRetrieveViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 
     def get_object(self):
         return self.request.user
+
+    def partial_update(self, request):
+        serializer = UserDetailsSerializer(data=request.data)
+
+        if serializer.is_valid(raise_exception=True):
+            try:
+                self.update_details(serializer.data)
+            except User.DoesNotExist:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+    def update_details(self, data):
+        my_user_id = self.request.user.user_id
+
+        user = User.objects.get(user_id=my_user_id)
+
+        for field, value in data.items():
+            if value:
+                setattr(user, field, value)
+
+        user.save()
 
 
 class UserIntrospectViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
