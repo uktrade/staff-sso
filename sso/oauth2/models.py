@@ -60,6 +60,14 @@ class Application(AbstractApplication):
         )
     )
 
+    can_view_all_user_settings = models.BooleanField(
+        _('allow access to all user settings'),
+        default=False,
+        help_text=_(
+            'Allow for this application authenticated users to access all their user-settings'
+        )
+    )
+
     allow_tokens_from = models.ManyToManyField('self', blank=True, symmetrical=False)
 
     def save(self, *args, **kwargs):

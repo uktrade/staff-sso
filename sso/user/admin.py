@@ -3,11 +3,13 @@ from django.contrib import admin
 from django.forms import ModelForm
 from django.forms.widgets import CheckboxSelectMultiple
 from django.urls import reverse
+from django.utils.html import format_html_join, format_html, escape
 from django.utils.safestring import mark_safe
 
 from oauth2_provider.admin import ApplicationAdmin as OAuth2ApplicationAdmin
 
 from sso.oauth2.models import Application
+from sso.usersettings.models import UserSettings
 from .filter import ApplicationFilter
 from .models import AccessProfile, EmailAddress, User
 
@@ -34,11 +36,16 @@ class EmailInline(admin.TabularInline):
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
+    class Media:
+        css = {
+            'all': ('/static/stylesheets/admin.css',)
+        }
+
     search_fields = ('emails__email', 'email', 'first_name', 'last_name')
     list_filter = (ApplicationFilter, 'is_superuser')
     fields = ('user_id', 'email', 'first_name', 'last_name', 'date_joined', 'last_login', 'last_accessed',
-              'access_profiles', 'permitted_applications')
-    readonly_fields = ('date_joined', 'last_login', 'last_accessed', 'user_id')
+              'access_profiles', 'permitted_applications', 'list_user_settings_wrapper')
+    readonly_fields = ('date_joined', 'last_login', 'last_accessed', 'user_id', 'list_user_settings_wrapper')
     list_display = ('email', 'email_list', 'is_superuser', 'last_login', 'last_accessed',
                     'list_permitted_applications', 'list_access_profiles', 'show_permissions_link')
     inlines = [
@@ -75,6 +82,17 @@ class UserAdmin(admin.ModelAdmin):
         ))
 
     show_permissions_link.short_description = ' '
+
+    def list_user_settings(self, obj):
+        return '<br>'.join(obj.usersettings_set.all().values_list('settings', flat=True))
+
+    def list_user_settings_wrapper(self, obj):
+        return format_html(
+            '<div class="admin__readonly-wrapper--scroll">{}</div>',
+            mark_safe(self.list_user_settings(obj))
+        )
+
+    list_user_settings_wrapper.short_description = 'User Settings'
 
 
 class ApplicationForm(forms.ModelForm):

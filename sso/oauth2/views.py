@@ -92,7 +92,7 @@ class CustomIntrospectTokenView(IntrospectTokenView):
             content_type='application/json'
         )
 
-    def get_introspecting_application(self):
+    def get_introspecting_application(self):   #TODO(jf): get application from here
         token = self.request.META['HTTP_AUTHORIZATION'][7:]
 
         return get_access_token_model().objects.get(token=token).application

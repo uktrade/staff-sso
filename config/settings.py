@@ -50,6 +50,7 @@ INSTALLED_APPS = [
 
     'sso.core',
     'sso.user',
+    'sso.usersettings',
     'sso.samlauth',
     'sso.samlidp',
     'sso.localauth',
