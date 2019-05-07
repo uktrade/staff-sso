@@ -163,7 +163,7 @@ class TestAPIGetUserMe:
             'contact_email': 'jd@test.qqq'
         }, format='json')
 
-        assert response.status_code == 202
+        assert response.status_code == 200
 
     def test_patch_user_first_name(self, api_client):
         """Test first_name is updated correctly on a patch request"""
@@ -184,7 +184,7 @@ class TestAPIGetUserMe:
             'first_name': 'Jane',
         }, format='json')
 
-        assert response.status_code == 202
+        assert response.status_code == 200
 
     def test_patch_user_with_valid_contact_email(self, api_client):
         """Test contact_email is updated correctly on a patch request"""
@@ -205,7 +205,7 @@ class TestAPIGetUserMe:
             'contact_email': 'jd@test.qqq',
         }, format='json')
 
-        assert response.status_code == 202
+        assert response.status_code == 200
 
     def test_patch_user_with_invalid_contact_email(self, api_client):
         """Test invalid contact_email is handled correctly on a patch request"""
