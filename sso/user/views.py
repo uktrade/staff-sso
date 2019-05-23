@@ -24,7 +24,7 @@ class UserRetrieveViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             except User.DoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
 
-        return Response(status=status.HTTP_202_ACCEPTED)
+        return Response(status=status.HTTP_200_OK)
 
     def update_details(self, data):
         my_user_id = self.request.user.user_id
