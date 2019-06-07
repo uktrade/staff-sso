@@ -193,6 +193,16 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         return False
 
+    @staticmethod
+    def can_access_all_settings(application: Union[OAuthApplication, SamlApplication]):
+        """is the user permitted to view all settings recorded against their profile?"""
+
+        if isinstance(application, OAuthApplication):
+            if application.can_view_all_user_settings:
+                return True
+
+        return False
+
     def get_emails_for_application(self, application):
         """
         Get all emails for current Oauth2 application and return a tuple (primary_email, related_emails)
