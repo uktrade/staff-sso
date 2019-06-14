@@ -306,6 +306,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'djangosaml2': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
     }
 }
 
