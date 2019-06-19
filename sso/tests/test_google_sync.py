@@ -5,6 +5,7 @@ import pytest
 
 from googleapiclient.errors import HttpError
 
+from sso.samlidp.models import SamlApplication
 from sso.samlidp.management.commands.sync_with_google import Command, http_retry
 from sso.tests.factories.user import AccessProfileFactory, UserFactory
 
@@ -128,10 +129,12 @@ class TestManagementCommand:
     @pytest.mark.django_db
     @patch('sso.samlidp.management.commands.sync_with_google.get_google_client')
     def test_user_without_access_and_not_in_google_is_not_syncd(self, mock_service, settings):
-        AccessProfileFactory(slug='an-mi-user')
+        saml_app = SamlApplication.objects.create(name='test', slug='sync-me')
+        AccessProfileFactory(slug='an-mi-user', saml_apps_list=[saml_app])
+
         UserFactory(email='test.user@whatever.com')
 
-        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILES = ['an-mi-user']
+        settings.MI_GOOGLE_USER_SYNC_SAML_APPLICATION_SLUG = 'sync-me'
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
         _configure_google_user_mock(mock_service)
@@ -143,10 +146,11 @@ class TestManagementCommand:
 
     @pytest.mark.django_db
     @patch('sso.samlidp.management.commands.sync_with_google.get_google_client')
-    def test_user_without_access_profile_and_in_google_is_disabled(self, mock_service, settings):
-        AccessProfileFactory(slug='an-mi-user')
+    def test_user_without_access_and_in_google_is_disabled(self, mock_service, settings):
+        saml_app = SamlApplication.objects.create(name='test', slug='sync-me')
+        AccessProfileFactory(slug='an-mi-user', saml_apps_list=[saml_app])
 
-        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILES = ['an-mi-user']
+        settings.MI_GOOGLE_USER_SYNC_SAML_APPLICATION_SLUG = 'sync-me'
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
         _configure_google_user_mock(mock_service, [_build_google_create_user_dict(suspended=True)])
@@ -163,10 +167,12 @@ class TestManagementCommand:
     @patch('sso.samlidp.management.commands.sync_with_google.get_google_client')
     def test_user_with_access_profile_not_in_google_is_created(self, mock_service, settings):
 
-        access_profile = AccessProfileFactory(slug='an-mi-user')
+        saml_app = SamlApplication.objects.create(name='test', slug='sync-me')
+        access_profile = AccessProfileFactory(slug='an-mi-user', saml_apps_list=[saml_app])
+
         user = UserFactory(email='test.user@whatever.com', add_access_profiles=[access_profile])
 
-        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILES = ['an-mi-user']
+        settings.MI_GOOGLE_USER_SYNC_SAML_APPLICATION_SLUG = 'sync-me'
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
         _configure_google_user_mock(mock_service)
@@ -192,11 +198,12 @@ class TestManagementCommand:
     @patch('sso.samlidp.management.commands.sync_with_google.get_google_client')
     def test_user_with_missing_name_is_created(self, mock_service, settings):
 
-        access_profile = AccessProfileFactory(slug='an-mi-user')
+        saml_app = SamlApplication.objects.create(name='test', slug='sync-me')
+        access_profile = AccessProfileFactory(slug='an-mi-user', saml_apps_list=[saml_app])
         user = UserFactory(email='test.user@whatever.com', add_access_profiles=[access_profile],
                            first_name='', last_name='')
 
-        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILES = ['an-mi-user']
+        settings.MI_GOOGLE_USER_SYNC_SAML_APPLICATION_SLUG = 'sync-me'
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
         _configure_google_user_mock(mock_service)
@@ -222,10 +229,11 @@ class TestManagementCommand:
     @patch('sso.samlidp.management.commands.sync_with_google.get_google_client')
     def test_user_with_access_profile_but_disabled_in_google_is_reenabled(self, mock_service, settings):
 
-        access_profile = AccessProfileFactory(slug='an-mi-user')
+        saml_app = SamlApplication.objects.create(name='test', slug='sync-me')
+        access_profile = AccessProfileFactory(slug='an-mi-user', saml_apps_list=[saml_app])
         UserFactory(email='test.user@whatever.com', add_access_profiles=[access_profile])
 
-        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILES = ['an-mi-user']
+        settings.MI_GOOGLE_USER_SYNC_SAML_APPLICATION_SLUG = 'sync-me'
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
         _configure_google_user_mock(mock_service, [_build_google_create_user_dict(suspended=True)])
@@ -242,9 +250,7 @@ class TestManagementCommand:
     @pytest.mark.django_db
     @patch('sso.samlidp.management.commands.sync_with_google.get_google_client')
     def test_google_admin_user_is_not_disabled(self, mock_service, settings):
-        AccessProfileFactory(slug='an-mi-user')
 
-        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILES = ['an-mi-user']
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
         _configure_google_user_mock(mock_service, [_build_google_create_user_dict(isAdmin=True)])
@@ -257,9 +263,9 @@ class TestManagementCommand:
     @pytest.mark.django_db
     @patch('sso.samlidp.management.commands.sync_with_google.get_google_client')
     def test_user_without_access_is_deleted(self, mock_service, settings):
-        AccessProfileFactory(slug='an-mi-user')
+        # AccessProfileFactory(slug='an-mi-user')
 
-        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILES = ['an-mi-user']
+        # settings.MI_GOOGLE_USER_SYNC_SAML_APPLICATION_SLUG = 'sync-me'
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
         _configure_google_user_mock(mock_service, [_build_google_create_user_dict(suspended=True)])
@@ -271,19 +277,3 @@ class TestManagementCommand:
         deletes = [call for call in mock_service.mock_calls if call[0] == '().users().delete']
         assert len(deletes) == 1
         assert deletes[0][2]['userKey'] == 'fake-id'
-
-    @pytest.mark.django_db
-    @patch('sso.samlidp.management.commands.sync_with_google.get_google_client')
-    def test_user_without_access_is_deleted(self, mock_service, settings):
-        AccessProfileFactory(slug='an-mi-user')
-
-        settings.MI_GOOGLE_USER_SYNC_ACCESS_PROFILES = ['an-mi-user']
-        settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
-
-        _configure_google_user_mock(mock_service, [_build_google_create_user_dict(suspended=True)])
-
-        Command().handle(inactive_account_action='noop')
-
-        assert not [call for call in mock_service.mock_calls if call[0] == '().users().inserts']
-        assert not [call for call in mock_service.mock_calls if call[0] == '().users().update']
-        assert not [call for call in mock_service.mock_calls if call[0] == '().users().delete']
