@@ -9,6 +9,11 @@ logger = logging.getLogger(__file__)
 
 
 class SamlApplication(models.Model):
+    slug = models.SlugField(
+        _('slug'),
+        help_text=_('WARNING: changing this may break things.')
+    )
+
     name = models.CharField(
         _('name'),
         max_length=100,
