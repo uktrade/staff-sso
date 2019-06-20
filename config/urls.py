@@ -3,6 +3,7 @@ from django.contrib import admin
 
 from sso.healthcheck.views import HealthCheckView
 from . import api_urls
+from sso.admin.views import admin_login_view
 
 app_name = 'staff_sso'
 
@@ -11,6 +12,7 @@ admin.site.site_title = ''
 admin.site.index_title = ''
 
 urlpatterns = [
+    url(r'^admin/login/$', admin_login_view),
     url(r'^admin/', admin.site.urls),
     url(r'^admin/', include('sso.user.admin_urls')),
 
