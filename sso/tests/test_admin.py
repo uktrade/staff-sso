@@ -78,3 +78,40 @@ class TestUserAdmin:
         fields = set(UserAdmin(user.__class__, {}).get_fields(request, None))
 
         assert {'is_staff', 'is_superuser', 'groups', 'user_permissions'}.isdisjoint(fields)
+
+
+class TestAdminSSOLogin:
+    def test_login_authenticated_but_not_staff_leads_to_403(self, client):
+        user = UserFactory()
+        client.force_login(user)
+        response = client.get('/admin/login/')
+
+        assert response.status_code == 403
+
+    def test_login_authenticated_without_next_url_redirects_to_admin(self, client):
+        user = UserFactory(is_staff=True)
+        client.force_login(user)
+
+        response = client.get('/admin/login/')
+
+        assert response.status_code == 302
+        assert response.url == '/admin/'
+
+    def test_login_authenticated_redirects_to_next_url(self, client):
+        user = UserFactory(is_staff=True)
+
+        user.is_staff = True
+        user.save()
+
+        client.force_login(user)
+
+        response = client.get('/admin/login/?next=/whatever/')
+
+        assert response.status_code == 302
+        assert response.url == '/whatever/'
+
+    def test_login_redirects_to_sso_login(self, client):
+        response = client.get('/admin/login/')
+
+        assert response.status_code == 302
+        assert response.url == '/saml2/login/?next=/admin/'
