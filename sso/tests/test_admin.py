@@ -7,7 +7,6 @@ from django.shortcuts import reverse
 
 from sso.user.admin_views import ShowUserPermissionsView
 from sso.user.admin import UserAdmin
-from sso.admin.views import NEXT_URL_SESSION_KEY
 
 from .factories.oauth import ApplicationFactory
 from .factories.user import UserFactory
@@ -100,17 +99,13 @@ class TestAdminSSOLogin:
 
     def test_login_authenticated_redirects_to_next_url(self, client):
         user = UserFactory(is_staff=True)
-        client.force_login(user)
 
         user.is_staff = True
-
         user.save()
-        session = client.session
-        session[NEXT_URL_SESSION_KEY] = '/whatever/'
-        session.save()
+
         client.force_login(user)
 
-        response = client.get('/admin/login/')
+        response = client.get('/admin/login/?next=/whatever/')
 
         assert response.status_code == 302
         assert response.url == '/whatever/'
@@ -120,9 +115,3 @@ class TestAdminSSOLogin:
 
         assert response.status_code == 302
         assert response.url == '/saml2/login/?next=/admin/'
-
-    def test_login_saves_next_query_string_in_session(self, client):
-
-        client.get('/admin/login/?next=/whatever/')
-
-        assert client.session[NEXT_URL_SESSION_KEY] == '/whatever/'
