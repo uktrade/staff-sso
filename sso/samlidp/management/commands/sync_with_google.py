@@ -22,7 +22,10 @@ logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
-SCOPES = ['https://www.googleapis.com/auth/admin.directory.user']
+SCOPES = [
+    'https://www.googleapis.com/auth/admin.directory.user',
+    'https://www.googleapis.com/auth/admin.directory.group',
+]
 
 
 def get_google_client():

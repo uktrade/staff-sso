@@ -263,9 +263,7 @@ class TestManagementCommand:
     @pytest.mark.django_db
     @patch('sso.samlidp.management.commands.sync_with_google.get_google_client')
     def test_user_without_access_is_deleted(self, mock_service, settings):
-        # AccessProfileFactory(slug='an-mi-user')
 
-        # settings.MI_GOOGLE_USER_SYNC_SAML_APPLICATION_SLUG = 'sync-me'
         settings.MI_GOOGLE_EMAIL_DOMAIN = 'data.test.com'
 
         _configure_google_user_mock(mock_service, [_build_google_create_user_dict(suspended=True)])
