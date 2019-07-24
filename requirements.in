@@ -12,7 +12,7 @@ google-api-python-client
 oauth2client
 
 waitress
-whitenoise
+whitenoise>=4.1.3
 dj-database-url
 django-axes==4.5.4
 raven
