@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'axes',
     'raven.contrib.django.raven_compat',
+    'django_filters',
 
     'sso.core',
     'sso.user',
@@ -280,7 +281,8 @@ OAUTH2_PROVIDER = {
         'read': 'Read scope',
         'write': 'Write scope',
         'introspection': 'introspect scope',
-        'data-hub:internal-front-end': 'A datahub specific scope'
+        'data-hub:internal-front-end': 'A datahub specific scope',
+        'search': 'Search Scope'
     },
     'DEFAULT_SCOPES': ['read', 'write', 'data-hub:internal-front-end'],
     'REFRESH_TOKEN_EXPIRE_SECONDS': 24 * 60 * 60 * 2,

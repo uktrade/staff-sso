@@ -24,3 +24,5 @@ __py_cache__/
 .pytest_cache/
 
 /config/google_credentials.json
+
+.vscode/
