@@ -253,7 +253,8 @@ class TestSAMLLogin:
         mock_create_x_access_log.assert_called_once_with(
             request, 200,
             entity_id='http://localhost:8080/simplesaml/saml2/idp/metadata.php',
-            message='Remote IdP Auth')
+            message='Remote IdP Auth',
+            email=['user1@example.com'])
 
     @freeze_time('2017-06-22 15:50:00.000000+00:00')
     def test_saml_login_using_name_id(self, client, mocker, settings):
