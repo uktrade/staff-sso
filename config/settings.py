@@ -242,6 +242,7 @@ if ENV_NAME == 'staging':
         os.path.join(SAML_CONFIG_DIR, 'idp_metadata_google.xml'),
         os.path.join(SAML_CONFIG_DIR, 'idp_metadata.xml'),
         os.path.join(SAML_CONFIG_DIR, 'idp_metadata_core.xml'),
+        os.path.join(SAML_CONFIG_DIR, 'idp_metadata_okta_dit.xml'),
     ]
 
     SAML_CONFIG['entityid'] = 'https://sso.uat.staff.service.trade.gov.uk/sp'

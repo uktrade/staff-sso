@@ -29,6 +29,9 @@
                 {% elif name == 'e-core' %}
                     <a class="button"  href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">UK Delivery Partners</a>
                     <span>username ends with @mobile.trade.gov.uk</span>
+                {% elif name == 'okta' %}
+                    <a class="button"  href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">UK Delivery Partners</a>
+                    <span>Okta login [tbd]</span>
                 {% else %}
                     <a class="button" href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">{{ name }}</a>
                 {% endif %}
