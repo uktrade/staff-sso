@@ -6,6 +6,8 @@ from django.shortcuts import redirect, render
 from django.views.generic import View
 from django.views.generic.edit import FormView
 
+from sso.core.logging import create_x_access_log
+
 from .forms import EmailForm
 from .models import EmailToken
 
@@ -85,6 +87,8 @@ class EmailAuthView(View):
         login(self.request, user)
 
         token_obj.mark_used()
+
+        create_x_access_log(request, 200, message='Email Token Auth', email=token_obj.email)
 
         return redirect(self.get_next_url())
 
