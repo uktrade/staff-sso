@@ -1,4 +1,5 @@
 import datetime as dt
+from unittest.mock import ANY
 
 import pytest
 from django.conf import settings
@@ -214,6 +215,23 @@ class TestEmailAuthView:
         client.post(url)
 
         assert '_auth_user_id' in client.session
+
+    def test_x_application_access_log_is_created(self, client, mocker):
+
+        email = 'test@test.com'
+
+        mock_create_x_access_log = mocker.patch('sso.emailauth.views.create_x_access_log')
+
+        token = EmailToken.objects.create_token(email)
+
+        url = '{}?next={}'.format(
+            reverse('emailauth:email-auth-signin', kwargs=dict(token=token)),
+            'https://myapp.com'
+        )
+
+        client.post(url)
+
+        mock_create_x_access_log.assert_called_with(ANY, 200, message='Email Token Auth', email=email)
 
     def test_user_is_not_authenticated_and_token_is_not_invalidated_with_get_request(self, client):
 

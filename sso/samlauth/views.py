@@ -293,7 +293,9 @@ def assertion_consumer_service(request,
     _set_subject_id(request.session, session_info['name_id'])
     logger.debug("User %s authenticated via SSO.", user)
 
-    create_x_access_log(request, 200, message='Remote IdP Auth', entity_id=session_info['issuer'])
+    email = session_info['ava'].get('email', 'undefined')
+
+    create_x_access_log(request, 200, message='Remote IdP Auth', entity_id=session_info['issuer'], email=email)
 
     logger.debug('Sending the post_authenticated signal')
     post_authenticated.send_robust(sender=user, session_info=session_info)
