@@ -39,6 +39,14 @@
   </p>
 {% endblock %}
 
+{% block footer_support_links %}
+  {{ block.super }}
+  <ul>
+      <li>
+        <a href="{% url 'privacy_policy'%}">Privacy Policy</a>
+      </li>
+  </ul>
+{% endblock %}
 
 {% block body_end %}
   <script src="{% static 'javascripts/vendor/jquery-1.11.0.min.js' %}"></script>
