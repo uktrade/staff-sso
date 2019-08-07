@@ -15,13 +15,13 @@
                 <li>
                   <hr>
                 {% if name == 'a-cirrus' %}
-                    <a class="button"  href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Cirrus, CTP</a>
+                    <a class="button"  href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Cirrus</a>
                     <span>username ends with @trade.gov.uk</span>
                 {% elif name == 'b-core' %}
-                    <a class="button" href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Evolve, Mobile Office</a>
+                    <a class="button" href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Mobile Office</a>
                     <span>username ends with @mobile.ukti.gov.uk or @extranet.ukti.gov.uk</span>
                 {% elif name == 'c-ukef' %}
-                    <a class="button" href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">UKEF</a>
+                    <a class="button" href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">UK Export Finance</a>
                     <span>username ends with @ukexportfinance.gov.uk</span>
                 {% elif name == 'd-google' %}
                     <a class="button"  href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">Digital Team</a>
@@ -29,6 +29,9 @@
                 {% elif name == 'e-core' %}
                     <a class="button"  href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">UK Delivery Partners</a>
                     <span>username ends with @mobile.trade.gov.uk</span>
+                {% elif name == 'okta' %}
+                    <a class="button"  href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">DIT Partners</a>
+                    <span>users from other organisations</span>
                 {% else %}
                     <a class="button" href="{% url 'saml2_login' %}?idp={{ url }}{% if came_from %}&next={{ came_from|urlencode }}{% endif %}">{{ name }}</a>
                 {% endif %}
