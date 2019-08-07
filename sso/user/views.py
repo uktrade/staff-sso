@@ -135,12 +135,8 @@ class UserListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             else:
                 qs = permitted_qs | access_qs
             return qs.distinct()    # remove dups
-        else:
-            # do we ever get into this?
-            return queryset.filter(
-                Q(access_profiles__saml2_applications__enabled=True) & \
-                Q(access_profiles__saml2_applications=application)
-            )
+
+        return queryset
 
     def filter_queryset(self, queryset):
         """
@@ -150,7 +146,6 @@ class UserListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         default ordering when another one has not already been set.)
         """
         filtered_queryset = super().filter_queryset(queryset)
-
 
         if not filtered_queryset.ordered:
             return filtered_queryset.order_by(*self._default_ordering)

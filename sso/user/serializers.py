@@ -68,7 +68,7 @@ class UserListSerializer(serializers.Serializer):
     def to_representation(self, obj):
         app = self.context['request'].auth.application
 
-        primary_email, related_emails = obj.get_emails_for_application(app)
+        primary_email, _ = obj.get_emails_for_application(app)
 
         return {
             'user_id': str(obj.user_id),
