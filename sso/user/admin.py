@@ -32,6 +32,7 @@ class UserForm(ModelForm):
 
 class EmailInline(admin.TabularInline):
     model = EmailAddress
+    readonly_fields = ('last_login',)
 
 
 @admin.register(User)

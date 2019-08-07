@@ -3,6 +3,7 @@ from unittest.mock import ANY
 
 import pytest
 from django.conf import settings
+from django.utils import timezone
 from freezegun import freeze_time
 
 from sso.emailauth.forms import EmailForm
@@ -312,3 +313,20 @@ class TestEmailAuthView:
 
         assert 'richard.jones' not in content
         assert '@invalid-not-in-whitelist.gov.uk' not in content
+
+    @freeze_time('2019-08-29 15:50:00.000000+00:00')
+    def test_last_login_time_recorded_against_email(self, client):
+
+        user = UserFactory(email='test@test.com')
+        user.emails.create(email='test@alternative.com')
+
+        token = EmailToken.objects.create_token('test@test.com')
+
+        url = '{}?next={}'.format(
+            reverse('emailauth:email-auth-signin', kwargs=dict(token=token)),
+            'https://myapp.com'
+        )
+
+        client.post(url)
+
+        assert user.emails.get(email='test@test.com').last_login == timezone.now()

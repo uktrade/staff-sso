@@ -3,7 +3,7 @@ import pytest
 from sso.samlidp.models import SamlApplication
 from sso.samlidp.processors import AWSProcessor, GoogleProcessor, ModelProcessor
 from sso.tests.factories.saml import SamlApplicationFactory
-from sso.tests.factories.user import UserFactory, AccessProfileFactory
+from sso.tests.factories.user import AccessProfileFactory, UserFactory
 
 
 pytestmark = [

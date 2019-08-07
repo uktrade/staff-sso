@@ -4,6 +4,7 @@ import logging
 
 from django.conf import settings
 from django.contrib import auth
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import (
     HttpResponse, HttpResponseBadRequest, HttpResponseRedirect,
@@ -293,10 +294,6 @@ def assertion_consumer_service(request,
     _set_subject_id(request.session, session_info['name_id'])
     logger.debug("User %s authenticated via SSO.", user)
 
-    email = session_info['ava'].get('email', 'undefined')
-
-    create_x_access_log(request, 200, message='Remote IdP Auth', entity_id=session_info['issuer'], email=email)
-
     logger.debug('Sending the post_authenticated signal')
     post_authenticated.send_robust(sender=user, session_info=session_info)
 
@@ -312,6 +309,15 @@ def assertion_consumer_service(request,
     logger.debug('Redirecting to the RelayState: %s', relay_state)
 
     http_response = HttpResponseRedirect(relay_state)
+
+    # Staff-sso specific logic
+    email = session_info['ava'].get('email', 'undefined')
+
+    if isinstance(email, list):
+        email = email[0]
+
+    create_x_access_log(request, 200, message='Remote IdP Auth', entity_id=session_info['issuer'], email=email)
+    get_user_model().objects.set_email_last_login_time(email)
 
     # remember the idp the user authenticated against
     http_response.set_cookie('last_login_idp', session_info['issuer'], expires=dt.datetime.today()+dt.timedelta(days=7))
