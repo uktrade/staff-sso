@@ -404,15 +404,20 @@ class TestAPISearchUsers:
         response = api_client.get(self.GET_USER_SEARCH_URL)
 
         assert response.status_code == 200
-        assert len(response.json()) == 1
-        assert response.json() == [
-            {
-                'user_id': str(search_user.user_id),
-                'first_name': 'John',
-                'last_name': 'Doe',
-                'email': 'john.doe@example.com',
-            }
-        ]
+        assert response.data["count"] == 1
+        assert response.json() == {
+            "count": 1,
+            "next": None,
+            "previous": None,
+            "results": [
+                {
+                    'user_id': str(search_user.user_id),
+                    'first_name': 'John',
+                    'last_name': 'Doe',
+                    'email': 'john.doe@example.com',
+                }
+            ]
+        }
 
     @pytest.mark.django_db
     def test_autocomplete_filter_only_search_user_first_name(self, api_client):
@@ -423,12 +428,19 @@ class TestAPISearchUsers:
         response = api_client.get(self.GET_USER_SEARCH_URL + '?autocomplete=john')
 
         assert response.status_code == 200
-        assert response.json() == [{
-            'user_id': str(search_user.user_id),
-            'first_name': 'John',
-            'last_name': 'Doe',
-            'email': 'john.doe@example.com',
-        }]
+        assert response.json() == {
+            "count": 1,
+            "next": None,
+            "previous": None,
+            "results": [
+                {
+                    'user_id': str(search_user.user_id),
+                    'first_name': 'John',
+                    'last_name': 'Doe',
+                    'email': 'john.doe@example.com',
+                }
+            ]
+        }
 
     @pytest.mark.django_db
     def test_autocomplete_filter_only_search_user_first_name_part(self, api_client):
@@ -439,12 +451,19 @@ class TestAPISearchUsers:
         response = api_client.get(self.GET_USER_SEARCH_URL + '?autocomplete=jo')
 
         assert response.status_code == 200
-        assert response.json() == [{
-            'user_id': str(search_user.user_id),
-            'first_name': 'John',
-            'last_name': 'Doe',
-            'email': 'john.doe@example.com',
-        }]
+        assert response.json() == {
+            "count": 1,
+            "next": None,
+            "previous": None,
+            "results": [
+                {
+                    'user_id': str(search_user.user_id),
+                    'first_name': 'John',
+                    'last_name': 'Doe',
+                    'email': 'john.doe@example.com',
+                }
+            ]
+        }
 
     @pytest.mark.django_db
     def test_all_users_with_user_with_default_access_user(self, api_client):
@@ -462,7 +481,7 @@ class TestAPISearchUsers:
         response = api_client.get(self.GET_USER_SEARCH_URL)
 
         assert response.status_code == 200
-        assert len(response.json()) == 2
+        assert response.data["count"] == 2
 
     @pytest.mark.django_db
     def test_all_users_scenario_1(self, api_client):
@@ -493,23 +512,30 @@ class TestAPISearchUsers:
         response = api_client.get(self.GET_USER_SEARCH_URL)
 
         assert response.status_code == 200
-        assert len(response.json()) == 3
+        assert response.data["count"] == 3
 
         response = api_client.get(self.GET_USER_SEARCH_URL + '?autocomplete=john')
 
         assert response.status_code == 200
-        assert len(response.json()) == 1
-        assert response.json() == [{
-            'user_id': str(search_user.user_id),
-            'first_name': 'John',
-            'last_name': 'Doe',
-            'email': 'john.doe@example.com',
-        }]
+        assert response.data["count"] == 1
+        assert response.json() == {
+            "count": 1,
+            "next": None,
+            "previous": None,
+            "results": [
+                {
+                    'user_id': str(search_user.user_id),
+                    'first_name': 'John',
+                    'last_name': 'Doe',
+                    'email': 'john.doe@example.com',
+                }
+            ]
+        }
 
         response = api_client.get(self.GET_USER_SEARCH_URL + '?autocomplete=first')
 
         assert response.status_code == 200
-        assert len(response.json()) == 2
+        assert response.data["count"] == 2
 
     @pytest.mark.django_db
     def test_all_users_scenario_2(self, api_client):
@@ -547,7 +573,7 @@ class TestAPISearchUsers:
         response = api_client.get(self.GET_USER_SEARCH_URL)
 
         assert response.status_code == 200
-        assert len(response.json()) == 1
+        assert response.data["count"] == 1
 
     @pytest.mark.django_db
     def test_all_users_scenario_3(self, api_client):
@@ -585,7 +611,7 @@ class TestAPISearchUsers:
         response = api_client.get(self.GET_USER_SEARCH_URL)
 
         assert response.status_code == 200
-        assert len(response.json()) == 1
+        assert response.data["count"] == 1
 
     @pytest.mark.django_db
     def test_list_all_users_access_profile(self, api_client):
@@ -617,7 +643,7 @@ class TestAPISearchUsers:
         response = api_client.get(self.GET_USER_SEARCH_URL)
 
         assert response.status_code == 200
-        assert len(response.json()) == 1
+        assert response.data["count"] == 1
 
     @pytest.mark.django_db
     def test_list_all_users_access_profile_and_permitted_app(self, api_client):
@@ -661,7 +687,7 @@ class TestAPISearchUsers:
         response = api_client.get(self.GET_USER_SEARCH_URL)
 
         assert response.status_code == 200
-        assert len(response.json()) == 2
+        assert response.data["count"] == 2
 
     @pytest.mark.django_db
     def test_all_users_saml_app_enabled(self, api_client):
@@ -685,7 +711,7 @@ class TestAPISearchUsers:
         response = api_client.get(self.GET_USER_SEARCH_URL)
 
         assert response.status_code == 200
-        assert len(response.json()) == 2
+        assert response.data["count"] == 2
 
     @pytest.mark.django_db
     def test_list_users_can_access_with_domain(self, api_client):
@@ -716,7 +742,7 @@ class TestAPISearchUsers:
         response = api_client.get(self.GET_USER_SEARCH_URL)
 
         assert response.status_code == 200
-        assert len(response.json()) == 1
+        assert response.data["count"] == 1
 
     @pytest.mark.django_db
     def test_list_users_with_access_by_domain_and_permitted_apps(self, api_client):
@@ -746,7 +772,7 @@ class TestAPISearchUsers:
         response = api_client.get(self.GET_USER_SEARCH_URL)
 
         assert response.status_code == 200
-        assert len(response.json()) == 2
+        assert response.data["count"] == 2
 
     @pytest.mark.django_db
     def test_list_access_by_domain_and_permitted_app_and_access_profile(self, api_client):
@@ -788,7 +814,7 @@ class TestAPISearchUsers:
 
         assert response.status_code == 200
         print(response.json())
-        assert len(response.json()) == 3
+        assert response.data["count"] == 3
 
     @pytest.mark.django_db
     def test_list_access_by_domain_and_permitted_app_and_access_profile_related_emails(self, api_client):
@@ -833,7 +859,7 @@ class TestAPISearchUsers:
         response = api_client.get(self.GET_USER_SEARCH_URL)
 
         assert response.status_code == 200
-        assert len(response.json()) == 3
+        assert response.data["count"] == 3
 
     @pytest.mark.django_db
     def test_all_users_scenario_5(self, api_client):
@@ -894,4 +920,160 @@ class TestAPISearchUsers:
         response = api_client.get(self.GET_USER_SEARCH_URL)
 
         assert response.status_code == 200
-        assert len(response.json()) == 5
+        assert response.data["count"] == 5
+
+    @pytest.mark.django_db
+    def test_autocomplete_filter_with_fullname_lowercase(self, api_client):
+        search_user, def_oauth_app, token = self.setup_seach_user()
+        user1 = UserFactory(
+            email='first1.last1@example.com',
+            first_name='First1',
+            last_name='Last1'
+        )
+        user1.groups.add(GroupFactory())
+        def_oauth_app.users.add(user1)
+
+        # add a different user to different app
+        oauth_app = ApplicationFactory()
+        user2 = UserFactory(
+            email='first2.last2@example.com',
+            first_name='First2',
+            last_name='Last2'
+        )
+        user2.groups.add(GroupFactory())
+        oauth_app.users.add(user2)
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.get(self.GET_USER_SEARCH_URL)
+
+        assert response.status_code == 200
+        assert response.data["count"] == 3
+
+        response = api_client.get(self.GET_USER_SEARCH_URL + '?autocomplete=john')
+
+        assert response.status_code == 200
+        assert response.data["count"] == 1
+        assert response.json() == {
+            "count": 1,
+            "next": None,
+            "previous": None,
+            "results": [
+                {
+                    'user_id': str(search_user.user_id),
+                    'first_name': 'John',
+                    'last_name': 'Doe',
+                    'email': 'john.doe@example.com',
+                }
+            ]
+        }
+
+        response = api_client.get(self.GET_USER_SEARCH_URL + '?autocomplete=first')
+
+        assert response.status_code == 200
+        assert response.data["count"] == 2
+
+        response = api_client.get(self.GET_USER_SEARCH_URL + '?autocomplete=First2 Last2')
+
+        assert response.status_code == 200
+        assert response.data["count"] == 1
+
+        response = api_client.get(self.GET_USER_SEARCH_URL + '?autocomplete=first2 last2')
+
+        assert response.status_code == 200
+        assert response.data["count"] == 1
+
+    @pytest.mark.django_db
+    def test_autocomplete_filter_with_fullname_correct_case(self, api_client):
+        search_user, def_oauth_app, token = self.setup_seach_user()
+        user1 = UserFactory(
+            email='first1.last1@example.com',
+            first_name='First1',
+            last_name='Last1'
+        )
+        user1.groups.add(GroupFactory())
+        def_oauth_app.users.add(user1)
+
+        # add a different user to different app
+        oauth_app = ApplicationFactory()
+        user2 = UserFactory(
+            email='first2.last2@example.com',
+            first_name='First2',
+            last_name='Last2'
+        )
+        user2.groups.add(GroupFactory())
+        oauth_app.users.add(user2)
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.get(self.GET_USER_SEARCH_URL)
+
+        assert response.status_code == 200
+        assert response.data["count"] == 3
+
+        response = api_client.get(self.GET_USER_SEARCH_URL + '?autocomplete=First2 Last2')
+
+        assert response.status_code == 200
+        assert response.data["count"] == 1
+
+    @pytest.mark.django_db
+    def test_autocomplete_filter_with_fullname_reverse(self, api_client):
+        search_user, def_oauth_app, token = self.setup_seach_user()
+        user1 = UserFactory(
+            email='first1.last1@example.com',
+            first_name='First1',
+            last_name='Last1'
+        )
+        user1.groups.add(GroupFactory())
+        def_oauth_app.users.add(user1)
+
+        # add a different user to different app
+        oauth_app = ApplicationFactory()
+        user2 = UserFactory(
+            email='first2.last2@example.com',
+            first_name='First2',
+            last_name='Last2'
+        )
+        user2.groups.add(GroupFactory())
+        oauth_app.users.add(user2)
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.get(self.GET_USER_SEARCH_URL)
+
+        assert response.status_code == 200
+        assert response.data["count"] == 3
+
+        response = api_client.get(self.GET_USER_SEARCH_URL + '?autocomplete=Last2 First2')
+
+        assert response.status_code == 200
+        assert response.data["count"] == 1
+
+    @pytest.mark.django_db
+    def test_autocomplete_filter_with_last_name(self, api_client):
+        search_user, def_oauth_app, token = self.setup_seach_user()
+        user1 = UserFactory(
+            email='first1.last1@example.com',
+            first_name='First1',
+            last_name='Last1'
+        )
+        user1.groups.add(GroupFactory())
+        def_oauth_app.users.add(user1)
+
+        # add a different user to different app
+        oauth_app = ApplicationFactory()
+        user2 = UserFactory(
+            email='first2.last2@example.com',
+            first_name='First2',
+            last_name='Last2'
+        )
+        user2.groups.add(GroupFactory())
+        oauth_app.users.add(user2)
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.get(self.GET_USER_SEARCH_URL)
+
+        assert response.status_code == 200
+        assert response.data["count"] == 3
+
+        response = api_client.get(self.GET_USER_SEARCH_URL + '?autocomplete=last')
+
+        assert response.status_code == 200
+        assert response.data["count"] == 2
