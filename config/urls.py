@@ -1,5 +1,6 @@
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.views.generic.base import TemplateView
 
 from sso.healthcheck.views import HealthCheckView
 from . import api_urls
@@ -30,4 +31,6 @@ urlpatterns = [
     url(r'^', include(('sso.localauth.urls', 'sso_localauth'), namespace='localauth')),
 
     url(r'^check/$', HealthCheckView.as_view(), name='healthcheck'),
+
+    url(r'^privacy-policy/$', TemplateView.as_view(template_name='sso/privacy-policy.html'), name='privacy_policy'),
 ]
