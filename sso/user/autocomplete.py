@@ -2,7 +2,7 @@ import re
 from functools import reduce
 from operator import or_
 
-from django.db.models import Case, CharField, IntegerField, Q, When
+from django.db.models import Q
 from django_filters import CharFilter
 
 
@@ -48,23 +48,9 @@ def _apply_autocomplete_filter_to_queryset(queryset, autocomplete_fields, search
 
     Results are automatically ordered as follows:
 
-    - matches are prioritised and grouped according to the position of the first field that was
-    matched in autocomplete_fields
-    - within each group, results are then sorted by:
-      - the field corresponding to the group
-      - the remainder of the fields in autocomplete_fields (in order)
+      - the fields in autocomplete_fields (in order)
       - and finally pk (so that the results are deterministic if the other ordering fields are
         identical)
-
-    Scoring is not used to keep the order of results predictable when only a few characters
-    are entered (i.e. so that results don't jump around as characters are entered).
-
-    Note that special care should be taken to ensure that orderings from other places (e.g.
-    default orderings on views) don't override the ordering performed by the filter.
-
-    It also also possible to significantly speed up this filter by creating GIN indexes using
-    the gin_trgm_ops operator class from the pg_trgm PostgreSQL extension. However, this will
-    typically only work if all search fields are on the same table.
     """
     escaped_tokens = [re.escape(token) for token in search_string.split()]
 
@@ -80,48 +66,12 @@ def _apply_autocomplete_filter_to_queryset(queryset, autocomplete_fields, search
         for escaped_token in escaped_tokens
     )
 
-    return queryset.annotate(
-        _matched_group_index=_make_ordering_case_expression(
-            enumerate(autocomplete_fields),
-            escaped_tokens,
-            IntegerField(),
-        ),
-        _matched_field=_make_ordering_case_expression(
-            zip(autocomplete_fields, autocomplete_fields),
-            escaped_tokens,
-            CharField(),
-        ),
-    ).filter(
+    return queryset.filter(
         *filter_q_objects_for_tokens,
     ).order_by(
-        '_matched_group_index',
-        '_matched_field',
         *autocomplete_fields,
         'pk',
     )
-
-
-def _make_ordering_q_for_field(field, escaped_tokens):
-    r"""
-    Creates a Q object that checks if any of a list of tokens appears in a field (as a
-    prefix).
-
-    For example::
-
-        _make_ordering_q_for_field('first_name', ['Joh', 'Car'])
-
-    would return a Q object equivalent to::
-
-        Q(first_name__iregex='\mJoh') | Q(first_name__iregex='\mCar')
-    """
-    return reduce(
-        or_,
-        (
-            Q(_make_prefix_match_q(field, escaped_token))
-            for escaped_token in escaped_tokens
-        ),
-    )
-
 
 def _make_filter_q_for_token(fields, escaped_token):
     r"""
@@ -157,31 +107,3 @@ def _make_prefix_match_q(field, escaped_token):
         f'{field}__iregex': rf'\m{escaped_token}',
     }
     return Q(**q_kwargs)
-
-
-def _make_ordering_case_expression(sort_values_and_fields, escaped_tokens, output_field):
-    r"""
-    Returns a case expression that returns a specified value for the first search field
-    that is matched by any token from a list.
-
-    For example::
-
-        _make_ordering_case_expression(
-            enumerate(['first_name', 'last_name']),
-            ['Joh', 'Car'],
-            IntegerField(),
-        )
-
-    is equivalent to:
-
-        Case(
-            When(Q(first_name__iregex='\mJoh') | Q(first_name__iregex='\mCar'), then=0),
-            When(Q(last_name__iregex='\mJoh') | Q(last_name__iregex='\mCar'), then=1),
-            output_field=IntegerField(),
-        )
-    """
-    case_whens = (
-        When(_make_ordering_q_for_field(field, escaped_tokens), then=sort_value)
-        for sort_value, field in sort_values_and_fields
-    )
-    return Case(*case_whens, output_field=output_field)
