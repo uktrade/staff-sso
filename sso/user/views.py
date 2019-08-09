@@ -108,33 +108,38 @@ class UserListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     ordering_fields = ('first_name', 'last_name')
     _default_ordering = ('first_name', 'last_name')
 
+    def _allowed_by_email_suffix_qs(self, application):
+        return reduce(
+                or_,
+                (
+                    Q(('emails__email__icontains', domain))
+                    for domain in application.allow_access_by_email_suffix.split(',')
+                ),
+            )
+
+    def _oauth_filtered_qs(self, queryset, application):
+        """
+        returns filtered queryset based on application
+        retrieves all users with allowed email domains, if relevant setting was on
+        retrieves users if this application is within thier permitted applications
+        retrieves users if user's access profile allows this application
+        """
+        permitted_qs = queryset.filter(permitted_applications=application)
+        access_qs = queryset.filter(access_profiles__oauth2_applications=application)
+        if application.allow_access_by_email_suffix:
+            email_qs = queryset.filter(self._allowed_by_email_suffix_qs(application))
+            qs = email_qs | permitted_qs | access_qs
+        else:
+            qs = permitted_qs | access_qs
+        return qs.distinct()    # remove dups        
+
     def get_queryset(self):
         queryset = super().get_queryset()
         application = self.request.auth.application
 
         if isinstance(application, OAuthApplication):
-            if application.default_access_allowed:
-                return queryset     # return all users
-
-            # check is_allowed_email(application)
-            email_qs = None
-            if application.allow_access_by_email_suffix:
-                email_qs = queryset.filter(
-                    reduce(or_, (
-                            Q(('emails__email__icontains', domain))
-                            for domain in application.allow_access_by_email_suffix.split(',')
-                        )
-                    )
-                )
-            # check if application is in permitted_applications
-            permitted_qs = queryset.filter(permitted_applications=application)
-            # check if application is in access_profiles's apps
-            access_qs = queryset.filter(access_profiles__oauth2_applications=application)
-            if email_qs:
-                qs = email_qs | permitted_qs | access_qs
-            else:
-                qs = permitted_qs | access_qs
-            return qs.distinct()    # remove dups
+            if not application.default_access_allowed:
+                return self._oauth_filtered_qs(queryset, application)
 
         return queryset
 
