@@ -7,6 +7,7 @@ from django.utils import timezone
 from sso.oauth2.models import Application
 
 from .factories.oauth import AccessTokenFactory, ApplicationFactory
+from .factories.saml import SamlApplicationFactory
 from .factories.user import GroupFactory, UserFactory, AccessProfileFactory
 
 pytestmark = [
@@ -373,3 +374,451 @@ class TestApiUserIntrospect:
         response = api_client.get(self.GET_USER_INTROSPECT_URL + '?email={introspected_user.email}')
 
         assert response.status_code == 400
+
+
+class TestAPISearchUsers:
+    GET_USER_SEARCH_URL = reverse_lazy('api-v1:user:user-search')
+
+    def setup_search_user(self):
+        search_user = UserFactory(
+            email='john.doe@example.com',
+            first_name='John',
+            last_name='Doe'
+        )
+
+        def_oauth_app = ApplicationFactory(default_access_allowed=True)
+        access_token = AccessTokenFactory(
+            application=def_oauth_app,
+            user=search_user,
+            expires=(timezone.now() + timedelta(days=1)),
+            scope='search'
+        )
+        return search_user, def_oauth_app, access_token.token
+
+    @pytest.fixture
+    def setup_users(self):
+        search_user, def_oauth_app, token = self.setup_search_user()
+        user1 = UserFactory(
+            email='first1.last1@example.com',
+            first_name='First1',
+            last_name='Last1'
+        )
+        def_oauth_app.users.add(user1)
+
+        # add a different user to different app
+        oauth_app = ApplicationFactory()
+        user2 = UserFactory(
+            email='first2.last2@example.com',
+            first_name='First2',
+            last_name='Last2'
+        )
+        oauth_app.users.add(user2)
+        return search_user, token
+
+
+    def test_all_users_with_only_root_search_user(self, api_client):
+        search_user, oauth_app, token = self.setup_search_user()
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.get(self.GET_USER_SEARCH_URL)
+
+        assert response.status_code == 200
+        assert response.data["count"] == 1
+        assert response.json() == {
+            "count": 1,
+            "next": None,
+            "previous": None,
+            "results": [
+                {
+                    'user_id': str(search_user.user_id),
+                    'first_name': 'John',
+                    'last_name': 'Doe',
+                    'email': 'john.doe@example.com',
+                }
+            ]
+        }
+
+    def test_all_users_with_user_added_to_a_group(self, api_client):
+        search_user, oauth_app, token = self.setup_search_user()
+        user1 = UserFactory(
+            email='first1.last1@example.com',
+            first_name='First1',
+            last_name='Last1'
+        )
+        user1.groups.add(GroupFactory())
+        oauth_app.users.add(user1)
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.get(self.GET_USER_SEARCH_URL)
+
+        assert response.status_code == 200
+        assert response.data["count"] == 2
+
+    @pytest.mark.parametrize(
+        'autocomplete, expected_results',
+        (
+            ('john', 1),
+            ('joh', 1),
+            ('first', 2),
+            ('first2 last2', 1),
+            ('FIRST2 LAST2', 1),
+            ('Last2 First2', 1),
+            ('last', 2),
+            ('las', 2)
+        ),
+    )
+    def test_autocomplete_filter(self, api_client, setup_users, autocomplete, expected_results):
+        search_user, token = setup_users
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.get(self.GET_USER_SEARCH_URL)
+
+        assert response.status_code == 200
+        assert response.data["count"] == 3
+
+        response = api_client.get(self.GET_USER_SEARCH_URL + '?autocomplete=' + autocomplete)
+
+        assert response.status_code == 200
+        assert response.data["count"] == expected_results
+
+    @pytest.mark.parametrize(
+        'default_access_allowed, expected_results',
+        (
+            (True, 3),
+            (False, 1)
+        ),
+    )
+    def test_all_users_scenario_2(self, api_client, default_access_allowed, expected_results):
+        """
+        searching with an app that has default_access_allowed
+        when True:
+        api lists all users, regardless of app access
+        when False:
+        api lists only users with access to that app,
+        none of the others should appear
+        """
+        search_user, def_oauth_app, token = self.setup_search_user()
+        user1 = UserFactory(
+            email='first1.last1@example.com',
+            first_name='First1',
+            last_name='Last1'
+        )
+        def_oauth_app.users.add(user1)
+
+        # add a different user to different app
+        oauth_app = ApplicationFactory(default_access_allowed=default_access_allowed)
+        user2 = UserFactory(
+            email='first2.last2@example.com',
+            first_name='First2',
+            last_name='Last2'
+        )
+        oauth_app.users.add(user2)
+        access_token = AccessTokenFactory(
+            application=oauth_app,
+            user=user2,
+            expires=(timezone.now() + timedelta(days=1)),
+            scope='search'
+        )
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + access_token.token)
+        response = api_client.get(self.GET_USER_SEARCH_URL)
+
+        assert response.status_code == 200
+        assert response.data["count"] == expected_results
+
+    def test_list_all_users_access_profile(self, api_client):
+        """
+        searching with an app that has default_access_allowed False
+        so api lists only users with access to that app via access profile
+        none of the others should appear
+        """
+        ap = AccessProfileFactory()
+        oauth_app_1 = ApplicationFactory(default_access_allowed=False)
+        ap.oauth2_applications.add(oauth_app_1)
+        user1 = UserFactory(
+            email='first1.last1@example.com',
+            first_name='First1',
+            last_name='Last1'
+        )
+        user1.access_profiles.add(ap)
+
+        user1.emails.create(email='test@aaa.com')
+        user1.emails.create(email='test@bbb.com')
+        access_token = AccessTokenFactory(
+            application=oauth_app_1,
+            user=user1,
+            expires=(timezone.now() + timedelta(days=1)),
+            scope='search'
+        )
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + access_token.token)
+        response = api_client.get(self.GET_USER_SEARCH_URL)
+
+        assert response.status_code == 200
+        assert response.data["count"] == 1
+
+    def test_list_all_users_access_profile_and_permitted_app(self, api_client):
+        """
+        searching with an app that has default_access_allowed False
+        so api lists only users with access to that app via
+        access profile or direct app access
+        none of the others should appear
+        """
+        # a user with access profile
+        ap = AccessProfileFactory()
+        oauth_app_1 = ApplicationFactory(default_access_allowed=False)
+        ap.oauth2_applications.add(oauth_app_1)
+        user1 = UserFactory(
+            email='first1.last1@example.com',
+            first_name='First1',
+            last_name='Last1'
+        )
+        user1.access_profiles.add(ap)
+
+        user1.emails.create(email='test@aaa.com')
+        user1.emails.create(email='test@bbb.com')
+
+        # a user with permitted application
+        user2 = UserFactory(
+            email='first2.last2@example.com',
+            first_name='First2',
+            last_name='Last2'
+        )
+        oauth_app_1.users.add(user2)
+
+        access_token = AccessTokenFactory(
+            application=oauth_app_1,
+            user=user1,
+            expires=(timezone.now() + timedelta(days=1)),
+            scope='search'
+        )
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + access_token.token)
+        response = api_client.get(self.GET_USER_SEARCH_URL)
+
+        assert response.status_code == 200
+        assert response.data["count"] == 2
+
+    def test_all_users_saml_app_enabled(self, api_client):
+        search_user, def_oauth_app, token = self.setup_search_user()
+        saml_app = SamlApplicationFactory(entity_id='an_entity_id', enabled=True)
+        ap = AccessProfileFactory(saml_apps_list=[saml_app])
+        user1 = UserFactory(
+            email='first1.last1@example.com',
+            first_name='First1',
+            last_name='Last1',
+            add_access_profiles=[ap]
+        )
+        access_token = AccessTokenFactory(
+            application=def_oauth_app,
+            user=user1,
+            expires=(timezone.now() + timedelta(days=1)),
+            scope='search'
+        )
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + access_token.token)
+        response = api_client.get(self.GET_USER_SEARCH_URL)
+
+        assert response.status_code == 200
+        assert response.data["count"] == 2
+
+    def test_list_users_can_access_with_domain(self, api_client):
+        """
+        Test that `can_access()` returns True when the user's email is in the
+        `Application.allow_access_by_email_suffix` list
+        """
+        app = ApplicationFactory(
+            default_access_allowed=False,
+            allow_access_by_email_suffix='testing.com, testing123.com'
+        )
+
+        user = UserFactory(email='hello@example.com')
+
+        assert not user.can_access(app)
+
+        user = UserFactory(email='joe.blogs@testing.com')
+        assert user.can_access(app)
+
+        access_token = AccessTokenFactory(
+            application=app,
+            user=user,
+            expires=(timezone.now() + timedelta(days=1)),
+            scope='search'
+        )
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + access_token.token)
+        response = api_client.get(self.GET_USER_SEARCH_URL)
+
+        assert response.status_code == 200
+        assert response.data["count"] == 1
+
+    def test_list_users_with_access_by_domain_and_permitted_apps(self, api_client):
+        app = ApplicationFactory(
+            default_access_allowed=False,
+            allow_access_by_email_suffix='testing.com, testing123.com'
+        )
+
+        user1 = UserFactory(email='hello@example.com')
+
+        assert not user1.can_access(app)
+
+        app.users.add(user1)
+        assert user1.can_access(app)
+
+        user2 = UserFactory(email='joe.blogs@testing.com')
+        assert user2.can_access(app)
+
+        access_token = AccessTokenFactory(
+            application=app,
+            user=user2,
+            expires=(timezone.now() + timedelta(days=1)),
+            scope='search'
+        )
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + access_token.token)
+        response = api_client.get(self.GET_USER_SEARCH_URL)
+
+        assert response.status_code == 200
+        assert response.data["count"] == 2
+
+    def test_list_access_by_domain_and_permitted_app_and_access_profile(self, api_client):
+        app = ApplicationFactory(
+            default_access_allowed=False,
+            allow_access_by_email_suffix='testing.com, testing123.com'
+        )
+        user = UserFactory(email='joe.blogs@testing.com')
+        assert user.can_access(app)
+
+        # a user with access profile
+        ap = AccessProfileFactory()
+        ap.oauth2_applications.add(app)
+        user1 = UserFactory(
+            email='first1.last1@example.com',
+            first_name='First1',
+            last_name='Last1'
+        )
+        user1.access_profiles.add(ap)
+
+        # a user with permitted application
+        user2 = UserFactory(
+            email='first2.last2@example.com',
+            first_name='First2',
+            last_name='Last2'
+        )
+        app.users.add(user2)
+
+        access_token = AccessTokenFactory(
+            application=app,
+            user=user1,
+            expires=(timezone.now() + timedelta(days=1)),
+            scope='search'
+        )
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + access_token.token)
+        response = api_client.get(self.GET_USER_SEARCH_URL)
+
+        assert response.status_code == 200
+        print(response.json())
+        assert response.data["count"] == 3
+
+    def test_list_access_by_domain_and_permitted_app_and_access_profile_related_emails(self, api_client):
+        app = ApplicationFactory(
+            default_access_allowed=False,
+            allow_access_by_email_suffix='testing.com, testing123.com'
+        )
+        user = UserFactory(email='joe.blogs@testing.com')
+        assert user.can_access(app)
+
+        # a user with access profile
+        ap = AccessProfileFactory()
+        ap.oauth2_applications.add(app)
+        user1 = UserFactory(
+            email='first1.last1@example.com',
+            first_name='First1',
+            last_name='Last1'
+        )
+        user1.access_profiles.add(ap)
+
+        # add few more emails, to check distinctness
+        user1.emails.create(email='test@aaa.com')
+        user1.emails.create(email='test@bbb.com')
+
+        # a user with permitted application
+        user2 = UserFactory(
+            email='first2.last2@example.com',
+            first_name='First2',
+            last_name='Last2'
+        )
+        app.users.add(user2)
+
+        access_token = AccessTokenFactory(
+            application=app,
+            user=user1,
+            expires=(timezone.now() + timedelta(days=1)),
+            scope='search'
+        )
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + access_token.token)
+        response = api_client.get(self.GET_USER_SEARCH_URL)
+
+        assert response.status_code == 200
+        assert response.data["count"] == 3
+
+    def test_all_users(self, api_client):
+        """
+        checking all users scenario, when we have all kinds of users
+        including saml
+        a request with default_access_allowed, should get all
+        users back, none filtered
+        """
+        search_user, def_oauth_app, token = self.setup_search_user()
+        saml_app = SamlApplicationFactory(entity_id='an_entity_id', enabled=True)
+        ap = AccessProfileFactory(saml_apps_list=[saml_app])
+        saml_user = UserFactory(
+            email='saml.user@example.com',
+            first_name='Saml',
+            last_name='User',
+            add_access_profiles=[ap]
+        )
+
+        app = ApplicationFactory(
+            default_access_allowed=False,
+            allow_access_by_email_suffix='testing.com, testing123.com'
+        )
+        user = UserFactory(email='joe.blogs@testing.com')
+        assert user.can_access(app)
+
+        # a user with access profile
+        ap1 = AccessProfileFactory()
+        ap1.oauth2_applications.add(app)
+        user1 = UserFactory(
+            email='first1.last1@example.com',
+            first_name='First1',
+            last_name='Last1'
+        )
+        user1.access_profiles.add(ap)
+
+        # add few more emails, to check distinctness
+        user1.emails.create(email='test@aaa.com')
+        user1.emails.create(email='test@bbb.com')
+
+        # a user with permitted application
+        user2 = UserFactory(
+            email='first2.last2@example.com',
+            first_name='First2',
+            last_name='Last2'
+        )
+        app.users.add(user2)
+
+        access_token = AccessTokenFactory(
+            application=def_oauth_app,
+            user=user1,
+            expires=(timezone.now() + timedelta(days=1)),
+            scope='search'
+        )
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + access_token.token)
+        response = api_client.get(self.GET_USER_SEARCH_URL)
+
+        assert response.status_code == 200
+        assert response.data["count"] == 5

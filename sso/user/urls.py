@@ -1,6 +1,10 @@
 from django.conf.urls import url
 
-from .views import UserIntrospectViewSet, UserRetrieveViewSet
+from .views import (
+    UserIntrospectViewSet,
+    UserRetrieveViewSet,
+    UserListViewSet
+)
 
 urlpatterns = [
     url(
@@ -17,5 +21,12 @@ urlpatterns = [
             'get': 'retrieve'
         }),
         name='user-introspect'
+    ),
+    url(
+        r'^search/$',
+        UserListViewSet.as_view({
+            'get': 'list'
+        }),
+        name='user-search'
     ),
 ]

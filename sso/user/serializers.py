@@ -55,3 +55,24 @@ class UserDetailsSerializer(serializers.Serializer):
 
         return data
 
+class UserListSerializer(serializers.Serializer):
+    class Meta:
+        model = User
+        fields = (
+            'user_id',
+            'first_name',
+            'last_name',
+            'email',
+        )
+
+    def to_representation(self, obj):
+        app = self.context['request'].auth.application
+
+        primary_email, _ = obj.get_emails_for_application(app)
+
+        return {
+            'user_id': str(obj.user_id),
+            'first_name': obj.first_name,
+            'last_name': obj.last_name,
+            'email': primary_email,
+        }

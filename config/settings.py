@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'axes',
     'raven.contrib.django.raven_compat',
+    'django_filters',
 
     'sso.core',
     'sso.user',
@@ -272,7 +273,9 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated'
-    ]
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100
 }
 
 # Include the local auth page?
@@ -283,7 +286,8 @@ OAUTH2_PROVIDER = {
         'read': 'Read scope',
         'write': 'Write scope',
         'introspection': 'introspect scope',
-        'data-hub:internal-front-end': 'A datahub specific scope'
+        'data-hub:internal-front-end': 'A datahub specific scope',
+        'search': 'Search Scope'
     },
     'DEFAULT_SCOPES': ['read', 'write', 'data-hub:internal-front-end'],
     'REFRESH_TOKEN_EXPIRE_SECONDS': 24 * 60 * 60 * 2,
