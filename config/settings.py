@@ -64,6 +64,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django_session_timeout.middleware.SessionTimeoutMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -364,8 +365,9 @@ EMAIL_FROM = env('EMAIL_FROM', default='test@example.com')
 
 # session settings
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-SESSION_COOKIE_AGE = env.int('SESSION_COOKIE_AGE_SECONDS')
+SESSION_EXPIRE_SECONDS = env.int('SESSION_COOKIE_AGE_SECONDS')
 SESSION_COOKIE_SAMESITE = None
+SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
 
 # google analytics
 GOOGLE_ANALYTICS_CODE = env('GOOGLE_ANALYTICS_CODE', default=None)

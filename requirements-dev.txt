@@ -22,6 +22,7 @@ django-environ==0.4.5
 django-filter==2.1.0
 django-ipware==2.1.0
 django-oauth-toolkit==1.1.0
+django-session-timeout==0.0.4
 django==2.2.3
 djangorestframework==3.10.1
 djangosaml2==0.17.2
@@ -66,7 +67,7 @@ pytz==2018.5
 raven==6.9.0
 requests==2.20.1
 rsa==4.0
-six==1.11.0
+six==1.12.0
 sqlparse==0.3.0
 termcolor==1.1.0          # via pytest-sugar
 text-unidecode==1.2       # via faker
@@ -77,4 +78,4 @@ whitenoise==4.1.3
 zenpy==2.0.6
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools==41.0.1        # via flake8-blind-except, flake8-import-order, pytest
+# setuptools==41.1.0        # via flake8-blind-except, flake8-import-order, pytest
