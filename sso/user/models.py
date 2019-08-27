@@ -21,7 +21,7 @@ class AccessProfile(models.Model):
     slug = models.SlugField(help_text="Used internally. Do not edit.")
 
     name = models.CharField(
-        _('name'),
+        _('access profile name'),
         max_length=50,
     )
 
