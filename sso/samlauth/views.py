@@ -1,6 +1,7 @@
 import base64
 import datetime as dt
 import logging
+import random
 
 from django.conf import settings
 from django.contrib import auth
@@ -10,13 +11,16 @@ from django.http import (
     HttpResponse, HttpResponseBadRequest, HttpResponseRedirect,
     HttpResponseServerError
 )
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import is_safe_url
 from django.utils.six import text_type
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import RedirectView
+from django.views.generic.base import TemplateView
+from django.views.generic.edit import FormView
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
 
 from djangosaml2.cache import IdentityCache, OutstandingQueriesCache, StateCache
@@ -40,6 +44,7 @@ from saml2.response import (
 from saml2.validate import ResponseLifetimeExceed, ToEarly
 
 from sso.core.logging import create_x_access_log
+from sso.samlauth.forms import EmailForm
 
 
 logger = logging.getLogger('sso.samlauth')
@@ -394,3 +399,114 @@ def logged_out(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect(reverse('saml2_logged_in'))
     return render(request, 'sso/logged-out.html')
+
+
+class LoginStartView(FormView):
+    # TODO: retain ?next= / unset existing selection
+    form_class = EmailForm
+    template_name = 'sso/enter-email.html'
+
+    def get_initial(self):
+
+        initial = super().get_initial()
+
+        email = self.request.COOKIES.get('sso_auth_email', None)
+
+        if email:
+            initial['email'] = email
+
+        return initial
+
+    def _lookup_idp(self, ref):
+        conf = get_config(None, self.request)
+        idps = available_idps(conf)
+
+        return [k for k, v in idps.items() if v == ref][0]
+
+    def form_valid(self, form):
+        email = form.cleaned_data['email']
+        email_domain = '@' + form.cleaned_data['email'].split('@')[1]
+
+        EMAIL_IDP_MAPPING = {
+            '@trade.gov.uk': 'a-cirrus',
+            '@mobile.ukti.gov.uk': 'b-core',
+            '@extranet.ukti.gov.uk': 'b-core',
+            '@ukexportfinance.gov.uk': 'c-ukef',
+            '@digital.trade.gov.uk': 'd-google',
+            '@mobile.trade.gov.uk': 'e-core',
+            '*': 'okta',
+        }
+
+        if email_domain in settings.EMAIL_TOKEN_DOMAIN_WHITELIST:
+            response = redirect('emailauth:email-auth-initiate')
+
+        else:
+
+            idp_ref = EMAIL_IDP_MAPPING[email_domain] if email_domain in EMAIL_IDP_MAPPING else 'okta'
+
+            idp = self._lookup_idp(idp_ref)
+
+            response = redirect(reverse('saml2_login') + f'?idp={idp}')
+
+        response.set_cookie('sso_auth_email', email, expires=dt.datetime.today() + dt.timedelta(days=30))
+
+        return response
+
+
+class LoginJourneySelectionView(RedirectView):
+
+    query_string = True
+
+    pattern_names = {
+        'current': 'saml2_login',
+        'new': 'saml2_login_start',
+    }
+
+    def setup(self, request, *args, **kwargs):
+        self._variant = self._get_user_journey_choice(request)
+        super().setup(request, *args, **kwargs)
+
+    def _get_user_journey_choice(self, request):
+        """ Logic to determine which authentication flow to use allowing the
+        user to override the default choice via a query string parameter.
+
+        TODO: make the choice weightable"""
+
+        options = list(self.pattern_names.keys())
+
+        # querystring takes precedence
+        if 'variant' in request.GET and request.GET['variant'] in options:
+            variant = request.GET['variant']
+        elif 'variant' in request.COOKIES and request.COOKIES['variant'] in options:
+            variant = request.COOKIES['variant']
+        else:
+            # TODO: additional logic required to make this weighted
+            variant = random.choice(options)
+
+        # TODO: remove temporary override
+        return 'new'
+
+        return variant
+
+    def get_redirect_url(self, *args, **kwargs):
+        """
+        Return the URL redirect to. Keyword arguments from the URL pattern
+        match generating the redirect request are provided as kwargs to this
+        method.
+        """
+        assert hasattr(self, '_variant')
+
+        pattern_name = self.pattern_names[self._variant]
+        url = reverse(pattern_name, args=args, kwargs=kwargs)
+
+        args = self.request.META.get('QUERY_STRING', '')
+        if args and self.query_string:
+            url = "%s?%s" % (url, args)
+        return url
+
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+
+        response.set_cookie('variant', self._variant)
+
+        return response

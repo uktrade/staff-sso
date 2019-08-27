@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.core.exceptions import PermissionDenied
@@ -18,4 +19,4 @@ def admin_login_view(request):
 
         return redirect(next_url)
 
-    return redirect('%s?next=%s' % (reverse('saml2_login'), next_url))
+    return redirect('%s?next=%s' % (reverse(settings.LOGIN_URL), next_url))

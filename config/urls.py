@@ -1,6 +1,8 @@
+from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
-from django.views.generic.base import TemplateView
+from django.views.generic.base import RedirectView, TemplateView
+
 
 from sso.healthcheck.views import HealthCheckView
 from . import api_urls
@@ -13,6 +15,7 @@ admin.site.site_title = ''
 admin.site.index_title = ''
 
 urlpatterns = [
+    url(r'^$', RedirectView.as_view(pattern_name=settings.LOGIN_URL)),
     url(r'^admin/login/$', admin_login_view),
     url(r'^admin/', admin.site.urls),
     url(r'^admin/', include('sso.user.admin_urls')),
