@@ -122,6 +122,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
 
         self.email = self.email.lower()
+        self.contact_email = self.contact_email.lower()
 
         if 'email' in kwargs:
             kwargs['email'] = kwargs['email'].lower()
