@@ -3,6 +3,7 @@ from unittest import mock
 
 import pytest
 from freezegun import freeze_time
+from django.utils import timezone
 
 from sso.user.middleware import UpdatedLastAccessedMiddleware
 from sso.user.models import AccessProfile, User
@@ -149,6 +150,29 @@ class TestUserManager:
         assert created
         assert user.emails.count() == 1
         assert user.emails.first().email == 'test@test.com'
+
+    @pytest.mark.parametrize(
+        'email',
+        (
+            'user@example.com',
+            'USER@EXAMPLE.COM',
+        ),
+    )
+    @pytest.mark.django_db
+    @freeze_time('2017-06-22 15:50:00.000000+00:00')
+    def test_set_email_last_login_time(self, email):
+        user = UserFactory(email='user@example.com')
+        assert user.emails.count() == 1
+        email_obj = user.emails.first()
+        assert email_obj.last_login is None
+        assert email_obj.email == 'user@example.com'
+
+        User.objects.set_email_last_login_time(email)
+
+        assert user.emails.count() == 1
+        email_obj = user.emails.first()
+        assert user.emails.first().last_login == timezone.now()
+        assert email_obj.email == 'user@example.com'
 
 
 class TestUser:
