@@ -311,10 +311,13 @@ def assertion_consumer_service(request,
     http_response = HttpResponseRedirect(relay_state)
 
     # Staff-sso specific logic
-    email = session_info['ava'].get('email', 'undefined')
+    if session_info['issuer'] in getattr(settings, 'SAML_IDPS_USE_NAME_ID_AS_USERNAME', []):
+        email = session_info['name_id'].text
+    else:
+        email = session_info['ava'].get('email', 'undefined')
 
-    if isinstance(email, list):
-        email = email[0]
+        if isinstance(email, list):
+            email = email[0]
 
     create_x_access_log(request, 200, message='Remote IdP Auth', entity_id=session_info['issuer'], email=email)
     get_user_model().objects.set_email_last_login_time(email)
