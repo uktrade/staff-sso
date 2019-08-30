@@ -1,4 +1,10 @@
+import logging
+
 from django.contrib.auth.models import BaseUserManager
+from django.utils import timezone
+
+
+logger = logging.getLogger(__name__)
 
 
 class UserManager(BaseUserManager):
@@ -32,19 +38,17 @@ class UserManager(BaseUserManager):
 
         defaults = defaults or {}
         email = kwargs['email'].lower()
-        default_email = defaults.get('email', '').lower()
         params = {
             **defaults,
-            'email': default_email,
             'email': email
         }
 
         try:
-            return self.get_by_email(email), False
+            user, created = self.get_by_email(email), False
         except self.model.DoesNotExist:
-            user = self.create(**params)
+            user, created = self.create(**params), True
 
-            return user, True
+        return user, created
 
     def get_by_email(self, email):
         email = email.lower()
@@ -52,3 +56,10 @@ class UserManager(BaseUserManager):
             return self.get(emails__email=email)
         except self.model.DoesNotExist:
             return self.get(email=email)
+
+    def set_email_last_login_time(self, email):
+        from sso.user.models import EmailAddress
+
+        email_obj = EmailAddress.objects.get(email=email)
+        email_obj.last_login = timezone.now()
+        email_obj.save()

@@ -1,7 +1,7 @@
 import datetime as dt
 
 from django.conf import settings
-from django.contrib.auth import login
+from django.contrib.auth import login, get_user_model
 from django.shortcuts import redirect, render
 from django.views.generic import View
 from django.views.generic.edit import FormView
@@ -89,6 +89,7 @@ class EmailAuthView(View):
         token_obj.mark_used()
 
         create_x_access_log(request, 200, message='Email Token Auth', email=token_obj.email)
+        get_user_model().objects.set_email_last_login_time(token_obj.email)
 
         return redirect(self.get_next_url())
 
