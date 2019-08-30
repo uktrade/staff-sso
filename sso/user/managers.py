@@ -60,6 +60,6 @@ class UserManager(BaseUserManager):
     def set_email_last_login_time(self, email):
         from sso.user.models import EmailAddress
 
-        email_obj = EmailAddress.objects.get(email=email)
+        email_obj = EmailAddress.objects.get(email=email.lower())
         email_obj.last_login = timezone.now()
         email_obj.save()
