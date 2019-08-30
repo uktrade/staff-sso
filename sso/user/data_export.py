@@ -18,10 +18,10 @@ class UserDataExport:
             else:
                 last_accessed = ''
 
-            other_emails = '|'.join(user.emails.exclude(email=user.email).values_list('email', flat=True))
+            other_emails = user.emails.exclude(email=user.email).values_list('email', flat=True)
             access_profiles = '|'.join(ap.slug for ap in user.access_profiles.all())
             permitted_applications = '|'.join(pa.name for pa in user.permitted_applications.all())
-            row = [user.user_id, user.email, user.first_name, user.last_name, last_login, last_accessed, other_emails,
-                   access_profiles, permitted_applications]
+            row = [user.user_id, user.email, user.first_name, user.last_name, last_login, last_accessed,
+                   access_profiles, permitted_applications, *other_emails]
 
             yield row
