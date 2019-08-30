@@ -60,9 +60,6 @@ class UserManager(BaseUserManager):
     def set_email_last_login_time(self, email):
         from sso.user.models import EmailAddress
 
-        try:
-            email_obj = EmailAddress.objects.get(email=email)
-            email_obj.last_login = timezone.now()
-            email_obj.save()
-        except EmailAddress.DoesNotExist:
-            logger.error(f'attempted to update last_login time for email that does not exist in {email}')
+        email_obj = EmailAddress.objects.get(email=email)
+        email_obj.last_login = timezone.now()
+        email_obj.save()
