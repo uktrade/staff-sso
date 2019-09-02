@@ -57,6 +57,7 @@ class TestAPIGetUserMe:
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': [],
+            'contact_email': '',
             'groups': [],
             'permitted_applications': [],
             'access_profiles': []
@@ -208,6 +209,10 @@ class TestAPIGetUserMe:
 
         assert response.status_code == 200
 
+        response = api_client.get(self.GET_USER_ME_URL)
+        data = response.json()
+        assert data['contact_email'] == 'jd@test.qqq'
+
     def test_patch_user_with_invalid_contact_email(self, api_client):
         """Test invalid contact_email is handled correctly on a patch request"""
         email = 'test@qqq.com'
@@ -249,6 +254,7 @@ class TestApiUserIntrospect:
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': [],
+            'contact_email': '',
             'groups': [],
             'permitted_applications': [],
             'access_profiles': []
@@ -270,6 +276,7 @@ class TestApiUserIntrospect:
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': ['test@bbb.com', 'test@aaa.com'],
+            'contact_email': '',
             'groups': [],
             'permitted_applications': [],
             'access_profiles': []
@@ -293,6 +300,7 @@ class TestApiUserIntrospect:
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': ['test@bbb.com', 'test@aaa.com'],
+            'contact_email': '',
             'groups': [],
             'permitted_applications': [],
             'access_profiles': [ap.slug]
@@ -316,6 +324,7 @@ class TestApiUserIntrospect:
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': ['test@bbb.com', 'test@aaa.com'],
+            'contact_email': '',
             'groups': [],
             'permitted_applications': [{'key': app.application_key, 'name': app.display_name, 'url': app.start_url}],
             'access_profiles': []
@@ -335,6 +344,7 @@ class TestApiUserIntrospect:
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': [],
+            'contact_email': '',
             'groups': [],
             'permitted_applications': [{'key': app.application_key, 'name': app.display_name, 'url': app.start_url}],
             'access_profiles': []
@@ -375,6 +385,31 @@ class TestApiUserIntrospect:
 
         assert response.status_code == 400
 
+    def test_with_valid_token_and_contact_email(self, api_client):
+        user = UserFactory(
+            email='user1@example.com',
+            first_name='John',
+            last_name='Doe',
+            contact_email='jd@test.qqq'
+        )
+        user, token = get_oauth_token(user=user, scope='introspection')
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.get(self.GET_USER_INTROSPECT_URL + '?email=user1@example.com')
+
+        assert response.status_code == 200
+        assert response.json() == {
+            'email': 'user1@example.com',
+            'user_id': str(user.user_id),
+            'first_name': 'John',
+            'last_name': 'Doe',
+            'related_emails': [],
+            'contact_email': 'jd@test.qqq',
+            'groups': [],
+            'permitted_applications': [],
+            'access_profiles': []
+        }
+
 
 class TestAPISearchUsers:
     GET_USER_SEARCH_URL = reverse_lazy('api-v1:user:user-search')
@@ -383,7 +418,8 @@ class TestAPISearchUsers:
         search_user = UserFactory(
             email='john.doe@example.com',
             first_name='John',
-            last_name='Doe'
+            last_name='Doe',
+            contact_email='jd@test.qqq',
         )
 
         def_oauth_app = ApplicationFactory(default_access_allowed=True)
@@ -401,7 +437,8 @@ class TestAPISearchUsers:
         user1 = UserFactory(
             email='first1.last1@example.com',
             first_name='First1',
-            last_name='Last1'
+            last_name='Last1',
+            contact_email='irst1.last1@test.qqq'
         )
         def_oauth_app.users.add(user1)
 
@@ -410,7 +447,8 @@ class TestAPISearchUsers:
         user2 = UserFactory(
             email='first2.last2@example.com',
             first_name='First2',
-            last_name='Last2'
+            last_name='Last2',
+            contact_email='first2.last2@test.qqq',
         )
         oauth_app.users.add(user2)
         return search_user, token
@@ -434,6 +472,7 @@ class TestAPISearchUsers:
                     'first_name': 'John',
                     'last_name': 'Doe',
                     'email': 'john.doe@example.com',
+                    'contact_email': 'jd@test.qqq',
                 }
             ]
         }
@@ -510,7 +549,7 @@ class TestAPISearchUsers:
         user2 = UserFactory(
             email='first2.last2@example.com',
             first_name='First2',
-            last_name='Last2'
+            last_name='Last2',
         )
         oauth_app.users.add(user2)
         access_token = AccessTokenFactory(
