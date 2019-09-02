@@ -1,11 +1,13 @@
 from django.contrib.auth import get_user_model
 
+from sso.user.models import EmailAddress
+
 
 class UserDataExport:
     def __iter__(self):
 
-        yield ['user_id', 'email', 'first_name', 'last_name', 'last login', 'last accessed', 'other emails',
-               'access profiles', 'permitted apps']
+        yield ['user_id', 'email', 'first_name', 'last_name', 'last login', 'last accessed',
+               'access profiles', 'permitted apps', 'other emails']
 
         for user in get_user_model().objects.all().order_by('email'):
             if user.last_login:
@@ -23,5 +25,21 @@ class UserDataExport:
             permitted_applications = '|'.join(pa.name for pa in user.permitted_applications.all())
             row = [user.user_id, user.email, user.first_name, user.last_name, last_login, last_accessed,
                    access_profiles, permitted_applications, *other_emails]
+
+            yield row
+
+
+class EmailLastLoginExport:
+    def __iter__(self):
+
+        yield ['email', 'last login']
+
+        for email in EmailAddress.objects.all().order_by('-last_login'):
+            if email.last_login:
+                last_login = email.last_login.strftime('%Y-%m-%d %H:%m:%S')
+            else:
+                last_login = ''
+
+            row = [email.email, last_login]
 
             yield row
