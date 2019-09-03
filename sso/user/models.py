@@ -122,6 +122,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
 
         self.email = self.email.lower()
+        self.contact_email = self.contact_email.lower()
 
         if 'email' in kwargs:
             kwargs['email'] = kwargs['email'].lower()
@@ -255,6 +256,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 class EmailAddress(models.Model):
     user = models.ForeignKey(User, related_name='emails', on_delete=models.CASCADE)
     email = models.EmailField(unique=True)
+    last_login = models.DateTimeField(null=True)
 
     def save(self, *args, **kwargs):
         """

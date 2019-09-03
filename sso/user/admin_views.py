@@ -11,7 +11,7 @@ from django.views.generic.base import View
 
 from sso.oauth2.models import Application
 from sso.samlidp.models import SamlApplication
-from .data_export import UserDataExport
+from .data_export import UserDataExport, EmailLastLoginExport
 from .models import User
 
 
@@ -52,6 +52,11 @@ class CSVExportView(View):
 class UserDataExportView(CSVExportView):
     generator_object = UserDataExport()
     file_name = 'user_data.csv'
+
+
+class EmailLastLoginExportView(CSVExportView):
+    generator_object = EmailLastLoginExport()
+    file_name = 'email_last_login.csv'
 
 
 @method_decorator(staff_member_required, name='dispatch')

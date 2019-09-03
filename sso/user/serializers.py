@@ -27,6 +27,7 @@ class UserSerializer(serializers.ModelSerializer):
             'first_name': obj.first_name,
             'last_name': obj.last_name,
             'related_emails': related_emails,
+            'contact_email': obj.contact_email,
             'groups': [],
             'permitted_applications': obj.get_permitted_applications(),
             'access_profiles': [profile.slug for profile in obj.access_profiles.all()]
@@ -63,6 +64,7 @@ class UserListSerializer(serializers.Serializer):
             'first_name',
             'last_name',
             'email',
+            'contact_email',
         )
 
     def to_representation(self, obj):
@@ -75,4 +77,5 @@ class UserListSerializer(serializers.Serializer):
             'first_name': obj.first_name,
             'last_name': obj.last_name,
             'email': primary_email,
+            'contact_email': obj.contact_email,
         }
