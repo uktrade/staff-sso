@@ -42,8 +42,8 @@ class UserAdmin(admin.ModelAdmin):
             'all': ('/static/stylesheets/admin.css',)
         }
 
-    search_fields = ('emails__email', 'email', 'first_name', 'last_name')
-    list_filter = (ApplicationFilter, 'is_superuser')
+    search_fields = ('emails__email', 'email', 'first_name', 'last_name', 'user_id')
+    list_filter = (ApplicationFilter, 'access_profiles__name', 'is_superuser')
     fields = ('user_id', 'email', 'first_name', 'last_name', 'contact_email', 'date_joined', 'last_login', 'last_accessed',
               'access_profiles', 'permitted_applications', 'list_user_settings_wrapper')
     readonly_fields = ('date_joined', 'last_login', 'last_accessed', 'user_id', 'list_user_settings_wrapper')
