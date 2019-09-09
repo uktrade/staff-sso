@@ -2,6 +2,7 @@ import csv
 from io import StringIO
 
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core.exceptions import ImproperlyConfigured
 
 from django.http.response import StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
@@ -27,6 +28,9 @@ class Echo(object):
 @method_decorator(staff_member_required, name='dispatch')
 class CSVExportView(View):
 
+    generator_object = None
+    file_name = None
+
     class Echo(object):
         """An object that implements just the write method of the file-like
         interface.
@@ -37,8 +41,15 @@ class CSVExportView(View):
             return value
 
     def __init__(self):
-        assert getattr(self, 'generator_object', None)
-        assert getattr(self, 'file_name', None)
+        super().__init__()
+
+        if self.generator_object is None:
+            raise ImproperlyConfigured(
+            'CSVExportView requires a definition of generator_object')
+        if self.file_name is None:
+            raise ImproperlyConfigured(
+            'CSVExportView requires a definition of file_name')
+
 
     def get(self, request, *args, **kwargs):
         pseudo_buffer = self.Echo()
