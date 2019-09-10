@@ -6,7 +6,7 @@ from sso.user.models import EmailAddress
 class UserDataExport:
     def __iter__(self):
 
-        yield ['user_id', 'email', 'first_name', 'last_name', 'last login', 'last accessed',
+        yield ['user_id', 'email', 'first_name', 'last_name', 'date joined', 'last login', 'last accessed',
                'access profiles', 'permitted apps', 'other emails']
 
         for user in get_user_model().objects.all().order_by('email'):
@@ -20,10 +20,12 @@ class UserDataExport:
             else:
                 last_accessed = ''
 
+            date_joined = user.date_joined.strftime('%Y-%m-%d %H:%m:%S')
+
             other_emails = user.emails.exclude(email=user.email).values_list('email', flat=True)
             access_profiles = '|'.join(ap.slug for ap in user.access_profiles.all())
             permitted_applications = '|'.join(pa.name for pa in user.permitted_applications.all())
-            row = [user.user_id, user.email, user.first_name, user.last_name, last_login, last_accessed,
+            row = [user.user_id, user.email, user.first_name, user.last_name, date_joined, last_login, last_accessed,
                    access_profiles, permitted_applications, *other_emails]
 
             yield row
