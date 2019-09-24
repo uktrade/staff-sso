@@ -10,16 +10,18 @@
         <p>Enter your email address to be directed to the correct login page.</p>
 
         <p class="email-input">
+
             <label class="form-label" for="username">Email address</label>
+
             {{ form.email }}
 
-            {% if form.non_field_errors %}
-        <ul>
-            {% for error in form.non_field_errors %}
-            <li class="error-message">{{ error }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
+            {% if form.email.errors %}
+                <ul class="errorlist">
+                  {% for error in form.email.errors %}
+                    <li><span class="error-message">{{ error }}</span></li>
+                  {% endfor %}
+                </ul>
+            {% endif %}
         </p>
 
         <p><input type="submit" class="button" value="Next step"></p>

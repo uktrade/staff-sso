@@ -141,7 +141,7 @@ STATIC_URL = '/static/'
 
 # Auth / SAML
 AUTH_USER_MODEL = 'user.user'
-# LOGIN_URL = 'saml2_login'
+#LOGIN_URL = 'saml2_login'
 LOGIN_URL = 'saml2_login_initiate'
 LOGOUT_REDIRECT_URL = '/saml2/logged-out/'
 LOGIN_REDIRECT_URL = '/saml2/logged-in/'
@@ -476,3 +476,8 @@ MI_GOOGLE_EMAIL_DOMAIN = env('MI_GOOGLE_EMAIL_DOMAIN')
 MI_GOOGLE_SERVICE_ACCOUNT_DATA = env('MI_GOOGLE_SERVICE_ACCOUNT_DATA').encode('utf-8').decode('unicode_escape')
 MI_GOOGLE_SERVICE_ACCOUNT_DELEGATED_USER = env('MI_GOOGLE_SERVICE_ACCOUNT_DELEGATED_USER')
 MI_GOOGLE_USER_SYNC_SAML_APPLICATION_SLUG = env('MI_GOOGLE_USER_SYNC_SAML_APPLICATION_SLUG')
+AUTH_EMAIL_TO_IPD_MAP=env.json('AUTH_EMAIL_TO_IPD_MAP')
+
+
+# NOTE: this allows us to enable the new auth flow for selected users for testing purposes. It will be removed soon.
+NEW_AUTH_FLOW_EMAILS=env.list('NEW_AUTH_FLOW_EMAILS')

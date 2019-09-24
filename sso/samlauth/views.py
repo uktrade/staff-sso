@@ -1,7 +1,6 @@
 import base64
 import datetime as dt
 import logging
-import random
 
 from django.conf import settings
 from django.contrib import auth
@@ -19,7 +18,6 @@ from django.utils.six import text_type
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import RedirectView
-from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
 
@@ -48,6 +46,10 @@ from sso.samlauth.forms import EmailForm
 
 
 logger = logging.getLogger('sso.samlauth')
+
+
+SSO_EMAIL_SESSION_KEY = 'sso_auth_email'
+LAST_LOGIN_IDP_SESSION_KEY = 'last_login_idp'
 
 
 def login(request,  # noqa: C901
@@ -111,7 +113,7 @@ def login(request,  # noqa: C901
     selected_idp = request.GET.get('idp', None)
     conf = get_config(config_loader_path, request)
 
-    last_login_idp = request.COOKIES.get('last_login_idp', None)
+    last_login_idp = request.COOKIES.get(LAST_LOGIN_IDP_SESSION_KEY, None)
 
     # is a embedded wayf needed?
     idps = available_idps(conf)
@@ -212,7 +214,7 @@ def login(request,  # noqa: C901
 
     # Remove the last logged in cookie:
     # this will be set again at the end of the ACS call, if the user successfully authenticates.
-    http_response.delete_cookie('last_login_idp')
+    http_response.delete_cookie(LAST_LOGIN_IDP_SESSION_KEY)
 
     return http_response
 
@@ -328,7 +330,11 @@ def assertion_consumer_service(request,
     get_user_model().objects.set_email_last_login_time(email)
 
     # remember the idp the user authenticated against
-    http_response.set_cookie('last_login_idp', session_info['issuer'], expires=dt.datetime.today()+dt.timedelta(days=7))
+    # this will be phased out when the new auth flow is rolled out fully
+    http_response.set_cookie(LAST_LOGIN_IDP_SESSION_KEY, session_info['issuer'], expires=dt.datetime.today()+dt.timedelta(days=7))
+
+    # remember the email the user authenticated with
+    http_response.set_cookie(SSO_EMAIL_SESSION_KEY, email, expires=dt.datetime.today() + dt.timedelta(days=30))
 
     return http_response
 
@@ -410,45 +416,31 @@ class LoginStartView(FormView):
 
         initial = super().get_initial()
 
-        email = self.request.COOKIES.get('sso_auth_email', None)
+        email = self.request.COOKIES.get(SSO_EMAIL_SESSION_KEY, None)
 
         if email:
             initial['email'] = email
 
         return initial
 
-    def _lookup_idp(self, ref):
+    def lookup_idp_from_ref(self, ref):
         conf = get_config(None, self.request)
         idps = available_idps(conf)
 
         return [k for k, v in idps.items() if v == ref][0]
 
     def form_valid(self, form):
+
         email = form.cleaned_data['email']
-        email_domain = '@' + form.cleaned_data['email'].split('@')[1]
 
-        EMAIL_IDP_MAPPING = {
-            '@trade.gov.uk': 'a-cirrus',
-            '@mobile.ukti.gov.uk': 'b-core',
-            '@extranet.ukti.gov.uk': 'b-core',
-            '@ukexportfinance.gov.uk': 'c-ukef',
-            '@digital.trade.gov.uk': 'd-google',
-            '@mobile.trade.gov.uk': 'e-core',
-            '*': 'okta',
-        }
-
-        if email_domain in settings.EMAIL_TOKEN_DOMAIN_WHITELIST:
-            response = redirect('emailauth:email-auth-initiate')
-
-        else:
-
-            idp_ref = EMAIL_IDP_MAPPING[email_domain] if email_domain in EMAIL_IDP_MAPPING else 'okta'
-
-            idp = self._lookup_idp(idp_ref)
-
+        if form.idp_ref:
+            idp = self.lookup_idp_from_ref(form.idp_ref)
             response = redirect(reverse('saml2_login') + f'?idp={idp}')
 
-        response.set_cookie('sso_auth_email', email, expires=dt.datetime.today() + dt.timedelta(days=30))
+        else:
+            response = redirect('emailauth:email-auth-initiate')
+
+        response.set_cookie(SSO_EMAIL_SESSION_KEY, email, expires=dt.datetime.today() + dt.timedelta(days=30))
 
         return response
 
@@ -457,36 +449,11 @@ class LoginJourneySelectionView(RedirectView):
 
     query_string = True
 
-    pattern_names = {
-        'current': 'saml2_login',
-        'new': 'saml2_login_start',
-    }
-
-    def setup(self, request, *args, **kwargs):
-        self._variant = self._get_user_journey_choice(request)
-        super().setup(request, *args, **kwargs)
-
     def _get_user_journey_choice(self, request):
-        """ Logic to determine which authentication flow to use allowing the
-        user to override the default choice via a query string parameter.
+        """ Logic to determine which authentication flow to use"""
+        email = request.COOKIES.get(SSO_EMAIL_SESSION_KEY)
 
-        TODO: make the choice weightable"""
-
-        options = list(self.pattern_names.keys())
-
-        # querystring takes precedence
-        if 'variant' in request.GET and request.GET['variant'] in options:
-            variant = request.GET['variant']
-        elif 'variant' in request.COOKIES and request.COOKIES['variant'] in options:
-            variant = request.COOKIES['variant']
-        else:
-            # TODO: additional logic required to make this weighted
-            variant = random.choice(options)
-
-        # TODO: remove temporary override
-        return 'new'
-
-        return variant
+        return 'saml2_login_start' if email and email in settings.NEW_AUTH_FLOW_EMAILS else 'saml2_login'
 
     def get_redirect_url(self, *args, **kwargs):
         """
@@ -494,19 +461,10 @@ class LoginJourneySelectionView(RedirectView):
         match generating the redirect request are provided as kwargs to this
         method.
         """
-        assert hasattr(self, '_variant')
-
-        pattern_name = self.pattern_names[self._variant]
-        url = reverse(pattern_name, args=args, kwargs=kwargs)
+        url_pattern = self._get_user_journey_choice(self.request)
+        url = reverse(url_pattern, args=args, kwargs=kwargs)
 
         args = self.request.META.get('QUERY_STRING', '')
         if args and self.query_string:
-            url = "%s?%s" % (url, args)
+            url = '%s?%s' % (url, args)
         return url
-
-    def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
-
-        response.set_cookie('variant', self._variant)
-
-        return response

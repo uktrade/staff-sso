@@ -114,4 +114,4 @@ class TestAdminSSOLogin:
         response = client.get('/admin/login/')
 
         assert response.status_code == 302
-        assert response.url == '/saml2/login/?next=/admin/'
+        assert response.url == reverse('saml2_login_initiate') + '?next=/admin/'
