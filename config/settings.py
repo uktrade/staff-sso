@@ -466,7 +466,7 @@ SAML_IDP_SPCONFIG = {
     'google.com': {
         'processor': 'sso.samlidp.processors.GoogleProcessor',
         'attribute_mapping': {}
-    }
+    },
 }
 
 SAML_IDP_ERROR_VIEW_CLASS = 'sso.samlidp.views.CustomSamlIDPErrorView'
