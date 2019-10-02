@@ -466,7 +466,11 @@ SAML_IDP_SPCONFIG = {
     'google.com': {
         'processor': 'sso.samlidp.processors.GoogleProcessor',
         'attribute_mapping': {}
-    }
+    },
+    'https://accounts.google.com/o/saml2?idpid=C02gtgu6t': {
+        'processor': 'sso.samlidp.processors.GoogleProcessor',
+        'attribute_mapping': {}
+    },
 }
 
 SAML_IDP_ERROR_VIEW_CLASS = 'sso.samlidp.views.CustomSamlIDPErrorView'
