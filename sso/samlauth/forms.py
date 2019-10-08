@@ -13,7 +13,7 @@ def lookup_idp_ref_from_email(email_domain):
 
 
 class EmailForm(forms.Form):
-    email = forms.EmailField(widget=forms.TextInput(attrs={'class': 'form-control form-control-1-4'}))
+    email = forms.EmailField(widget=forms.TextInput(attrs={'class': 'form-control form-control-1-5'}))
 
     def __init__(self, *args, **kwargs):
         self.idp_ref = None
