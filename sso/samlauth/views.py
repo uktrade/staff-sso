@@ -1,6 +1,7 @@
 import base64
 import datetime as dt
 import logging
+import random
 
 from django.conf import settings
 from django.contrib import auth
@@ -17,7 +18,7 @@ from django.utils.http import is_safe_url
 from django.utils.six import text_type
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import RedirectView
+from django.views.generic.base import View
 from django.views.generic.edit import FormView
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
 
@@ -408,9 +409,8 @@ def logged_out(request):
 
 
 class LoginStartView(FormView):
-    # TODO: retain ?next= / unset existing selection
     form_class = EmailForm
-    template_name = 'sso/enter-email.html'
+    template_name = 'sso/login-initiate.html'
 
     def get_initial(self):
 
@@ -424,6 +424,7 @@ class LoginStartView(FormView):
         return initial
 
     def lookup_idp_from_ref(self, ref):
+
         conf = get_config(None, self.request)
         idps = available_idps(conf)
 
@@ -435,8 +436,13 @@ class LoginStartView(FormView):
 
         if form.idp_ref:
             idp = self.lookup_idp_from_ref(form.idp_ref)
-            response = redirect(reverse('saml2_login') + f'?idp={idp}')
+            url = reverse('saml2_login') + f'?idp={idp}'
+            args = self.request.META.get('QUERY_STRING', '')
 
+            if args:
+                url = '%s&%s' % (url, args)
+
+            response = redirect(url)
         else:
             response = redirect('emailauth:email-auth-initiate')
 
@@ -445,26 +451,39 @@ class LoginStartView(FormView):
         return response
 
 
-class LoginJourneySelectionView(RedirectView):
+class LoginJourneySelectionView(View):
 
-    query_string = True
+    CHOICE_SESSION_KEY = '_auth_flow_choice'
+    CHOICE_SESSION_INDEX_KEY = '_auth_flow_choice_index'
 
-    def _get_user_journey_choice(self, request):
-        """ Logic to determine which authentication flow to use"""
-        email = request.COOKIES.get(SSO_EMAIL_SESSION_KEY)
+    JOURNEYS = {
+        'a': 'saml2_login_start',   # new journey
+        'b': 'saml2_login'          # existing login page
+    }
 
-        return 'saml2_login_start' if email and email in settings.NEW_AUTH_FLOW_EMAILS else 'saml2_login'
+    def get(self, request, *args, **kwargs):
+        choice = request.COOKIES.get(self.CHOICE_SESSION_KEY)
+        index = request.COOKIES.get(self.CHOICE_SESSION_INDEX_KEY, 0)
 
-    def get_redirect_url(self, *args, **kwargs):
-        """
-        Return the URL redirect to. Keyword arguments from the URL pattern
-        match generating the redirect request are provided as kwargs to this
-        method.
-        """
-        url_pattern = self._get_user_journey_choice(self.request)
-        url = reverse(url_pattern, args=args, kwargs=kwargs)
+        if choice not in ['a', 'b'] or (choice != 'a' and index != settings.NEW_AUTH_FLOW_CHOICE_INDEX):
+            email = request.COOKIES.get(SSO_EMAIL_SESSION_KEY)
+
+            selected_by_email = email in settings.NEW_AUTH_FLOW_EMAILS
+            selected_by_choice = random.random() < settings.NEW_AUTH_FLOW_WEIGHTING_PERCENT / 100.0
+
+            choice = 'a' if selected_by_email or selected_by_choice else 'b'
+
+        url = reverse(self.JOURNEYS[choice])
 
         args = self.request.META.get('QUERY_STRING', '')
-        if args and self.query_string:
+        if args:
             url = '%s?%s' % (url, args)
-        return url
+
+        response = HttpResponseRedirect(url)
+
+        expiry_date = dt.datetime.today() + dt.timedelta(days=30)
+
+        response.set_cookie(self.CHOICE_SESSION_KEY, choice, expires=expiry_date)
+        response.set_cookie(self.CHOICE_SESSION_INDEX_KEY, settings.NEW_AUTH_FLOW_CHOICE_INDEX, expires=expiry_date)
+
+        return response

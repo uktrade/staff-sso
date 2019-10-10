@@ -3,7 +3,7 @@ import os
 import re
 from functools import lru_cache
 from unittest.mock import Mock
-from urllib.parse import parse_qs, quote, urlencode
+from urllib.parse import parse_qs, quote, urlencode, urlsplit
 
 import pytest
 from django.http.cookie import SimpleCookie
@@ -741,7 +741,7 @@ class TestReAuth:
 
 
 class TestRedirectionView:
-    def test_whitelisted_email_is_redirected_to_new_view(self, client, settings):
+    def test_whitelisted_email_is_redirected_to_route_a(self, client, settings):
         client.cookies.load({'sso_auth_email': 'test@test.com'})
 
         settings.NEW_AUTH_FLOW_EMAILS = ['test@test.com']
@@ -751,10 +751,11 @@ class TestRedirectionView:
         assert response.status_code == 302
         assert response.url == reverse('saml2_login_start')
 
-    def test_non_whitelisted_email_redirected_to_existing_view(self, client, settings):
+    def test_non_whitelisted_email_redirected_to_route_b(self, client, settings):
         client.cookies = SimpleCookie({'sso_auth_email': 'test@test.com'})
 
         settings.NEW_AUTH_FLOW_EMAILS = ['test@test123.com']
+        settings.NEW_AUTH_FLOW_WEIGHTING_PERCENT = 0
 
         response = client.get(reverse('saml2_login_initiate'))
 
@@ -770,6 +771,30 @@ class TestRedirectionView:
 
         assert response.status_code == 302
         assert response.url == reverse('saml2_login')  + '?test=true'
+
+    @pytest.mark.parametrize(
+        'weight, url_pattern',
+        (
+            (100, 'saml2_login_start'),
+            (0, 'saml2_login'),
+        ),
+    )
+    def test_choice_weighting(self, client, settings, weight, url_pattern):
+        settings.NEW_AUTH_FLOW_WEIGHTING_PERCENT = weight
+        response = client.get(reverse('saml2_login_initiate'))
+
+        assert response.url == reverse(url_pattern)
+
+    def test_bumping_index_causes_reselection(self, client, settings):
+        client.cookies = SimpleCookie({'_auth_flow_choice_index': '1', '_auth_flow_choice': 'a'})
+        settings.NEW_AUTH_FLOW_CHOICE_INDEX = 2
+        settings.NEW_AUTH_FLOW_WEIGHTING_PERCENT = 0
+
+        response = client.get(reverse('saml2_login_initiate'))
+
+        assert response.url == reverse('saml2_login')
+        assert client.cookies['_auth_flow_choice_index'].value == str(settings.NEW_AUTH_FLOW_CHOICE_INDEX)
+        assert client.cookies['_auth_flow_choice'].value == 'b'
 
 
 class TestEmailBasedAuthFlow:
@@ -796,5 +821,24 @@ class TestEmailBasedAuthFlow:
 
         assert response.url == reverse('emailauth:email-auth-initiate')
 
-    def test_redirect_to_idp(self):
-        pass
+    def test_redirect_to_idp(self, settings, client):
+
+        settings.AUTH_EMAIL_TO_IPD_MAP={'a-test': ['@test.com']}
+        response = client.post(reverse('saml2_login_start'), {'email': 'test@test.com'})
+
+        assert response.status_code == 302
+        assert response.url == '/saml2/login/?idp=http://localhost:8080/simplesaml/saml2/idp/metadata.php'
+
+    def test_querystring_is_preserved_on_redirect(self, settings, client):
+        settings.AUTH_EMAIL_TO_IPD_MAP={'a-test': ['@test.com']}
+        response = client.post(reverse('saml2_login_start') + '?a=hello&b=world', {'email': 'test@test.com'})
+
+        qs_items = dict(parse_qs(urlsplit(response.url).query))
+
+        assert response.status_code == 302
+        assert len(qs_items.items()) == 3
+        assert qs_items == {
+            'idp': ['http://localhost:8080/simplesaml/saml2/idp/metadata.php'],
+            'a': ['hello'],
+            'b': ['world'],
+        }
