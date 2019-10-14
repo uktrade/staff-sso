@@ -741,26 +741,37 @@ class TestReAuth:
 
 
 class TestRedirectionView:
-    def test_whitelisted_email_is_redirected_to_route_a(self, client, settings):
-        client.cookies.load({'sso_auth_email': 'test@test.com'})
-
-        settings.NEW_AUTH_FLOW_EMAILS = ['test@test.com']
-
-        response = client.get(reverse('saml2_login_initiate'))
-
-        assert response.status_code == 302
-        assert response.url == reverse('saml2_login_start')
-
-    def test_non_whitelisted_email_redirected_to_route_b(self, client, settings):
-        client.cookies = SimpleCookie({'sso_auth_email': 'test@test.com'})
-
-        settings.NEW_AUTH_FLOW_EMAILS = ['test@test123.com']
-        settings.NEW_AUTH_FLOW_WEIGHTING_PERCENT = 0
+    def test_no_cookie_use_existing_route(self, client):
+        client.cookies.load({'sso_auth_email': 'does-not-exist@test.com'})
 
         response = client.get(reverse('saml2_login_initiate'))
 
         assert response.status_code == 302
         assert response.url == reverse('saml2_login')
+
+    def test_cookie_with_invalid_email_use_existing_route(self, client):
+        response = client.get(reverse('saml2_login_initiate'))
+
+        assert response.status_code == 302
+        assert response.url == reverse('saml2_login')
+
+    @pytest.mark.parametrize(
+        'use_new_journey, url_pattern',
+        (
+            (True, 'saml2_login_start'),
+            (False, 'saml2_login'),
+        ),
+    )
+    def test_route_selection(self, client, use_new_journey, url_pattern):
+        email = 'test@test.com'
+        UserFactory(email=email, use_new_journey=use_new_journey)
+
+        client.cookies.load({'sso_auth_email': email})
+
+        response = client.get(reverse('saml2_login_initiate'))
+
+        assert response.status_code == 302
+        assert response.url == reverse(url_pattern)
 
     def test_querystring_is_preserved(self, client, settings):
         client.cookies = SimpleCookie({'sso_auth_email': 'test@test.com'})
@@ -771,30 +782,6 @@ class TestRedirectionView:
 
         assert response.status_code == 302
         assert response.url == reverse('saml2_login')  + '?test=true'
-
-    @pytest.mark.parametrize(
-        'weight, url_pattern',
-        (
-            (100, 'saml2_login_start'),
-            (0, 'saml2_login'),
-        ),
-    )
-    def test_choice_weighting(self, client, settings, weight, url_pattern):
-        settings.NEW_AUTH_FLOW_WEIGHTING_PERCENT = weight
-        response = client.get(reverse('saml2_login_initiate'))
-
-        assert response.url == reverse(url_pattern)
-
-    def test_bumping_index_causes_reselection(self, client, settings):
-        client.cookies = SimpleCookie({'_auth_flow_choice_index': '1', '_auth_flow_choice': 'a'})
-        settings.NEW_AUTH_FLOW_CHOICE_INDEX = 2
-        settings.NEW_AUTH_FLOW_WEIGHTING_PERCENT = 0
-
-        response = client.get(reverse('saml2_login_initiate'))
-
-        assert response.url == reverse('saml2_login')
-        assert client.cookies['_auth_flow_choice_index'].value == str(settings.NEW_AUTH_FLOW_CHOICE_INDEX)
-        assert client.cookies['_auth_flow_choice'].value == 'b'
 
 
 class TestEmailBasedAuthFlow:
