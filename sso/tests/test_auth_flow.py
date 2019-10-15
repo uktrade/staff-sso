@@ -814,7 +814,7 @@ class TestEmailBasedAuthFlow:
         response = client.post(reverse('saml2_login_start'), {'email': 'test@test.com'})
 
         assert response.status_code == 302
-        assert response.url == '/saml2/login/?idp=http://localhost:8080/simplesaml/saml2/idp/metadata.php'
+        assert response.url == '/saml2/login/?idp=http%3A//localhost%3A8080/simplesaml/saml2/idp/metadata.php'
 
     def test_querystring_is_preserved_on_redirect(self, settings, client):
         settings.AUTH_EMAIL_TO_IPD_MAP={'a-test': ['@test.com']}

@@ -5,7 +5,7 @@ from django.conf import settings
 def lookup_idp_ref_from_email(email_domain):
     idp_ref = None
     for ref, allowed_email_domains in settings.AUTH_EMAIL_TO_IPD_MAP.items():
-        if any(True for domain in allowed_email_domains if domain == email_domain):
+        if email_domain in allowed_email_domains:
             idp_ref = ref
             break
 

@@ -1,6 +1,7 @@
 import base64
 import datetime as dt
 import logging
+from urllib.parse import quote
 
 from django.conf import settings
 from django.contrib import auth
@@ -434,7 +435,7 @@ class LoginStartView(FormView):
         email = form.cleaned_data['email']
 
         if form.idp_ref:
-            idp = self.lookup_idp_from_ref(form.idp_ref)
+            idp = quote(self.lookup_idp_from_ref(form.idp_ref))
             url = reverse('saml2_login') + f'?idp={idp}'
             args = self.request.META.get('QUERY_STRING', '')
 
