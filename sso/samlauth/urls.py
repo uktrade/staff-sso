@@ -11,4 +11,6 @@ urlpatterns = [
     url(r'^metadata/$', djangosaml2_views.metadata, name='saml2_metadata'),
     url(r'^logged-in/$', views.logged_in, name='saml2_logged_in'),
     url(r'^logged-out/$', views.logged_out, name='saml2_logged_out'),
+    url(r'^login-start/$', views.LoginStartView.as_view(), name='saml2_login_start'),
+    url(r'^login-redirect/$', views.LoginJourneySelectionView.as_view(), name='saml2_login_initiate')
 ]

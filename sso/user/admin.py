@@ -43,11 +43,12 @@ class UserAdmin(admin.ModelAdmin):
         }
 
     search_fields = ('emails__email', 'email', 'first_name', 'last_name', 'user_id')
-    list_filter = (ApplicationFilter, 'access_profiles__name', 'is_superuser')
-    fields = ('user_id', 'email', 'first_name', 'last_name', 'contact_email', 'date_joined', 'last_login', 'last_accessed',
-              'access_profiles', 'permitted_applications', 'list_user_settings_wrapper')
+    list_filter = (ApplicationFilter, 'access_profiles__name', 'is_superuser', 'use_new_journey')
+    fields = ('user_id', 'email', 'first_name', 'last_name', 'contact_email', 'date_joined', 'last_login',
+              'last_accessed', 'use_new_journey', 'access_profiles', 'permitted_applications',
+              'list_user_settings_wrapper')
     readonly_fields = ('date_joined', 'last_login', 'last_accessed', 'user_id', 'list_user_settings_wrapper')
-    list_display = ('email', 'email_list', 'is_superuser', 'last_login', 'last_accessed',
+    list_display = ('email', 'email_list', 'is_superuser', 'use_new_journey', 'last_login', 'last_accessed',
                     'list_permitted_applications', 'list_access_profiles', 'show_permissions_link')
     inlines = [
         EmailInline

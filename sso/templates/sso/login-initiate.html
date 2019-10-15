@@ -1,0 +1,33 @@
+{% extends 'sso/base.html' %}
+
+{% block inner_content %}
+<div class="container">
+    <h1 class="heading-large">Sign in to DIT internal services</h1>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <p>Enter your email address to be directed to the correct login page.</p>
+
+        <p class="email-input">
+
+            <label class="form-label" for="username">Email address</label>
+
+            {{ form.email }}
+
+            {% if form.email.errors %}
+                <ul class="errorlist">
+                  {% for error in form.email.errors %}
+                    <li><span class="error-message">{{ error }}</span></li>
+                  {% endfor %}
+                </ul>
+            {% endif %}
+        </p>
+
+        <p><input type="submit" class="button" value="Next step"></p>
+    </form>
+
+    <p><a href="{% url 'saml2_login' %}">Show all login options</a></p>
+
+</div>
+{% endblock %}

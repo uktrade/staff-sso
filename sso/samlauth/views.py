@@ -1,6 +1,7 @@
 import base64
 import datetime as dt
 import logging
+from urllib.parse import quote
 
 from django.conf import settings
 from django.contrib import auth
@@ -10,13 +11,15 @@ from django.http import (
     HttpResponse, HttpResponseBadRequest, HttpResponseRedirect,
     HttpResponseServerError
 )
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import is_safe_url
 from django.utils.six import text_type
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic.base import View
+from django.views.generic.edit import FormView
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
 
 from djangosaml2.cache import IdentityCache, OutstandingQueriesCache, StateCache
@@ -40,9 +43,14 @@ from saml2.response import (
 from saml2.validate import ResponseLifetimeExceed, ToEarly
 
 from sso.core.logging import create_x_access_log
+from sso.samlauth.forms import EmailForm
 
 
 logger = logging.getLogger('sso.samlauth')
+
+
+SSO_EMAIL_SESSION_KEY = 'sso_auth_email'
+LAST_LOGIN_IDP_SESSION_KEY = 'last_login_idp'
 
 
 def login(request,  # noqa: C901
@@ -106,7 +114,7 @@ def login(request,  # noqa: C901
     selected_idp = request.GET.get('idp', None)
     conf = get_config(config_loader_path, request)
 
-    last_login_idp = request.COOKIES.get('last_login_idp', None)
+    last_login_idp = request.COOKIES.get(LAST_LOGIN_IDP_SESSION_KEY, None)
 
     # is a embedded wayf needed?
     idps = available_idps(conf)
@@ -207,7 +215,7 @@ def login(request,  # noqa: C901
 
     # Remove the last logged in cookie:
     # this will be set again at the end of the ACS call, if the user successfully authenticates.
-    http_response.delete_cookie('last_login_idp')
+    http_response.delete_cookie(LAST_LOGIN_IDP_SESSION_KEY)
 
     return http_response
 
@@ -323,7 +331,11 @@ def assertion_consumer_service(request,
     get_user_model().objects.set_email_last_login_time(email)
 
     # remember the idp the user authenticated against
-    http_response.set_cookie('last_login_idp', session_info['issuer'], expires=dt.datetime.today()+dt.timedelta(days=7))
+    # this will be phased out when the new auth flow is rolled out fully
+    http_response.set_cookie(LAST_LOGIN_IDP_SESSION_KEY, session_info['issuer'], expires=dt.datetime.today()+dt.timedelta(days=7))
+
+    # remember the email the user authenticated with
+    http_response.set_cookie(SSO_EMAIL_SESSION_KEY, email, expires=dt.datetime.today() + dt.timedelta(days=30))
 
     return http_response
 
@@ -394,3 +406,72 @@ def logged_out(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect(reverse('saml2_logged_in'))
     return render(request, 'sso/logged-out.html')
+
+
+class LoginStartView(FormView):
+    form_class = EmailForm
+    template_name = 'sso/login-initiate.html'
+
+    def get_initial(self):
+
+        initial = super().get_initial()
+
+        email = self.request.COOKIES.get(SSO_EMAIL_SESSION_KEY, None)
+
+        if email:
+            initial['email'] = email
+
+        return initial
+
+    def lookup_idp_from_ref(self, ref):
+
+        conf = get_config(None, self.request)
+        idps = available_idps(conf)
+
+        return [k for k, v in idps.items() if v == ref][0]
+
+    def form_valid(self, form):
+
+        email = form.cleaned_data['email']
+
+        if form.idp_ref:
+            idp = quote(self.lookup_idp_from_ref(form.idp_ref))
+            url = reverse('saml2_login') + f'?idp={idp}'
+            args = self.request.META.get('QUERY_STRING', '')
+
+            if args:
+                url = '%s&%s' % (url, args)
+
+            response = redirect(url)
+        else:
+            response = redirect('emailauth:email-auth-initiate')
+
+        response.set_cookie(SSO_EMAIL_SESSION_KEY, email, expires=dt.datetime.today() + dt.timedelta(days=30))
+
+        return response
+
+
+class LoginJourneySelectionView(View):
+
+    def get(self, request, *args, **kwargs):
+
+        User = get_user_model()
+
+        choice = 'saml2_login'
+
+        user_email = request.COOKIES.get(SSO_EMAIL_SESSION_KEY)
+
+        if user_email:
+            try:
+                if User.objects.get(email=user_email).use_new_journey:
+                    choice = 'saml2_login_start'
+            except User.DoesNotExist:
+                pass
+
+        url = reverse(choice)
+
+        args = self.request.META.get('QUERY_STRING', '')
+        if args:
+            url = '%s?%s' % (url, args)
+
+        return redirect(url)

@@ -3,9 +3,10 @@ import os
 import re
 from functools import lru_cache
 from unittest.mock import Mock
-from urllib.parse import parse_qs, quote, urlencode
+from urllib.parse import parse_qs, quote, urlencode, urlsplit
 
 import pytest
+from django.http.cookie import SimpleCookie
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from freezegun import freeze_time
@@ -39,6 +40,8 @@ SAML_LS_POST_URL = reverse_lazy('saml2_ls_post')  # for logout
 OAUTH_AUTHORIZE_URL = reverse_lazy('oauth2_provider:authorize')
 OAUTH_REDIRECT_URL = 'http://localhost/authorized'
 OAUTH_TOKEN_URL = reverse_lazy('oauth2_provider:token')
+
+SAML_LOGIN_INITIATE_URL = reverse_lazy('saml2_login_initiate')
 
 
 pytestmark = [
@@ -96,7 +99,7 @@ class TestOAuthAuthorize:
 
         assert response.status_code == 302
         assert response.url.startswith(
-            f'{SAML_LOGIN_URL}?next={OAUTH_AUTHORIZE_URL}'
+            f'{SAML_LOGIN_INITIATE_URL}?next={OAUTH_AUTHORIZE_URL}'
         )
 
     def test_x_application_log_is_created(self, client, mocker):
@@ -715,3 +718,114 @@ class TestReAuth:
 
         assert user.emails.count() == 1
         assert user.emails.first().last_login == timezone.now()
+
+    @freeze_time('2017-06-22 15:50:00.000000+00:00')
+    def test_used_email_is_saved_in_cookie(self, client, mocker):
+        application, authorize_params = create_oauth_application()
+
+        data = {
+            'SAMLResponse': [base64.b64encode(get_saml_response(action='login'))],
+            'RelayState': f'{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}'
+        }
+
+        MockOutstandingQueriesCache = mocker.patch('sso.samlauth.views.OutstandingQueriesCache')
+        MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
+
+        MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
+        MockCryptoBackendXmlSec1().validate_signature.return_value = True
+
+        response = client.post(SAML_ACS_URL, data)
+
+        assert response.status_code == 302
+        assert client.cookies['sso_auth_email'].value == 'user1@example.com'
+
+
+class TestRedirectionView:
+    def test_no_cookie_use_existing_route(self, client):
+        client.cookies.load({'sso_auth_email': 'does-not-exist@test.com'})
+
+        response = client.get(reverse('saml2_login_initiate'))
+
+        assert response.status_code == 302
+        assert response.url == reverse('saml2_login')
+
+    def test_cookie_with_invalid_email_use_existing_route(self, client):
+        response = client.get(reverse('saml2_login_initiate'))
+
+        assert response.status_code == 302
+        assert response.url == reverse('saml2_login')
+
+    @pytest.mark.parametrize(
+        'use_new_journey, url_pattern',
+        (
+            (True, 'saml2_login_start'),
+            (False, 'saml2_login'),
+        ),
+    )
+    def test_route_selection(self, client, use_new_journey, url_pattern):
+        email = 'test@test.com'
+        UserFactory(email=email, use_new_journey=use_new_journey)
+
+        client.cookies.load({'sso_auth_email': email})
+
+        response = client.get(reverse('saml2_login_initiate'))
+
+        assert response.status_code == 302
+        assert response.url == reverse(url_pattern)
+
+    def test_querystring_is_preserved(self, client, settings):
+        client.cookies = SimpleCookie({'sso_auth_email': 'test@test.com'})
+
+        settings.NEW_AUTH_FLOW_EMAILS = []
+
+        response = client.get(reverse('saml2_login_initiate') + '?test=true')
+
+        assert response.status_code == 302
+        assert response.url == reverse('saml2_login')  + '?test=true'
+
+
+class TestEmailBasedAuthFlow:
+    def test_invalid_email_leads_to_form_error(self, client):
+        response = client.post(reverse('saml2_login_start'), {'email': 'test@invalid.com'})
+
+        assert response.status_code == 200
+
+        assert 'You cannot login with this email address'.encode('utf-8') in response.content
+
+    def test_previously_used_email_is_rendered_on_form(self, client):
+        client.cookies = SimpleCookie({'sso_auth_email': 'test@test.com'})
+
+        response = client.get(reverse('saml2_login_start'))
+
+        assert '<input type="text" name="email" value="test@test.com"'.encode('utf-8') in response.content
+
+    def test_email_token_based_email_redirects_to_email_flow(self, client, settings):
+        settings.EMAIL_TOKEN_DOMAIN_WHITELIST = ['@test.com']
+
+        response = client.post(reverse('saml2_login_start'), {'email': 'test@test.com'})
+
+        assert response.status_code == 302
+
+        assert response.url == reverse('emailauth:email-auth-initiate')
+
+    def test_redirect_to_idp(self, settings, client):
+
+        settings.AUTH_EMAIL_TO_IPD_MAP={'a-test': ['@test.com']}
+        response = client.post(reverse('saml2_login_start'), {'email': 'test@test.com'})
+
+        assert response.status_code == 302
+        assert response.url == '/saml2/login/?idp=http%3A//localhost%3A8080/simplesaml/saml2/idp/metadata.php'
+
+    def test_querystring_is_preserved_on_redirect(self, settings, client):
+        settings.AUTH_EMAIL_TO_IPD_MAP={'a-test': ['@test.com']}
+        response = client.post(reverse('saml2_login_start') + '?a=hello&b=world', {'email': 'test@test.com'})
+
+        qs_items = dict(parse_qs(urlsplit(response.url).query))
+
+        assert response.status_code == 302
+        assert len(qs_items.items()) == 3
+        assert qs_items == {
+            'idp': ['http://localhost:8080/simplesaml/saml2/idp/metadata.php'],
+            'a': ['hello'],
+            'b': ['world'],
+        }
