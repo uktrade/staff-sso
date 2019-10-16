@@ -50,7 +50,6 @@ logger = logging.getLogger('sso.samlauth')
 
 
 SSO_EMAIL_SESSION_KEY = 'sso_auth_email'
-LAST_LOGIN_IDP_SESSION_KEY = 'last_login_idp'
 
 
 def login(request,  # noqa: C901
@@ -114,25 +113,17 @@ def login(request,  # noqa: C901
     selected_idp = request.GET.get('idp', None)
     conf = get_config(config_loader_path, request)
 
-    last_login_idp = request.COOKIES.get(LAST_LOGIN_IDP_SESSION_KEY, None)
-
     # is a embedded wayf needed?
     idps = available_idps(conf)
     if selected_idp is None and len(idps) > 1:
-        if last_login_idp and last_login_idp in idps:
-
-            logger.debug('Re-authenticating against: %s', last_login_idp)
-            selected_idp = last_login_idp
-
-        else:
-            logger.debug('A discovery process is needed')
-            idps = sorted(idps.items(), key=lambda x: x[1])
-            return render(
-                request, wayf_template, {
-                    'available_idps': idps,
-                    'came_from': came_from,
-                }
-            )
+        logger.debug('A discovery process is needed')
+        idps = sorted(idps.items(), key=lambda x: x[1])
+        return render(
+            request, wayf_template, {
+                'available_idps': idps,
+                'came_from': came_from,
+            }
+        )
 
     # choose a binding to try first
     sign_requests = getattr(conf, '_sp_authn_requests_signed', False)
@@ -212,10 +203,6 @@ def login(request,  # noqa: C901
     logger.debug('Saving the session_id in the OutstandingQueries cache')
     oq_cache = OutstandingQueriesCache(request.session)
     oq_cache.set(session_id, came_from)
-
-    # Remove the last logged in cookie:
-    # this will be set again at the end of the ACS call, if the user successfully authenticates.
-    http_response.delete_cookie(LAST_LOGIN_IDP_SESSION_KEY)
 
     return http_response
 
@@ -330,10 +317,6 @@ def assertion_consumer_service(request,
     create_x_access_log(request, 200, message='Remote IdP Auth', entity_id=session_info['issuer'], email=email)
     get_user_model().objects.set_email_last_login_time(email)
 
-    # remember the idp the user authenticated against
-    # this will be phased out when the new auth flow is rolled out fully
-    http_response.set_cookie(LAST_LOGIN_IDP_SESSION_KEY, session_info['issuer'], expires=dt.datetime.today()+dt.timedelta(days=7))
-
     # remember the email the user authenticated with
     http_response.set_cookie(SSO_EMAIL_SESSION_KEY, email, expires=dt.datetime.today() + dt.timedelta(days=30))
 
@@ -411,6 +394,12 @@ def logged_out(request):
 class LoginStartView(FormView):
     form_class = EmailForm
     template_name = 'sso/login-initiate.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['next'] = self.request.GET.get('next', settings.LOGIN_REDIRECT_URL)
+
+        return context
 
     def get_initial(self):
 

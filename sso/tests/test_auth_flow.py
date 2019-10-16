@@ -662,37 +662,6 @@ class TestReAuth:
         assert response.status_code == 200
         assert response.templates[0].name == 'djangosaml2/wayf.html'
 
-    def test_login_cookie_is_removed_at_login(self, client, settings):
-        client.cookies.load({'last_login_idp': 'http://entityid'})
-        settings.SAML_CONFIG['metadata']['local'] += [os.path.join(settings.SAML_CONFIG_DIR, 'idp_metadata_2.xml')]
-        login_url = f'{SAML_LOGIN_URL}'
-        response = client.get(login_url)
-
-        assert response.status_code == 200
-        assert response.templates[0].name == 'djangosaml2/post_binding_form.html'
-        assert response.cookies['last_login_idp'].value == ''
-
-    @freeze_time('2017-06-22 15:50:00.000000+00:00')
-    def test_acs_cookie_set_on_success(self, client, mocker):
-
-        application, authorize_params = create_oauth_application()
-
-        data = {
-            'SAMLResponse': [base64.b64encode(get_saml_response(action='login'))],
-            'RelayState': f'{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}'
-        }
-
-        MockOutstandingQueriesCache = mocker.patch('sso.samlauth.views.OutstandingQueriesCache')
-        MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
-
-        MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
-        MockCryptoBackendXmlSec1().validate_signature.return_value = True
-
-        response = client.post(SAML_ACS_URL, data)
-
-        assert response.status_code == 302
-        assert client.cookies['last_login_idp'].value == 'http://localhost:8080/simplesaml/saml2/idp/metadata.php'
-
     @freeze_time('2017-06-22 15:50:00.000000+00:00')
     def test_last_login_time_recorded_against_email(self, client, mocker):
 
@@ -829,3 +798,10 @@ class TestEmailBasedAuthFlow:
             'a': ['hello'],
             'b': ['world'],
         }
+
+    def test_next_querystring_is_retained(self, client):
+
+        response = client.get(reverse('saml2_login_start') + '?next=http://whatever')
+
+        assert '<a href="/saml2/login/?next=http://whatever">Show all login options</a>' in \
+               response.content.decode('utf-8')
