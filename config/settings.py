@@ -307,7 +307,7 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console'],
-        'level': 'WARN',
+        'level': 'DEBUG',
     },
     'loggers': {
         'x-auth': {
@@ -469,7 +469,8 @@ SAML_IDP_SPCONFIG = {
         'processor': 'sso.samlidp.processors.GoogleProcessor',
         'attribute_mapping': {}
     },
-    'https://departmentforinternationaltrade.invisionapp.com':{
+    'https://departmentforinternationaltrade.invisionapp.com': {
+        'processor': 'sso.samlidp.processors.ModelProcessor',
         'attribute_mapping': {},
     }
 }
