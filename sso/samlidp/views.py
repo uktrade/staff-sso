@@ -1,8 +1,5 @@
 import logging
 
-from django.shortcuts import redirect
-
-from djangosaml2idp.error_views import SamlIDPErrorView
 from djangosaml2idp.views import IdPHandlerViewMixin
 
 from django.conf import settings
@@ -20,16 +17,6 @@ from saml2.s_utils import UnknownPrincipal, UnsupportedBinding
 
 
 logger = logging.getLogger(__name__)
-
-
-class CustomSamlIDPErrorView(SamlIDPErrorView):
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-
-        if context and 'PermissionDenied' in context['exception_type']:
-            return redirect('contact:access-denied')
-        return self.render_to_response(context)
-
 
 
 @method_decorator(never_cache, name='dispatch')

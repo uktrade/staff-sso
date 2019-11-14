@@ -475,7 +475,7 @@ SAML_IDP_SPCONFIG = {
     }
 }
 
-SAML_IDP_ERROR_VIEW_CLASS = 'sso.samlidp.views.CustomSamlIDPErrorView'
+SAML_IDP_ERROR_VIEW_CLASS = 'sso.samlidp.error_views.CustomSamlIDPErrorView'
 SAML_IDP_DJANGO_USERNAME_FIELD = 'user_id'
 MI_GOOGLE_EMAIL_DOMAIN = env('MI_GOOGLE_EMAIL_DOMAIN')
 MI_GOOGLE_SERVICE_ACCOUNT_DATA = env('MI_GOOGLE_SERVICE_ACCOUNT_DATA').encode('utf-8').decode('unicode_escape')
