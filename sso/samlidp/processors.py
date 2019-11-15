@@ -74,5 +74,3 @@ class GoogleProcessor(ModelProcessor):
 class InvisionProcessor(ModelProcessor):
     def get_user_id(self, user):
         return user.email
-
-
