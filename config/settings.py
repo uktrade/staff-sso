@@ -426,7 +426,6 @@ SAML_IDP_CONFIG = {
             'sign_response': True,
             'sign_assertion': True,
             'want_authn_requests_signed': False,
-
             'policy': {
                 'default': {
                     'lifetime': {'minutes': 15},
@@ -470,7 +469,7 @@ SAML_IDP_SPCONFIG = {
         'attribute_mapping': {}
     },
     'https://departmentforinternationaltrade.invisionapp.com': {
-        'processor': 'sso.samlidp.processors.ModelProcessor',
+        'processor': 'sso.samlidp.processors.InvisionProcessor',
         'attribute_mapping': {},
     }
 }
