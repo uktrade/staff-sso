@@ -426,7 +426,6 @@ SAML_IDP_CONFIG = {
             'sign_response': True,
             'sign_assertion': True,
             'want_authn_requests_signed': False,
-
             'policy': {
                 'default': {
                     'lifetime': {'minutes': 15},
@@ -439,7 +438,8 @@ SAML_IDP_CONFIG = {
     'metadata': {
         'local': [
             os.path.join(SAML_IDP_CONFIG_DIR, 'sp_google_metadata.xml'),
-            os.path.join(SAML_IDP_CONFIG_DIR, 'aws-metadata.xml')
+            os.path.join(SAML_IDP_CONFIG_DIR, 'aws-metadata.xml'),
+            os.path.join(SAML_IDP_CONFIG_DIR, 'invision-metadata.xml'),
         ],
     },
     # Signing
@@ -468,9 +468,13 @@ SAML_IDP_SPCONFIG = {
         'processor': 'sso.samlidp.processors.GoogleProcessor',
         'attribute_mapping': {}
     },
+    'https://departmentforinternationaltrade.invisionapp.com': {
+        'processor': 'sso.samlidp.processors.InvisionProcessor',
+        'attribute_mapping': {},
+    }
 }
 
-SAML_IDP_ERROR_VIEW_CLASS = 'sso.samlidp.views.CustomSamlIDPErrorView'
+SAML_IDP_ERROR_VIEW_CLASS = 'sso.samlidp.error_views.CustomSamlIDPErrorView'
 SAML_IDP_DJANGO_USERNAME_FIELD = 'user_id'
 MI_GOOGLE_EMAIL_DOMAIN = env('MI_GOOGLE_EMAIL_DOMAIN')
 MI_GOOGLE_SERVICE_ACCOUNT_DATA = env('MI_GOOGLE_SERVICE_ACCOUNT_DATA').encode('utf-8').decode('unicode_escape')
