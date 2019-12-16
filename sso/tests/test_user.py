@@ -12,11 +12,15 @@ from .factories.oauth import ApplicationFactory
 from .factories.saml import SamlApplicationFactory
 from .factories.user import UserFactory
 
+
+pytestmark = [
+    pytest.mark.django_db
+]
+
 EMAIL = 'test@example.com'
 
 
 class TestUserManager:
-    @pytest.mark.django_db
     def test_create_superuser_basic(self):
         """
         Test that the `create_superuser` class method creates a superuser
@@ -33,7 +37,6 @@ class TestUserManager:
         assert user.first_name == ''
         assert user.last_name == ''
 
-    @pytest.mark.django_db
     def test_create_superuser_complete(self):
         """
         Test that the `create_superuser` class method creates a superuser
@@ -55,7 +58,6 @@ class TestUserManager:
         assert user.first_name == 'John'
         assert user.last_name == 'Doe'
 
-    @pytest.mark.django_db
     def test_create_superuser_without_email(self):
         """
         Test that the `create_superuser` class method raises `ValueError`
@@ -66,7 +68,6 @@ class TestUserManager:
         with pytest.raises(ValueError):
             User.objects.create_superuser(email='', password='password')
 
-    @pytest.mark.django_db
     def test_user_emails_are_lower_cased(self):
         """
         Test that `save()` lower cases emails
@@ -83,7 +84,6 @@ class TestUserManager:
 
         assert user.email == email.lower()
 
-    @pytest.mark.django_db
     def test_get_or_create_user_emails_are_lower_cased(self):
         """
         Test that `get_or_create()` lower cases emails
@@ -102,7 +102,6 @@ class TestUserManager:
 
         assert user.email == email.lower()
 
-    @pytest.mark.django_db
     def test_get_or_create_user_email_no_duplicates(self):
         """
         Test that `get_or_create()` lower cases emails
@@ -129,7 +128,6 @@ class TestUserManager:
 
         assert user.email == email.lower()
 
-    @pytest.mark.django_db
     def test_get_or_create_existing_user_queries_email_list(self):
         user = UserFactory(email='test@test.com')
 
@@ -142,7 +140,6 @@ class TestUserManager:
         assert user.emails.count() == 1
         assert user.emails.first().email == 'test@test.com'
 
-    @pytest.mark.django_db
     def test_get_or_create_new_user_adds_to_email_list(self):
 
         user, created = User.objects.get_or_create(email='test@test.com')
@@ -158,7 +155,6 @@ class TestUserManager:
             'USER@EXAMPLE.COM',
         ),
     )
-    @pytest.mark.django_db
     @freeze_time('2017-06-22 15:50:00.000000+00:00')
     def test_set_email_last_login_time(self, email):
         user = UserFactory(email='user@example.com')
@@ -221,7 +217,6 @@ class TestUser:
             mock_get_full_name.return_value = EMAIL
             assert user.get_short_name() == EMAIL
 
-    @pytest.mark.django_db
     def test_can_access_with_perms(self):
         """
         Test that `can_access()` returns True when user assigned to app
@@ -232,7 +227,6 @@ class TestUser:
 
         assert user.can_access(app)
 
-    @pytest.mark.django_db
     def test_cannot_access_without_perms(self):
         """
         Test that `can_access()` returns False when user is not assigned to app
@@ -243,7 +237,6 @@ class TestUser:
 
         assert not user.can_access(app)
 
-    @pytest.mark.django_db
     def test_can_access_saml2_with_access_profile(self):
         app = SamlApplicationFactory()
         user = UserFactory()
@@ -253,13 +246,11 @@ class TestUser:
 
         assert user.can_access(app)
 
-    @pytest.mark.django_db
     def test_can_access_saml2_without_access_profile_false(self):
         app = SamlApplicationFactory()
         user = UserFactory()
         assert not user.can_access(app)
 
-    @pytest.mark.django_db
     def test_can_access_saml2_if_app_disabled(self):
         app = SamlApplicationFactory(enabled=False)
         user = UserFactory()
@@ -269,7 +260,6 @@ class TestUser:
 
         assert not user.can_access(app)
 
-    @pytest.mark.django_db
     def test_can_access_with_access_profile(self):
 
         app = ApplicationFactory()
@@ -280,7 +270,6 @@ class TestUser:
 
         assert user.can_access(app)
 
-    @pytest.mark.django_db
     def test_can_access_with_access_profile_that_does_not_include_application(self):
         """The user has an access profile but it doesn't provide access to the app"""
 
@@ -293,7 +282,6 @@ class TestUser:
 
         assert not user.can_access(app)
 
-    @pytest.mark.django_db
     def test_user_has_multiple_profiles_can_access_application(self):
         """The user has multiple profiles, only one grants them access to the application"""
 
@@ -307,7 +295,6 @@ class TestUser:
 
         assert user.can_access(app)
 
-    @pytest.mark.django_db
     def test_user_permitted_application_but_not_profile(self):
         """User is permitted to access an application directly but does not have profile based access"""
 
@@ -317,7 +304,6 @@ class TestUser:
         user.access_profiles.add(ap)
         assert user.can_access(app)
 
-    @pytest.mark.django_db
     def test_user_permitted_application_but_permitted_via_profile(self):
         """User is not granted direct access (permitted_applications) but has profile based access"""
 
@@ -328,7 +314,6 @@ class TestUser:
         user.access_profiles.add(ap)
         assert user.can_access(app)
 
-    @pytest.mark.django_db
     def test_can_access_with_app_default_access(self):
         """
         Test that `can_access()` returns True when user is not assigned to an app but the app allows default access
@@ -339,7 +324,6 @@ class TestUser:
 
         assert user.can_access(app)
 
-    @pytest.mark.django_db
     def test_can_access_without_app_default_access(self):
         """
         Test that `can_access()` returns False when user is not assigned to app and the app does not allow default
@@ -351,7 +335,6 @@ class TestUser:
 
         assert not user.can_access(app)
 
-    @pytest.mark.django_db
     def test_can_access_with_email(self):
         """
         Test that `can_access()` returns True when the user's email is in the
@@ -369,7 +352,6 @@ class TestUser:
         user = UserFactory(email='joe.blogs@testing.com')
         assert user.can_access(app)
 
-    @pytest.mark.django_db
     def test_get_emails_for_application_app_email_ordering(self):
         app = ApplicationFactory(email_ordering='aaa.com, bbb.com, ccc.com, ddd.com, eee.com')
 
@@ -383,7 +365,6 @@ class TestUser:
         emails.pop(emails.index(primary_email))
         assert set(related_emails) == set(emails)
 
-    @pytest.mark.django_db
     def test_get_emails_for_application_settings_email_ordering(self, settings):
         emails = ['test@zzz.com', 'test@aaa.com', 'test@bbb.com', 'test@ccc.com']
 
@@ -399,7 +380,6 @@ class TestUser:
         emails.pop(emails.index('test@bbb.com'))
         assert set(related_emails) == set(emails)
 
-    @pytest.mark.django_db
     def test_get_emails_for_application_settings_no_ordering(self):
         """Sanity check to confirm that something is returned with no specific ordering applied"""
         emails = ['test@zzz.com', 'test@aaa.com', 'test@bbb.com', 'test@ccc.com']
@@ -414,7 +394,6 @@ class TestUser:
         emails.pop(emails.index(primary_email))
         assert set(emails) == set(related_emails)
 
-    @pytest.mark.django_db
     def test_get_emails_for_application_emails_not_in_priority_list(self):
         emails = ['test@google.com', 'test@microsoft.com', 'test@yahoo.com']
 
@@ -428,7 +407,6 @@ class TestUser:
         emails.pop(emails.index(primary_email))
         assert set(emails) == set(related_emails)
 
-    @pytest.mark.django_db
     def test_get_emails_for_application_emails_no_application(self):
         ApplicationFactory(email_ordering='bbb.com, ccc.com, ddd.com', provide_immutable_email=False)
 
@@ -441,7 +419,6 @@ class TestUser:
         assert primary_email == 'test@google.com'
         assert set(related_emails) == set(emails[1:])
 
-    @pytest.mark.django_db
     def test_get_emails_for_application_emails_immutable_email(self):
         app = ApplicationFactory(email_ordering='bbb.com, ccc.com, ddd.com', provide_immutable_email=True)
 
@@ -454,7 +431,6 @@ class TestUser:
         assert primary_email == 'test@google.com'
         assert set(related_emails) == set(emails[1:])
 
-    @pytest.mark.django_db
     def test_save_adds_to_email_list(self):
         user = User()
 
@@ -465,7 +441,6 @@ class TestUser:
         assert user.emails.count() == 1
         assert user.emails.first().email == 'test@test.com'
 
-    @pytest.mark.django_db
     def test_save_email_already_in_email_list(self):
         """Sanity check to confirm `save()` won't try add additional user.emails related objects"""
         user = UserFactory(email='test@test.com')
@@ -476,7 +451,6 @@ class TestUser:
 
         assert user.emails.count() == 1
 
-    @pytest.mark.django_db
     def test_emails_create(self):
 
         user = UserFactory(email='test@test.com')
@@ -489,7 +463,6 @@ class TestUser:
         assert user.emails.count() == 2
         assert user.emails.last().email == 'test222@test.com'
 
-    @pytest.mark.django_db
     def test_emails_added_on_save_are_lowercase(self):
 
         user = User.objects.create(email='TEST@TEST.COM')
@@ -497,7 +470,6 @@ class TestUser:
         assert user.emails.count() == 1
         assert user.emails.last().email == 'test@test.com'
 
-    @pytest.mark.django_db
     def test_emails_added_directly_to_list_are_lower_cased(self):
         user = UserFactory(email='test@test.com')
 
@@ -506,7 +478,6 @@ class TestUser:
         assert user.emails.count() == 2
         assert user.emails.last().email == 'upper@case.com'
 
-    @pytest.mark.django_db
     @freeze_time('2017-06-22 15:50:00.000000+00:00')
     def test_user_last_accessed_field_updates(self, rf, mocker):
 
@@ -522,7 +493,6 @@ class TestUser:
         assert request.user.last_accessed == datetime.datetime.now(tz=datetime.timezone.utc)
         assert User.objects.get(pk=user.pk).last_accessed == datetime.datetime.now(tz=datetime.timezone.utc)
 
-    @pytest.mark.django_db
     @freeze_time('2017-06-22 15:50:00.000000+00:00')
     def test_user_last_accessed_field_updates_integration_test(self, client):
         user = UserFactory(email='goblin@example.com')
@@ -536,7 +506,6 @@ class TestUser:
 
 
 class TestAccessProfile:
-    @pytest.mark.django_db
     def test_is_allowed_true(self):
         app = ApplicationFactory()
 
@@ -545,7 +514,6 @@ class TestAccessProfile:
 
         assert ap.is_allowed(app)
 
-    @pytest.mark.django_db
     def test_is_access_allowed_false(self):
         app = ApplicationFactory()
 
@@ -553,7 +521,6 @@ class TestAccessProfile:
 
         assert not ap.is_allowed(app)
 
-    @pytest.mark.django_db
     def test_saml2_is_access_alowed_true(self):
         app = SamlApplicationFactory()
 
@@ -562,7 +529,6 @@ class TestAccessProfile:
 
         assert ap.is_allowed(app)
 
-    @pytest.mark.django_db
     def test_saml2_is_access_allowed_false(self):
         app = SamlApplicationFactory()
 
@@ -571,7 +537,6 @@ class TestAccessProfile:
 
         assert ap.is_allowed(app)
 
-    @pytest.mark.django_db
     def test_saml2_is_access_allowed_if_app_is_disabled(self):
 
         app = SamlApplicationFactory(enabled=False)
@@ -581,7 +546,6 @@ class TestAccessProfile:
 
         assert not ap.is_allowed(app)
 
-    @pytest.mark.django_db
     def test_user_get_permitted_applications(self):
         ap = AccessProfile.objects.create()
         user = UserFactory(email='goblin@example.com', add_access_profiles=[ap])
