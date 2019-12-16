@@ -24,6 +24,7 @@ class UserSerializer(serializers.ModelSerializer):
         return {
             'email': primary_email,
             'user_id': str(obj.user_id),
+            'email_id': obj.email_id,
             'first_name': obj.first_name,
             'last_name': obj.last_name,
             'related_emails': related_emails,
@@ -36,11 +37,12 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserParamSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False, default=None)
+    email_id = serializers.EmailField(required=False, default=None)
     user_id = serializers.UUIDField(required=False, default=None)
 
     def validate(self, data):
-        if not data['email'] and not data['user_id']:
-            raise serializers.ValidationError('Either an email or a user_id is required')
+        if not any(val for val in data.values()):
+            raise serializers.ValidationError('Either an email, email_id or user_id is required')
 
         return data
 
@@ -61,6 +63,7 @@ class UserListSerializer(serializers.Serializer):
         model = User
         fields = (
             'user_id',
+            'email_id',
             'first_name',
             'last_name',
             'email',
@@ -74,6 +77,7 @@ class UserListSerializer(serializers.Serializer):
 
         return {
             'user_id': str(obj.user_id),
+            'email_id': obj.email_id,
             'first_name': obj.first_name,
             'last_name': obj.last_name,
             'email': primary_email,

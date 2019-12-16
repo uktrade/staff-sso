@@ -15,6 +15,14 @@ from sso.samlidp.models import SamlApplication
 from .managers import UserManager
 
 
+def build_email_id(email, user_id):
+    """Generate a user's email id"""
+    username = email.split('@')[0]
+    hash = str(user_id)[:8]
+
+    return f'{username}-{hash}{settings.EMAIL_ID_DOMAIN}'
+
+
 class AccessProfile(models.Model):
     """This model defines a list of applications that a user can access"""
 
@@ -58,6 +66,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(
         _('email'), unique=True,
         help_text=_('Warning: editing this field may cause user profiles to break in Digital Workspace')
+    )
+    email_id = models.EmailField(
+        unique=True,
+        help_text=_('An user id an email compatible format'),
     )
     user_id = models.UUIDField(
         _('unique user id'), unique=True,
@@ -126,7 +138,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     def save(self, *args, **kwargs):
         """
         Ensure that emails are lower cased and that the primary email address
-        exists in the fk'd EmailAddress model
+        exists in the fk'd EmailAddress model.
+
+        Also ensure that the email_id field is added if empty.
         """
 
         self.email = self.email.lower()
@@ -134,6 +148,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         if 'email' in kwargs:
             kwargs['email'] = kwargs['email'].lower()
+
+        if self.email and not self.email_id:
+            self.email_id = build_email_id(self.email, self.user_id)
+
         return_value = super().save(*args, **kwargs)
 
         if not self.emails.filter(email=self.email).exists():

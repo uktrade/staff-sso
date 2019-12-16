@@ -504,6 +504,33 @@ class TestUser:
 
         assert User.objects.get(pk=user.pk).last_accessed == datetime.datetime.now(tz=datetime.timezone.utc)
 
+    def test_email_id_is_created_on_save(self, settings):
+        user = User()
+        user.email = 'test@test.com'
+
+        assert not user.email_id
+
+        user.save()
+
+        user.refresh_from_db()
+
+        hash = str(user.user_id)[:8]
+
+        assert user.email_id == f'test-{hash}{settings.EMAIL_ID_DOMAIN}'
+
+    def test_email_id_is_not_overwritten(self):
+        user = UserFactory(email='goblin@example.com')
+
+        current_id = user.email_id
+
+        assert current_id is not None
+
+        user.save()
+
+        user.refresh_from_db()
+
+        assert current_id == user.email_id
+
 
 class TestAccessProfile:
     def test_is_allowed_true(self):
