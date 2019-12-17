@@ -93,6 +93,7 @@ class TestIntrospectView:
             'active': True,
             'scope': 'read',
             'user_id': str(user.user_id),
+            'email_user_id': user.email_user_id,
         }
 
     def test_with_immutable_email(self, api_client):
