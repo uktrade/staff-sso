@@ -15,7 +15,7 @@ from sso.samlidp.models import SamlApplication
 from .managers import UserManager
 
 
-def build_email_id(email, user_id):
+def build_email_user_id(email, user_id):
     """Generate a user's email id"""
     username = email.split('@')[0]
     hash = str(user_id)[:8]
@@ -67,9 +67,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         _('email'), unique=True,
         help_text=_('Warning: editing this field may cause user profiles to break in Digital Workspace')
     )
-    email_id = models.EmailField(
+    email_user_id = models.EmailField(
         unique=True,
-        help_text=_('An user id an email compatible format'),
+        help_text=_('A unique user id in an email format'),
     )
     user_id = models.UUIDField(
         _('unique user id'), unique=True,
@@ -149,8 +149,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         if 'email' in kwargs:
             kwargs['email'] = kwargs['email'].lower()
 
-        if self.email and not self.email_id:
-            self.email_id = build_email_id(self.email, self.user_id)
+        if self.email and not self.email_user_id:
+            self.email_user_id = build_email_user_id(self.email, self.user_id)
 
         return_value = super().save(*args, **kwargs)
 

@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='user',
-            name='email_id',
+            name='email_user_id',
             field=models.EmailField(default='', help_text='An user id an email compatible format', max_length=254),
             preserve_default=False,
         ),

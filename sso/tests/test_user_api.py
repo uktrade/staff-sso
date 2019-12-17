@@ -54,7 +54,7 @@ class TestAPIGetUserMe:
         assert response.json() == {
             'email': 'user1@example.com',
             'user_id': str(user.user_id),
-            'email_id': user.email_id,
+            'email_user_id': user.email_user_id,
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': [],
@@ -252,7 +252,7 @@ class TestApiUserIntrospect:
         assert response.json() == {
             'email': 'user1@example.com',
             'user_id': str(user.user_id),
-            'email_id': user.email_id,
+            'email_user_id': user.email_user_id,
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': [],
@@ -275,7 +275,7 @@ class TestApiUserIntrospect:
         assert response.json() == {
             'email': 'user1@example.com',
             'user_id': str(user.user_id),
-            'email_id': user.email_id,
+            'email_user_id': user.email_user_id,
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': ['test@bbb.com', 'test@aaa.com'],
@@ -300,7 +300,7 @@ class TestApiUserIntrospect:
         assert response.json() == {
             'email': 'user1@example.com',
             'user_id': str(user.user_id),
-            'email_id': user.email_id,
+            'email_user_id': user.email_user_id,
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': ['test@bbb.com', 'test@aaa.com'],
@@ -325,7 +325,7 @@ class TestApiUserIntrospect:
         assert response.json() == {
             'email': 'user1@example.com',
             'user_id': str(user.user_id),
-            'email_id': user.email_id,
+            'email_user_id': user.email_user_id,
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': ['test@bbb.com', 'test@aaa.com'],
@@ -346,7 +346,7 @@ class TestApiUserIntrospect:
         assert response.json() == {
             'email': 'user1@example.com',
             'user_id': str(user.user_id),
-            'email_id': user.email_id,
+            'email_user_id': user.email_user_id,
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': [],
@@ -356,18 +356,18 @@ class TestApiUserIntrospect:
             'access_profiles': []
         }
 
-    def test_with_email_id(self, api_client):
+    def test_with_email_user_id(self, api_client):
         user, token = get_oauth_token(scope='introspection')
 
         app = ApplicationFactory(users=[user])
         api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
-        response = api_client.get(self.GET_USER_INTROSPECT_URL + '?email_id={}'.format(user.email_id))
+        response = api_client.get(self.GET_USER_INTROSPECT_URL + '?email_user_id={}'.format(user.email_user_id))
 
         assert response.status_code == 200
         assert response.json() == {
             'email': 'user1@example.com',
             'user_id': str(user.user_id),
-            'email_id': user.email_id,
+            'email_user_id': user.email_user_id,
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': [],
@@ -377,7 +377,7 @@ class TestApiUserIntrospect:
             'access_profiles': []
         }
 
-    def test_requires_email_or_user_id_or_email_id(self, api_client):
+    def test_requires_email_or_user_id_or_email_user_id(self, api_client):
         user, token = get_oauth_token(scope='introspection')
 
         api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
@@ -428,7 +428,7 @@ class TestApiUserIntrospect:
         assert response.json() == {
             'email': 'user1@example.com',
             'user_id': str(user.user_id),
-            'email_id': user.email_id,
+            'email_user_id': user.email_user_id,
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': [],
@@ -497,7 +497,7 @@ class TestAPISearchUsers:
             "results": [
                 {
                     'user_id': str(search_user.user_id),
-                    'email_id': search_user.email_id,
+                    'email_user_id': search_user.email_user_id,
                     'first_name': 'John',
                     'last_name': 'Doe',
                     'email': 'john.doe@example.com',

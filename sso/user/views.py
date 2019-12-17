@@ -69,7 +69,7 @@ class UserIntrospectViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
                 elif serializer.validated_data['user_id']:
                     selected_user = User.objects.get(user_id=serializer.validated_data['user_id'])
                 else:
-                    selected_user = User.objects.get(email_id=serializer.validated_data['email_id'])
+                    selected_user = User.objects.get(email_user_id=serializer.validated_data['email_user_id'])
             except User.DoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
 

@@ -2,13 +2,13 @@
 
 from django.db import migrations
 
-from sso.user.models import build_email_id
+from sso.user.models import build_email_user_id
 
 
 def gen_email_unique_id(apps, schema_editor):
     User = apps.get_model('user', 'User')
     for user in User.objects.all():
-        user.email_id = build_email_id(user.email, user.user_id)
+        user.email_user_id = build_email_user_id(user.email, user.user_id)
         user.save()
 
 
