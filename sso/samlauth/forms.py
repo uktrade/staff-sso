@@ -27,7 +27,7 @@ class EmailForm(forms.Form):
         idp_ref = lookup_idp_ref_from_email(email_domain)
 
         if not idp_ref and email_domain not in settings.EMAIL_TOKEN_DOMAIN_WHITELIST:
-            raise forms.ValidationError('You cannot login with this email address')
+            raise forms.ValidationError('__unsupported_email__')
 
         self.idp_ref = idp_ref
 
