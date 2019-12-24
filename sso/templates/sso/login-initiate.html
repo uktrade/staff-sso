@@ -7,27 +7,31 @@
     <form method="post">
         {% csrf_token %}
 
-        <p>Enter your email address to be directed to the correct login page.</p>
-
         <p class="email-input">
 
-            <label class="form-label" for="username">Email address</label>
+            <label class="form-label" for="username">Enter your work email address</label>
 
             {{ form.email }}
 
             {% if form.email.errors %}
                 <ul class="errorlist">
                   {% for error in form.email.errors %}
-                    <li><span class="error-message">{{ error }}</span></li>
+                    {% if error == '__unsupported_email__' %}
+                        <li>
+                            <span class="error-message">You can't use this email address to access DIT's internal services.
+                            <a href="{% url 'saml2_login' %}?next={{ next }}">Sign in using a different method</a></span>
+                        </li>
+                    {% else %}
+                        <li><span class="error-message">{{ error }}</span></li>
+                    {% endif %}
                   {% endfor %}
                 </ul>
             {% endif %}
         </p>
+        <p>We will use your email address to identify your organisation. Each organisation has a different sign in service. We will direct you to the right service.</p>
 
         <p><input type="submit" class="button" value="Next step"></p>
     </form>
-
-    <p><a href="{% url 'saml2_login' %}?next={{ next }}">Show all login options</a></p>
 
 </div>
 {% endblock %}

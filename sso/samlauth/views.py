@@ -1,12 +1,13 @@
 import base64
 import datetime as dt
 import logging
-from urllib.parse import quote
+from urllib.parse import parse_qs, quote, quote_plus, urlparse
 
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
 from django.http import (
     HttpResponse, HttpResponseBadRequest, HttpResponseRedirect,
     HttpResponseServerError
@@ -43,8 +44,14 @@ from saml2.response import (
 from saml2.validate import ResponseLifetimeExceed, ToEarly
 
 from sso.core.logging import create_x_access_log
-from sso.samlauth.forms import EmailForm
 
+from urllib.parse import parse_qs, quote_plus, urlparse
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+
+from sso.emailauth.models import EmailToken
+
+from .forms import EmailForm
 
 logger = logging.getLogger('sso.samlauth')
 
@@ -395,6 +402,12 @@ class LoginStartView(FormView):
     form_class = EmailForm
     template_name = 'sso/login-initiate.html'
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('saml2_logged_in')
+
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['next'] = self.request.GET.get('next', settings.LOGIN_REDIRECT_URL)
@@ -433,11 +446,59 @@ class LoginStartView(FormView):
 
             response = redirect(url)
         else:
-            response = redirect('emailauth:email-auth-initiate')
+            self.send_signin_email(form.cleaned_data['email'])
+
+            response = redirect('emailauth:email-auth-initiate-success')
 
         response.set_cookie(SSO_EMAIL_SESSION_KEY, email, expires=dt.datetime.today() + dt.timedelta(days=30))
 
         return response
+
+    def extract_redirect_url(self, next_url):
+        oauth2_url = urlparse(next_url)
+
+        qs_items = parse_qs(oauth2_url.query)
+
+        try:
+            redirect_url = qs_items['redirect_uri'][0]
+        except KeyError:
+            return next_url
+
+        url = urlparse(redirect_url)
+        redirect_url = f'{url.scheme}://{url.netloc}'
+
+        return redirect_url
+
+    def send_signin_email(self, email):
+        """
+        Generate an EmailToken and send a sign in email to the user
+        """
+        token = EmailToken.objects.create_token(email)
+        next_url = self.request.GET.get('next', '')
+
+        if next_url:
+            next_url = self.extract_redirect_url(next_url)
+            next_url = quote_plus(next_url)
+
+        path = reverse('emailauth:email-auth-signin', kwargs=dict(token=token))
+
+        url = '{scheme}{host}{path}?next={next_url}'.format(
+            scheme='https://',
+            host=self.request.get_host(),
+            path=path,
+            next_url=next_url
+        )
+
+        subject = render_to_string('emailauth/email_subject.txt').strip()
+        message = render_to_string('emailauth/email.txt', context=dict(auth_url=url))
+
+        send_mail(
+            subject,
+            message,
+            settings.EMAIL_FROM,
+            [email],
+            fail_silently=False,
+        )
 
 
 class LoginJourneySelectionView(View):
