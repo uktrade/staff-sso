@@ -755,11 +755,12 @@ class TestRedirectionView:
 
 class TestEmailBasedAuthFlow:
     def test_invalid_email_leads_to_form_error(self, client):
+
         response = client.post(reverse('saml2_login_start'), {'email': 'test@invalid.com'})
 
         assert response.status_code == 200
 
-        assert 'You cannot login with this email address'.encode('utf-8') in response.content
+        assert 'You can\'t use this email address to access DIT\'s internal services.'.encode('utf-8') in response.content
 
     def test_previously_used_email_is_rendered_on_form(self, client):
         client.cookies = SimpleCookie({'sso_auth_email': 'test@test.com'})
@@ -775,7 +776,7 @@ class TestEmailBasedAuthFlow:
 
         assert response.status_code == 302
 
-        assert response.url == reverse('emailauth:email-auth-initiate')
+        assert response.url == reverse('emailauth:email-auth-initiate-success')
 
     def test_redirect_to_idp(self, settings, client):
 
@@ -801,7 +802,7 @@ class TestEmailBasedAuthFlow:
 
     def test_next_querystring_is_retained(self, client):
 
-        response = client.get(reverse('saml2_login_start') + '?next=http://whatever')
+        response = client.post(reverse('saml2_login_start') + '?next=http://whatever', {'email': 'bad@invalid.com'})
 
-        assert '<a href="/saml2/login/?next=http://whatever">Show all login options</a>' in \
+        assert '<a href="/saml2/login/?next=http://whatever">Sign in using a different method</a>' in \
                response.content.decode('utf-8')

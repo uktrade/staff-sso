@@ -16,7 +16,7 @@
             {% if form.email.errors %}
                 <ul class="errorlist">
                   {% for error in form.email.errors %}
-                    {% if error == "__unsupported_email__" %}
+                    {% if error == '__unsupported_email__' %}
                         <li>
                             <span class="error-message">You can't use this email address to access DIT's internal services.
                             <a href="{% url 'saml2_login' %}?next={{ next }}">Sign in using a different method</a></span>
