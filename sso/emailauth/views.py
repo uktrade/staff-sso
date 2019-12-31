@@ -105,9 +105,9 @@ class EmailAuthView(View):
         return token_obj
 
     def get_next_url(self):
-        next_url = self.request.GET.get('next')
+        next_url = self.request.GET.get('next', '').strip()
 
-        if next_url not in ['None', None]:
+        if next_url:
             return next_url
         else:
             return reverse('saml2_logged_in')
