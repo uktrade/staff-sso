@@ -41,7 +41,7 @@ OAUTH_AUTHORIZE_URL = reverse_lazy('oauth2_provider:authorize')
 OAUTH_REDIRECT_URL = 'http://localhost/authorized'
 OAUTH_TOKEN_URL = reverse_lazy('oauth2_provider:token')
 
-SAML_LOGIN_INITIATE_URL = reverse_lazy('saml2_login_initiate')
+SAML_LOGIN_START_URL = reverse_lazy('saml2_login_start')
 
 
 pytestmark = [
@@ -99,7 +99,7 @@ class TestOAuthAuthorize:
 
         assert response.status_code == 302
         assert response.url.startswith(
-            f'{SAML_LOGIN_INITIATE_URL}?next={OAUTH_AUTHORIZE_URL}'
+            f'{SAML_LOGIN_START_URL}?next={OAUTH_AUTHORIZE_URL}'
         )
 
     def test_x_application_log_is_created(self, client, mocker):
@@ -707,50 +707,6 @@ class TestReAuth:
 
         assert response.status_code == 302
         assert client.cookies['sso_auth_email'].value == 'user1@example.com'
-
-
-class TestRedirectionView:
-    def test_no_cookie_use_existing_route(self, client):
-        client.cookies.load({'sso_auth_email': 'does-not-exist@test.com'})
-
-        response = client.get(reverse('saml2_login_initiate'))
-
-        assert response.status_code == 302
-        assert response.url == reverse('saml2_login')
-
-    def test_cookie_with_invalid_email_use_existing_route(self, client):
-        response = client.get(reverse('saml2_login_initiate'))
-
-        assert response.status_code == 302
-        assert response.url == reverse('saml2_login')
-
-    @pytest.mark.parametrize(
-        'use_new_journey, url_pattern',
-        (
-            (True, 'saml2_login_start'),
-            (False, 'saml2_login'),
-        ),
-    )
-    def test_route_selection(self, client, use_new_journey, url_pattern):
-        email = 'test@test.com'
-        UserFactory(email=email, use_new_journey=use_new_journey)
-
-        client.cookies.load({'sso_auth_email': email})
-
-        response = client.get(reverse('saml2_login_initiate'))
-
-        assert response.status_code == 302
-        assert response.url == reverse(url_pattern)
-
-    def test_querystring_is_preserved(self, client, settings):
-        client.cookies = SimpleCookie({'sso_auth_email': 'test@test.com'})
-
-        settings.NEW_AUTH_FLOW_EMAILS = []
-
-        response = client.get(reverse('saml2_login_initiate') + '?test=true')
-
-        assert response.status_code == 302
-        assert response.url == reverse('saml2_login')  + '?test=true'
 
 
 class TestEmailBasedAuthFlow:
