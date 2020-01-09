@@ -505,23 +505,4 @@ class LoginJourneySelectionView(View):
 
     def get(self, request, *args, **kwargs):
 
-        User = get_user_model()
-
-        choice = 'saml2_login'
-
-        user_email = request.COOKIES.get(SSO_EMAIL_SESSION_KEY)
-
-        if user_email:
-            try:
-                if User.objects.get(email=user_email).use_new_journey:
-                    choice = 'saml2_login_start'
-            except User.DoesNotExist:
-                pass
-
-        url = reverse(choice)
-
-        args = self.request.META.get('QUERY_STRING', '')
-        if args:
-            url = '%s?%s' % (url, args)
-
-        return redirect(url)
+        return redirect('saml2_login_start')
