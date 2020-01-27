@@ -264,13 +264,16 @@ class User(AbstractBaseUser, PermissionsMixin):
         else:
             return self.get_emails_for_application(application)[0]
 
-    def get_permitted_applications(self):
+    def get_permitted_applications(self, public_only=False):
         """Return a list of applications that this user has access to"""
 
         apps = set(self.permitted_applications.all())
 
         for ap in self.access_profiles.all():
             apps.update(set(ap.oauth2_applications.all()))
+
+        if public_only:
+            apps = {ap for ap in apps if ap.public}
 
         return [{
                     'key': app.application_key,

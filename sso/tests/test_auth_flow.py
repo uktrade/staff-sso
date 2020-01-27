@@ -11,7 +11,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from freezegun import freeze_time
 
-from sso.user.models import User
+from sso.user.models import AccessProfile, User
 
 from .factories.oauth import ApplicationFactory
 from .factories.user import UserFactory
@@ -762,3 +762,36 @@ class TestEmailBasedAuthFlow:
 
         assert '<a href="/saml2/login/?next=http://whatever">Sign in using a different method</a>' in \
                response.content.decode('utf-8')
+
+
+class TestLoggedInPage:
+    def test_dynamic_links(self, client):
+
+        ap = AccessProfile.objects.create()
+
+        user = log_user_in(client)
+        user.access_profiles.add(ap)
+
+        app1 = ApplicationFactory(
+            application_key='app-1',
+            display_name='Appplication 1',
+            start_url='https://application1.com',
+            public=True,
+            users=[user])
+        ApplicationFactory(
+            application_key='app-2',
+            display_name='Appplication 2',
+            start_url='https://application2.com',
+            public=False,
+            users=[user])
+
+        permitted_applications = user.get_permitted_applications(public_only=True)
+
+        assert len(permitted_applications) == 1
+
+        response = client.get(reverse('saml2_logged_in'))
+
+        assert response.status_code == 200
+        assert f'<p>Go to <a href="{app1.start_url}">{app1.display_name}</a></p>' in response.content.decode('utf-8')
+
+
