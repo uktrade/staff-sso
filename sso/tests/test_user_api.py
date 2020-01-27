@@ -50,6 +50,10 @@ class TestAPIGetUserMe:
         api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
         response = api_client.get(self.GET_USER_ME_URL)
 
+        assert Application.objects.count() == 1
+        application = Application.objects.first()
+        assert application.default_access_allowed
+
         assert response.status_code == 200
         assert response.json() == {
             'email': 'user1@example.com',
@@ -60,7 +64,13 @@ class TestAPIGetUserMe:
             'related_emails': [],
             'contact_email': '',
             'groups': [],
-            'permitted_applications': [],
+            'permitted_applications': [
+                {
+                    'key': application.application_key,
+                    'name': application.display_name,
+                    'url': application.start_url
+                }
+            ],
             'access_profiles': []
         }
 
@@ -248,6 +258,10 @@ class TestApiUserIntrospect:
         api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
         response = api_client.get(self.GET_USER_INTROSPECT_URL + '?email=user1@example.com')
 
+        assert Application.objects.count() == 1
+        application = Application.objects.first()
+        assert application.default_access_allowed
+
         assert response.status_code == 200
         assert response.json() == {
             'email': 'user1@example.com',
@@ -258,7 +272,13 @@ class TestApiUserIntrospect:
             'related_emails': [],
             'contact_email': '',
             'groups': [],
-            'permitted_applications': [],
+            'permitted_applications': [
+                {
+                    'key': application.application_key,
+                    'name': application.display_name,
+                    'url': application.start_url
+                }
+            ],
             'access_profiles': []
         }
 
@@ -271,6 +291,10 @@ class TestApiUserIntrospect:
         api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
         response = api_client.get(self.GET_USER_INTROSPECT_URL + '?email=test@aaa.com')
 
+        assert Application.objects.count() == 1
+        application = Application.objects.first()
+        assert application.default_access_allowed
+
         assert response.status_code == 200
         assert response.json() == {
             'email': 'user1@example.com',
@@ -281,7 +305,13 @@ class TestApiUserIntrospect:
             'related_emails': ['test@bbb.com', 'test@aaa.com'],
             'contact_email': '',
             'groups': [],
-            'permitted_applications': [],
+            'permitted_applications': [
+                {
+                    'key': application.application_key,
+                    'name': application.display_name,
+                    'url': application.start_url
+                }
+            ],
             'access_profiles': []
         }
 
@@ -296,6 +326,10 @@ class TestApiUserIntrospect:
         api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
         response = api_client.get(self.GET_USER_INTROSPECT_URL + '?email=test@aaa.com')
 
+        assert Application.objects.count() == 1
+        application = Application.objects.first()
+        assert application.default_access_allowed
+
         assert response.status_code == 200
         assert response.json() == {
             'email': 'user1@example.com',
@@ -306,7 +340,13 @@ class TestApiUserIntrospect:
             'related_emails': ['test@bbb.com', 'test@aaa.com'],
             'contact_email': '',
             'groups': [],
-            'permitted_applications': [],
+            'permitted_applications': [
+                {
+                    'key': application.application_key,
+                    'name': application.display_name,
+                    'url': application.start_url
+                }
+            ],
             'access_profiles': [ap.slug]
         }
 
@@ -317,6 +357,15 @@ class TestApiUserIntrospect:
 
         user.emails.create(email='test@aaa.com')
         user.emails.create(email='test@bbb.com')
+
+        permitted_applications = [
+            {
+                'key': app.application_key,
+                'name': app.display_name,
+                'url': app.start_url
+            }
+            for app in Application.objects.all()
+        ]
 
         api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
         response = api_client.get(self.GET_USER_INTROSPECT_URL + '?email=test@aaa.com')
@@ -331,7 +380,7 @@ class TestApiUserIntrospect:
             'related_emails': ['test@bbb.com', 'test@aaa.com'],
             'contact_email': '',
             'groups': [],
-            'permitted_applications': [{'key': app.application_key, 'name': app.display_name, 'url': app.start_url}],
+            'permitted_applications': permitted_applications,
             'access_profiles': []
         }
 
@@ -342,6 +391,15 @@ class TestApiUserIntrospect:
         api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
         response = api_client.get(self.GET_USER_INTROSPECT_URL + '?user_id={}'.format(str(user.user_id)))
 
+        permitted_applications = [
+            {
+                'key': app.application_key,
+                'name': app.display_name,
+                'url': app.start_url
+            }
+            for app in Application.objects.all()
+        ]
+
         assert response.status_code == 200
         assert response.json() == {
             'email': 'user1@example.com',
@@ -352,7 +410,7 @@ class TestApiUserIntrospect:
             'related_emails': [],
             'contact_email': '',
             'groups': [],
-            'permitted_applications': [{'key': app.application_key, 'name': app.display_name, 'url': app.start_url}],
+            'permitted_applications': permitted_applications,
             'access_profiles': []
         }
 
@@ -363,6 +421,15 @@ class TestApiUserIntrospect:
         api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
         response = api_client.get(self.GET_USER_INTROSPECT_URL + '?email_user_id={}'.format(user.email_user_id))
 
+        permitted_applications = [
+            {
+                'key': app.application_key,
+                'name': app.display_name,
+                'url': app.start_url
+            }
+            for app in Application.objects.all()
+        ]
+
         assert response.status_code == 200
         assert response.json() == {
             'email': 'user1@example.com',
@@ -373,7 +440,7 @@ class TestApiUserIntrospect:
             'related_emails': [],
             'contact_email': '',
             'groups': [],
-            'permitted_applications': [{'key': app.application_key, 'name': app.display_name, 'url': app.start_url}],
+            'permitted_applications': permitted_applications,
             'access_profiles': []
         }
 
@@ -413,6 +480,7 @@ class TestApiUserIntrospect:
         assert response.status_code == 400
 
     def test_with_valid_token_and_contact_email(self, api_client):
+
         user = UserFactory(
             email='user1@example.com',
             first_name='John',
@@ -424,6 +492,10 @@ class TestApiUserIntrospect:
         api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
         response = api_client.get(self.GET_USER_INTROSPECT_URL + '?email=user1@example.com')
 
+        assert Application.objects.count() == 1
+        application = Application.objects.first()
+        assert application.default_access_allowed
+
         assert response.status_code == 200
         assert response.json() == {
             'email': 'user1@example.com',
@@ -434,7 +506,13 @@ class TestApiUserIntrospect:
             'related_emails': [],
             'contact_email': 'jd@test.qqq',
             'groups': [],
-            'permitted_applications': [],
+            'permitted_applications': [
+                {
+                    'key': application.application_key,
+                    'name': application.display_name,
+                    'url': application.start_url
+                }
+            ],
             'access_profiles': []
         }
 

@@ -272,14 +272,22 @@ class User(AbstractBaseUser, PermissionsMixin):
         for ap in self.access_profiles.all():
             apps.update(set(ap.oauth2_applications.all()))
 
+        apps.update(set(OAuthApplication.objects.filter(default_access_allowed=True)))
+
         if public_only:
             apps = {ap for ap in apps if ap.public}
 
-        return [{
-                    'key': app.application_key,
-                    'url': app.start_url,
-                    'name': app.display_name
-                } for app in apps]
+        results = [
+            {
+                'key': app.application_key,
+                'url': app.start_url,
+                'name': app.display_name
+            } for app in apps
+        ]
+
+        sorted(results, key=lambda el: el['name'])
+
+        return results
 
 
 class EmailAddress(models.Model):

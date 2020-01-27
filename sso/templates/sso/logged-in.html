@@ -4,7 +4,9 @@
 <div class="container">
     <h1 class="heading-large">You have signed in to DIT internal services</h1>
 
+    {% if oauth2_applications %}
     <p>You can now use:</p>
+    {% endif %}
 
     {% for application in oauth2_applications %}
         <p>Go to <a href="{{ application.url | safe }}">{{ application.name }}</a></p>
