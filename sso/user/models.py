@@ -281,9 +281,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         apps.update(set(OAuthApplication.objects.filter(default_access_allowed=True)))
 
-        permitted_apps = list(apps)
-
-        sorted(permitted_apps, key=lambda el: el.display_name)
+        permitted_apps = sorted(list(apps), key=lambda el: el.display_name)
 
         if include_non_public:
             return [_extract(ap) for ap in permitted_apps]

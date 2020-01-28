@@ -623,13 +623,13 @@ class TestAccessProfile:
 
         app1 = ApplicationFactory(
             application_key='app-1',
-            display_name='Appplication 1',
+            display_name='Application 1',
             start_url='https://application1.com',
             public=True,
             users=[user])
         ApplicationFactory(
             application_key='app-2',
-            display_name='Appplication 2',
+            display_name='Application 2',
             start_url='https://application2.com',
             public=False,
             users=[user])
@@ -645,3 +645,43 @@ class TestAccessProfile:
             }
         ]
 
+    def test_get_permitted_applications_ordering(self):
+        ap = AccessProfile.objects.create()
+        user = UserFactory(email='goblin@example.com', add_access_profiles=[ap])
+
+        ApplicationFactory(
+            application_key='app-5',
+            display_name='E',
+            start_url='https://application2.com',
+            public=True,
+            users=[user])
+        ApplicationFactory(
+            application_key='app-1',
+            display_name='A',
+            start_url='https://application1.com',
+            public=True,
+            users=[user])
+        ApplicationFactory(
+            application_key='app-4',
+            display_name='D',
+            start_url='https://application2.com',
+            public=True,
+            users=[user])
+        ApplicationFactory(
+            application_key='app-3',
+            display_name='C',
+            start_url='https://application2.com',
+            public=True,
+            users=[user])
+        ApplicationFactory(
+            application_key='app-2',
+            display_name='B',
+            start_url='https://application2.com',
+            public=True,
+            users=[user])
+
+        permitted_apps = user.get_permitted_applications()
+
+        assert ['A', 'B', 'C', 'D', 'E'] == [
+            app['name'] for app in permitted_apps
+        ]
