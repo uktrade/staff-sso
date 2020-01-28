@@ -4,15 +4,13 @@
 <div class="container">
     <h1 class="heading-large">You have signed in to DIT internal services</h1>
 
+    {% if oauth2_applications %}
     <p>You can now use:</p>
+    {% endif %}
 
-    <p>Go to <a href="https://www.workspace.trade.gov.uk">Digital Workspace</a></p>
-
-    <p>Go to <a href="https://www.datahub.trade.gov.uk">Data Hub</a></p>
-
-    <p>Go to <a href="https://data.trade.gov.uk/">Data Workspace</a></p>
-
-    <p>Go to <a href="https://market-access.trade.gov.uk/">Market Access</a></p>
+    {% for application in oauth2_applications %}
+        <p>Go to <a href="{{ application.url | safe }}">{{ application.name }}</a></p>
+    {% endfor %}
 
 </div>
 {% endblock %}

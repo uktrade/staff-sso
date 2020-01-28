@@ -596,7 +596,7 @@ class TestAccessProfile:
         ap.oauth2_applications.add(app1)
         ap.oauth2_applications.add(app3)
 
-        permitted_applications = user.get_permitted_applications()
+        permitted_applications = user.get_permitted_applications(include_non_public=True)
 
         assert len(permitted_applications) == 3
         assert sorted(permitted_applications, key=lambda x: x['key']) == [
@@ -616,3 +616,32 @@ class TestAccessProfile:
                 'name': app3.display_name
             }
         ]
+
+    def test_user_get_permitted_applications_public_only(self):
+        ap = AccessProfile.objects.create()
+        user = UserFactory(email='goblin@example.com', add_access_profiles=[ap])
+
+        app1 = ApplicationFactory(
+            application_key='app-1',
+            display_name='Appplication 1',
+            start_url='https://application1.com',
+            public=True,
+            users=[user])
+        ApplicationFactory(
+            application_key='app-2',
+            display_name='Appplication 2',
+            start_url='https://application2.com',
+            public=False,
+            users=[user])
+
+        permitted_applications = user.get_permitted_applications()
+
+        assert len(permitted_applications) == 1
+        assert permitted_applications == [
+            {
+                'key': app1.application_key,
+                'url': app1.start_url,
+                'name': app1.display_name
+            }
+        ]
+

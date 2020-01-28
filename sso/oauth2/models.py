@@ -15,6 +15,12 @@ class Application(AbstractApplication):
         max_length=100,
     )
 
+    public = models.BooleanField(
+        _('display a link to this application on the logged in page'),
+        max_length=255,
+        default=False,
+    )
+
     start_url = models.CharField(
         _('the start url for the application'),
         max_length=255,

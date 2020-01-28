@@ -7,7 +7,6 @@ from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail
 from django.http import (
     HttpResponse, HttpResponseBadRequest, HttpResponseRedirect,
     HttpResponseServerError
@@ -50,6 +49,7 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 
 from sso.emailauth.models import EmailToken
+from sso.oauth2.models import Application as OAuth2Application
 
 from .forms import EmailForm
 
@@ -335,7 +335,10 @@ def logged_in(request):
     """
     Fallback view after logging in if no redirect url is specified.
     """
-    return render(request, 'sso/logged-in.html')
+
+    return render(request, 'sso/logged-in.html', {
+        'oauth2_applications': request.user.get_permitted_applications(),
+    })
 
 
 @login_required

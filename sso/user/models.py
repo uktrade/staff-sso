@@ -264,19 +264,31 @@ class User(AbstractBaseUser, PermissionsMixin):
         else:
             return self.get_emails_for_application(application)[0]
 
-    def get_permitted_applications(self):
+    def get_permitted_applications(self, include_non_public=False):
         """Return a list of applications that this user has access to"""
+
+        def _extract(app):
+            return {
+                'key': app.application_key,
+                'url': app.start_url,
+                'name': app.display_name
+            }
 
         apps = set(self.permitted_applications.all())
 
         for ap in self.access_profiles.all():
             apps.update(set(ap.oauth2_applications.all()))
 
-        return [{
-                    'key': app.application_key,
-                    'url': app.start_url,
-                    'name': app.display_name
-                } for app in apps]
+        apps.update(set(OAuthApplication.objects.filter(default_access_allowed=True)))
+
+        permitted_apps = list(apps)
+
+        sorted(permitted_apps, key=lambda el: el.display_name)
+
+        if include_non_public:
+            return [_extract(ap) for ap in permitted_apps]
+        else:
+            return [_extract(ap) for ap in permitted_apps if ap.public]
 
 
 class EmailAddress(models.Model):
