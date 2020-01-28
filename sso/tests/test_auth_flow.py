@@ -785,7 +785,7 @@ class TestLoggedInPage:
             public=False,
             users=[user])
 
-        permitted_applications = user.get_permitted_applications(public_only=True)
+        permitted_applications = user.get_permitted_applications()
 
         assert len(permitted_applications) == 1
 
@@ -793,5 +793,3 @@ class TestLoggedInPage:
 
         assert response.status_code == 200
         assert f'<p>Go to <a href="{app1.start_url}">{app1.display_name}</a></p>' in response.content.decode('utf-8')
-
-

@@ -337,7 +337,7 @@ def logged_in(request):
     """
 
     return render(request, 'sso/logged-in.html', {
-        'oauth2_applications': request.user.get_permitted_applications(public_only=True),
+        'oauth2_applications': request.user.get_permitted_applications(),
     })
 
 

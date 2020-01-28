@@ -596,7 +596,7 @@ class TestAccessProfile:
         ap.oauth2_applications.add(app1)
         ap.oauth2_applications.add(app3)
 
-        permitted_applications = user.get_permitted_applications()
+        permitted_applications = user.get_permitted_applications(include_non_public=True)
 
         assert len(permitted_applications) == 3
         assert sorted(permitted_applications, key=lambda x: x['key']) == [
@@ -634,7 +634,7 @@ class TestAccessProfile:
             public=False,
             users=[user])
 
-        permitted_applications = user.get_permitted_applications(public_only=True)
+        permitted_applications = user.get_permitted_applications()
 
         assert len(permitted_applications) == 1
         assert permitted_applications == [

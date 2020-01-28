@@ -264,8 +264,15 @@ class User(AbstractBaseUser, PermissionsMixin):
         else:
             return self.get_emails_for_application(application)[0]
 
-    def get_permitted_applications(self, public_only=False):
+    def get_permitted_applications(self, include_non_public=False):
         """Return a list of applications that this user has access to"""
+
+        def _extract(app):
+            return {
+                'key': app.application_key,
+                'url': app.start_url,
+                'name': app.display_name
+            }
 
         apps = set(self.permitted_applications.all())
 
@@ -274,20 +281,14 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         apps.update(set(OAuthApplication.objects.filter(default_access_allowed=True)))
 
-        if public_only:
-            apps = {ap for ap in apps if ap.public}
+        permitted_apps = list(apps)
 
-        results = [
-            {
-                'key': app.application_key,
-                'url': app.start_url,
-                'name': app.display_name
-            } for app in apps
-        ]
+        sorted(permitted_apps, key=lambda el: el.display_name)
 
-        sorted(results, key=lambda el: el['name'])
-
-        return results
+        if include_non_public:
+            return [_extract(ap) for ap in permitted_apps]
+        else:
+            return [_extract(ap) for ap in permitted_apps if ap.public]
 
 
 class EmailAddress(models.Model):
