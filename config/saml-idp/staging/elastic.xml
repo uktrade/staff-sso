@@ -1,0 +1,72 @@
+<EntityDescriptor
+        xmlns="urn:oasis:names:tc:SAML:2.0:metadata"
+        entityID="https://localhost:5601/">
+    <SPSSODescriptor
+            AuthnRequestsSigned="false"
+            WantAssertionsSigned="false"
+            protocolSupportEnumeration=
+                    "urn:oasis:names:tc:SAML:2.0:protocol">
+        <KeyDescriptor use="signing">
+            <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+                <X509Data>
+                    <X509Certificate>MIIDYzCCAsygAwIBAgIJAOCk/K15+/7QMA0GCSqGSIb3DQEBBQUAMH8xCzAJBgNV
+                        BAYTAlVTMQswCQYDVQQIEwJOWTELMAkGA1UEBxMCTlkxFDASBgNVBAoTC0ludmlz
+                        aW9uQXBwMRgwFgYDVQQDEw9pbnZpc2lvbmFwcC5jb20xJjAkBgkqhkiG9w0BCQEW
+                        F3N1cHBvcnRAaW52aXNpb25hcHAuY29tMB4XDTE0MDUyOTE4MzYxNloXDTI0MDUy
+                        ODE4MzYxNlowfzELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAk5ZMQswCQYDVQQHEwJO
+                        WTEUMBIGA1UEChMLSW52aXNpb25BcHAxGDAWBgNVBAMTD2ludmlzaW9uYXBwLmNv
+                        bTEmMCQGCSqGSIb3DQEJARYXc3VwcG9ydEBpbnZpc2lvbmFwcC5jb20wgZ8wDQYJ
+                        KoZIhvcNAQEBBQADgY0AMIGJAoGBAMV4kfE0LURMF9T6kj6pIn+KUzGmTVHrTMeQ
+                        RaMTX4rxFg102Mn7XD2RYGudKvy0TloxEIECD634MrwYA7OShP9gAfyssjbBv58u
+                        Zeewpjd1Z4WY5Hq+kFSd3m0q3Ob+9hnPMVLQbskR+XQ7xpgA8k6wB9T0ML4C7N+i
+                        brmxpXTzAgMBAAGjgeYwgeMwHQYDVR0OBBYEFENUAqaOzovuD9/MbSdYeUBxOv3e
+                        MIGzBgNVHSMEgaswgaiAFENUAqaOzovuD9/MbSdYeUBxOv3eoYGEpIGBMH8xCzAJ
+                        BgNVBAYTAlVTMQswCQYDVQQIEwJOWTELMAkGA1UEBxMCTlkxFDASBgNVBAoTC0lu
+                        dmlzaW9uQXBwMRgwFgYDVQQDEw9pbnZpc2lvbmFwcC5jb20xJjAkBgkqhkiG9w0B
+                        CQEWF3N1cHBvcnRAaW52aXNpb25hcHAuY29tggkA4KT8rXn7/tAwDAYDVR0TBAUw
+                        AwEB/zANBgkqhkiG9w0BAQUFAAOBgQA5RnXunNqTWbBbrz/Tfefg1O8nochKaZoE
+                        F4NOrqxmBu+64gxez4hKSUk12OSmSSrZ5v8rvVkIPQd4M2yyeE90xN4qNLm+xU6s
+                        DDTpKAy2RglRK+qWtkh/CA/fn+LS5lyFXO02RSYFmyeB5jSdIyPwqyZtbvUQzgzk
+                        KjuNv9v9MA==
+                    </X509Certificate>
+                </X509Data>
+            </KeyInfo>
+        </KeyDescriptor>
+        <KeyDescriptor use="encryption">
+            <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+                <X509Data>
+                    <X509Certificate>MIIDYzCCAsygAwIBAgIJAJdUoi5WHpWtMA0GCSqGSIb3DQEBBQUAMH8xCzAJBgNV
+                        BAYTAlVTMQswCQYDVQQIEwJOWTELMAkGA1UEBxMCTlkxFDASBgNVBAoTC0ludmlz
+                        aW9uQXBwMRgwFgYDVQQDEw9pbnZpc2lvbmFwcC5jb20xJjAkBgkqhkiG9w0BCQEW
+                        F3N1cHBvcnRAaW52aXNpb25hcHAuY29tMB4XDTE0MDUyOTE4MzY0NFoXDTI0MDUy
+                        ODE4MzY0NFowfzELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAk5ZMQswCQYDVQQHEwJO
+                        WTEUMBIGA1UEChMLSW52aXNpb25BcHAxGDAWBgNVBAMTD2ludmlzaW9uYXBwLmNv
+                        bTEmMCQGCSqGSIb3DQEJARYXc3VwcG9ydEBpbnZpc2lvbmFwcC5jb20wgZ8wDQYJ
+                        KoZIhvcNAQEBBQADgY0AMIGJAoGBALTLboNB4jE/5QW1Q/JVc8zQXJg5tYXfJ8bu
+                        /loYmKyqTY2HNDGmID/RB7V5V7XYbvBMAUwSBD2HlIJXuaiLJ47oY6T6mi7GPhEj
+                        C4t6kRrW04BbAoTrAPlOmQ2Xc9bEobgC9BkDvpAGxy723iynQ7oAq3tTP86lHoSc
+                        P7yRtlwlAgMBAAGjgeYwgeMwHQYDVR0OBBYEFM+ZtnHU755yZklunVD3uKut6NIR
+                        MIGzBgNVHSMEgaswgaiAFM+ZtnHU755yZklunVD3uKut6NIRoYGEpIGBMH8xCzAJ
+                        BgNVBAYTAlVTMQswCQYDVQQIEwJOWTELMAkGA1UEBxMCTlkxFDASBgNVBAoTC0lu
+                        dmlzaW9uQXBwMRgwFgYDVQQDEw9pbnZpc2lvbmFwcC5jb20xJjAkBgkqhkiG9w0B
+                        CQEWF3N1cHBvcnRAaW52aXNpb25hcHAuY29tggkAl1SiLlYela0wDAYDVR0TBAUw
+                        AwEB/zANBgkqhkiG9w0BAQUFAAOBgQBlOKPTpYTg7uXE1n8NneEVTB1S2vpWZmoB
+                        eC/Hrdum0gd2laET0j1PShJ2k94BRBnT452ZTOpKphEJNG49OZJGawvCZDPCcRQa
+                        Uy1v/EYxiyj3QKXhcP4KlDxafxegAvjrjMRx3XlsFEbpeVMi0vJxhlqLH6FNUt3u
+                        ojNeYbVNPg==
+                    </X509Certificate>
+                </X509Data>
+            </KeyInfo>
+        </KeyDescriptor>
+        <NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</NameIDFormat>
+        <AssertionConsumerService
+                index="0"
+                Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+                Location="http://localhost:5601/api/security/v1/saml"/>
+        <SingleLogoutService
+                index="1"
+                Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+                Location="http://localhost:5601/logout"/>
+    </SPSSODescriptor>
+</EntityDescriptor>
+	

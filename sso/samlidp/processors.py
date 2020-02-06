@@ -74,3 +74,8 @@ class GoogleProcessor(ModelProcessor):
 class InvisionProcessor(ModelProcessor):
     def get_user_id(self, user):
         return user.email
+
+
+class EmailIdProcessor(ModelProcessor):
+    def get_user_id(self, user):
+        return user.email_id

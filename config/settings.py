@@ -472,6 +472,10 @@ SAML_IDP_SPCONFIG = {
     'https://departmentforinternationaltrade.invisionapp.com': {
         'processor': 'sso.samlidp.processors.InvisionProcessor',
         'attribute_mapping': {},
+    },
+    'https://localhost:5601/': {
+        'processor': 'sso.samlidp.processors.EmailIdProcessor',
+        'attribute_mapping': {},
     }
 }
 
