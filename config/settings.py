@@ -441,6 +441,7 @@ SAML_IDP_CONFIG = {
             os.path.join(SAML_IDP_CONFIG_DIR, 'sp_google_metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'aws-metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'invision-metadata.xml'),
+            os.path.join(SAML_IDP_CONFIG_DIR, 'elastic.xml'),
         ],
     },
     # Signing
