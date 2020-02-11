@@ -78,4 +78,4 @@ class InvisionProcessor(ModelProcessor):
 
 class EmailIdProcessor(ModelProcessor):
     def get_user_id(self, user):
-        return user.email_id
+        return user.email_user_id
