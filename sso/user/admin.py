@@ -3,15 +3,14 @@ from django.contrib import admin
 from django.forms import ModelForm
 from django.forms.widgets import CheckboxSelectMultiple
 from django.urls import reverse
-from django.utils.html import format_html_join, format_html, escape
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 from oauth2_provider.admin import ApplicationAdmin as OAuth2ApplicationAdmin
 
 from sso.oauth2.models import Application
-from sso.usersettings.models import UserSettings
 from .filter import ApplicationFilter
-from .models import AccessProfile, EmailAddress, User
+from .models import AccessProfile, ApplicationPermission, EmailAddress, User
 
 
 class UserForm(ModelForm):
@@ -127,3 +126,9 @@ class AccessProfileAdmin(admin.ModelAdmin):
         return ', '.join([str(app) for app in obj.oauth2_applications.all()])
 
     list_oauth2_applications.short_description = 'OAuth2 Applications'
+
+
+@admin.register(ApplicationPermission)
+class ApplicationPermissionAdmin(admin.ModelAdmin):
+    list_display = ('application_name', 'permission')
+    list_filter = ('saml2_application', 'oauth2_application')
