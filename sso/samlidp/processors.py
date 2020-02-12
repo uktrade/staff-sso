@@ -79,3 +79,11 @@ class InvisionProcessor(ModelProcessor):
 class EmailIdProcessor(ModelProcessor):
     def get_user_id(self, user):
         return user.email_user_id
+
+    def create_identity(self, user, sp_mapping, **extra_config):
+
+        identity = super().create_identity(user, sp_mapping)
+
+        identity['groups'] = 'superuser'
+
+        return identity
