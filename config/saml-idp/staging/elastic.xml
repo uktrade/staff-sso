@@ -27,7 +27,8 @@ DtQKkupL1lE73x2k4NX9VtX2cg==</ds:X509Certificate>
     <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://localhost:5601/api/security/v1/saml" index="1" isDefault="true"/>
     <md:AttributeConsumingService index="1" isDefault="true">
       <md:ServiceName xml:lang="en-US">docker-cluster</md:ServiceName>
-      <md:RequestedAttribute FriendlyName="principal" Name="nameid:persistent" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"/>
+      <md:RequestedAttribute FriendlyName="groups" Name="groups" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"/>
+      <md:RequestedAttribute FriendlyName="nameid" Name="principal" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"/>
     </md:AttributeConsumingService>
   </md:SPSSODescriptor>
 </md:EntityDescriptor>
