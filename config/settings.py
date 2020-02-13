@@ -477,7 +477,12 @@ SAML_IDP_SPCONFIG = {
     'https://localhost:5601/': {
         'processor': 'sso.samlidp.processors.EmailIdProcessor',
         'attribute_mapping': {},
+    },
+    'https://elk.ci.uktrade.io:443/': {
+        'processor': 'sso.samlidp.processors.EmailIdProcessor',
+        'attribute_mapping': {},
     }
+
 }
 
 SAML_IDP_ERROR_VIEW_CLASS = 'sso.samlidp.error_views.CustomSamlIDPErrorView'

@@ -1,32 +1,31 @@
-<?xml version="1.0" encoding="UTF-8"?><md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="https://localhost:5601/">
+<?xml version="1.0" encoding="UTF-8"?><md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="https://elk.ci.uktrade.io:443/">
   <md:SPSSODescriptor AuthnRequestsSigned="true" WantAssertionsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
     <md:KeyDescriptor use="signing">
       <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
         <ds:X509Data>
-          <ds:X509Certificate>MIIDZjCCAk4CCQCYDRGAnbZalzANBgkqhkiG9w0BAQsFADB1MQswCQYDVQQGEwJHQjEPMA0GA1UE
-CAwGTG9uZG9uMRQwEgYDVQQHDAtXZXN0bWluc3RlcjEMMAoGA1UECgwDRElUMTEwLwYJKoZIhvcN
-AQkBFiJseW5kb24uZ2FydmV5QGRpZ2l0YWwudHJhZGUuZ292LnVrMB4XDTIwMDIxMTE1MjA0MFoX
-DTIxMDIxMDE1MjA0MFowdTELMAkGA1UEBhMCR0IxDzANBgNVBAgMBkxvbmRvbjEUMBIGA1UEBwwL
-V2VzdG1pbnN0ZXIxDDAKBgNVBAoMA0RJVDExMC8GCSqGSIb3DQEJARYibHluZG9uLmdhcnZleUBk
-aWdpdGFsLnRyYWRlLmdvdi51azCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKJCMKXP
-yoAmZvd85b9igFkcg4HlCW8sW/1t9jqyNdD70cTA0qCSVlNnGhGBcSe4ldS1E65vC2z3osxDADCj
-WCikFZUhuajNLc3NQnXxvj5QBQvk31hlwwCW7mkEnAuDyT7JFNVdNAZQk5z6vwBGc5XZW+PELo8N
-un2+Ljg5eOqGfyX2hkTtNb5XGNLMHBEPdE2LIPxNrIgG1rDv3KctvOhCPv+Ybhl3LoD6bfaKdGhR
-+2WWobCh6jkd1t9BVo1FiVN45P/u8+4lHMU6D2oPY1Gdm5Y6n3H+Y4rELtAOa9GLFGwvW1wBgzWV
-ntwGAe4I+hQQYZQiNo+6nad8tM0Bb9sCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAKXfjObWPIle3
-GRUbYScwoPUK6d163dbalWsgps8OWGmu+T1hBEq8xeuV+RR7mCnevnS3Hi5RRb8XziRTpVVBpkty
-1DTdxaMOmu2x+czgsi9FV3l9j56Y9jhi1fRIp2O7HHfI3rpJOi24JbMOP1LTmg/XpR8oxyQLHN8i
-sCAo/QtIH7hc4frl9diZ4TMve+8p6LE6V/rHudonDQeTefnz6y2f16vsPpBlOuH+5bg09JT/iQ0+
-BU9gXyUvZJFWhJUYUAvkbY8DPV/iUIpzWF7S4rS1Oor9d1Fx2Un+cGh2+zw792zp8cmE/7Az0BWN
-DtQKkupL1lE73x2k4NX9VtX2cg==</ds:X509Certificate>
+          <ds:X509Certificate>MIIDHjCCAgYCCQDuKNn5raOhVTANBgkqhkiG9w0BAQsFADBRMQswCQYDVQQGEwJHQjEPMA0GA1UE
+CAwGTG9uZG9uMRQwEgYDVQQHDAtXZXN0bWluc3RlcjEMMAoGA1UECgwDRElUMQ0wCwYDVQQLDARE
+RGFUMB4XDTIwMDIxMjE1MTQyNloXDTIwMDMxMzE1MTQyNlowUTELMAkGA1UEBhMCR0IxDzANBgNV
+BAgMBkxvbmRvbjEUMBIGA1UEBwwLV2VzdG1pbnN0ZXIxDDAKBgNVBAoMA0RJVDENMAsGA1UECwwE
+RERhVDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKg1quqzv5Mcf4XIuJhSdwEwqEti
+wsl9GWg39vy1GUXPc860ZOYOxe5uhUHET+XKecrhDEHgwx1YfnK+izUkx33bwzeH7cPH8LQ9LFTm
+TtJFqPX86P0EKzX4fnV9U21rBmWhx2g8udaIoxKpmJQvmGxktdFBD/di9FQ1qB4MKov9nP0oYHoX
+8NGHcXJuHM0jjaO6CyyGxAWrc58n9GQ08SlXgZ0mZsX61i5tA4VfbFPl/JGfdGv8t4WbG4ag/auk
+iPsfU/eBEtzC1/VZQqwYtcKV6X9dU5vWrQTIfRv5aHP13Y4ALZfAX1dLxEjwOUElXZ7BNw+4WDJg
+PzyXqcU6DP8CAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAKWOnYGo2md7aEEi5qfvnl28jSsxyhRNU
+HnWtrm0XDtgGI1uIiD7910xm6UPmiopm03fV34mX5w8XGNI02Ah+dPjCH6Fdd6eOYmzBO3s8TFGe
+pYBRl8VyC4ygxRwJM42n3x4ViWFO9d5Xs6B6y7YoM9wXEwmKFh5d0ZXcyV3cvvpmKszhQd5irBbg
+lJr+bxLKlyBUlIWpgqxUWagidWKQNb0YVye09NYgfKJ4z3ioVhRECjouNJNTficvjhxlyeVoZ+id
+STs45b28aPvjgiAcufPXQugtvyDo8XOnqdCIhczfxKRvaMcZXg70JwahFvRa8pIAoY15VE7UVItt
+3WhUsg==</ds:X509Certificate>
         </ds:X509Data>
       </ds:KeyInfo>
     </md:KeyDescriptor>
-    <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://localhost:5601/logout"/>
+    <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://elk.ci.uktrade.io/logout"/>
     <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
-    <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://localhost:5601/api/security/v1/saml" index="1" isDefault="true"/>
+    <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://elk.ci.uktrade.io:443/api/security/v1/saml" index="1" isDefault="true"/>
     <md:AttributeConsumingService index="1" isDefault="true">
-      <md:ServiceName xml:lang="en-US">docker-cluster</md:ServiceName>
+      <md:ServiceName xml:lang="en-US">elk-cluster</md:ServiceName>
       <md:RequestedAttribute FriendlyName="groups" Name="groups" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"/>
       <md:RequestedAttribute FriendlyName="nameid" Name="principal" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"/>
     </md:AttributeConsumingService>
