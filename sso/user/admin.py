@@ -45,7 +45,7 @@ class UserAdmin(admin.ModelAdmin):
     list_filter = (ApplicationFilter, 'access_profiles__name', 'is_superuser', 'use_new_journey')
     fields = ('email_user_id', 'user_id', 'email', 'first_name', 'last_name', 'contact_email', 'date_joined', 'last_login',
               'last_accessed', 'use_new_journey', 'access_profiles', 'permitted_applications',
-              'list_user_settings_wrapper')
+              'list_user_settings_wrapper', 'application_permissions')
     readonly_fields = ('date_joined', 'last_login', 'last_accessed', 'user_id', 'email_user_id',
                        'list_user_settings_wrapper')
     list_display = ('email', 'email_list', 'is_superuser', 'use_new_journey', 'last_login', 'last_accessed',

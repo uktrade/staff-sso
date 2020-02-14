@@ -84,6 +84,11 @@ class EmailIdProcessor(ModelProcessor):
 
         identity = super().create_identity(user, sp_mapping)
 
-        identity['groups'] = 'superuser'
+        permissions = list(
+            user.application_permissions
+                .filter(saml2_application=self._application)
+                .values_list('permission', flat=True))
+
+        identity['groups'] = permissions
 
         return identity

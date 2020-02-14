@@ -35,7 +35,7 @@ class ApplicationPermission(models.Model):
     """
 
     saml2_application = models.ForeignKey(
-        'oauth2.Application',
+        'samlidp.SamlApplication',
         related_name='application_permissions',
         blank=True,
         null=True,
@@ -43,7 +43,7 @@ class ApplicationPermission(models.Model):
     )
 
     oauth2_application = models.ForeignKey(
-       'samlidp.SamlApplication',
+        'oauth2.Application',
         related_name='application_permissions',
         blank=True,
         null=True,
