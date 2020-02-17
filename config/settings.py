@@ -435,13 +435,12 @@ SAML_IDP_CONFIG = {
             }
         },
     },
-
     'metadata': {
         'local': [
             os.path.join(SAML_IDP_CONFIG_DIR, 'sp_google_metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'aws-metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'invision-metadata.xml'),
-            os.path.join(SAML_IDP_CONFIG_DIR, 'elastic.xml'),
+            os.path.join(SAML_IDP_CONFIG_DIR, 'elk-metadata.xml'),
         ],
     },
     # Signing
@@ -474,15 +473,10 @@ SAML_IDP_SPCONFIG = {
         'processor': 'sso.samlidp.processors.InvisionProcessor',
         'attribute_mapping': {},
     },
-    'https://localhost:5601/': {
-        'processor': 'sso.samlidp.processors.EmailIdProcessor',
-        'attribute_mapping': {},
-    },
     'https://elk.ci.uktrade.io:443/': {
         'processor': 'sso.samlidp.processors.EmailIdProcessor',
         'attribute_mapping': {},
     }
-
 }
 
 SAML_IDP_ERROR_VIEW_CLASS = 'sso.samlidp.error_views.CustomSamlIDPErrorView'
