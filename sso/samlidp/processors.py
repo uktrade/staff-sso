@@ -74,3 +74,21 @@ class GoogleProcessor(ModelProcessor):
 class InvisionProcessor(ModelProcessor):
     def get_user_id(self, user):
         return user.email
+
+
+class EmailIdProcessor(ModelProcessor):
+    def get_user_id(self, user):
+        return user.email_user_id
+
+    def create_identity(self, user, sp_mapping, **extra_config):
+
+        identity = super().create_identity(user, sp_mapping)
+
+        permissions = list(
+            user.application_permissions
+                .filter(saml2_application=self._application)
+                .values_list('permission', flat=True))
+
+        identity['groups'] = permissions
+
+        return identity

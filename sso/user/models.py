@@ -6,6 +6,7 @@ from typing import Union
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
+from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
@@ -21,6 +22,55 @@ def build_email_user_id(email, user_id):
     hash = str(user_id)[:8]
 
     return f'{username}-{hash}{settings.EMAIL_ID_DOMAIN}'
+
+
+class ApplicationPermission(models.Model):
+    """Application level permissions.
+    To allow management of user access for an application via Staff-sso;
+    Permissions are formatted using a dotted notation, e.g
+
+    content.approver
+    blog.editor
+
+    """
+
+    saml2_application = models.ForeignKey(
+        'samlidp.SamlApplication',
+        related_name='application_permissions',
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE
+    )
+
+    oauth2_application = models.ForeignKey(
+        'oauth2.Application',
+        related_name='application_permissions',
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE
+    )
+
+    permission = models.CharField(
+        max_length=255,
+        validators=[RegexValidator(
+            regex='^[a-zA-Z0-9\.\-\_]*$',
+            message=_('Permission must only contain letters, numbers and ._-'),
+            code='invalid_permission_format',
+        )]
+    )
+
+    def application_name(self):
+        if self.saml2_application:
+            app_key = f'saml2: {self.saml2_application.slug}'
+        elif self.oauth2_application:
+            app_key = f'oauth2: {self.oauth2_application.application_key}'
+        else:
+            app_key = 'None'
+
+        return app_key
+
+    def __str__(self):
+        return f'{self.application_name()} - {self.permission}'
 
 
 class AccessProfile(models.Model):
@@ -103,6 +153,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         related_name='users',
         help_text=_(
             'Applications that this user is permitted to access'
+        ),
+        blank=True,
+    )
+    application_permissions = models.ManyToManyField(
+        ApplicationPermission,
+        related_name='application_permissions',
+        help_text=_(
+            'Permissions that a user has on in an application'
         ),
         blank=True,
     )

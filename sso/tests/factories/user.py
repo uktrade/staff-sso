@@ -27,6 +27,16 @@ class UserFactory(factory.django.DjangoModelFactory):
                 self.emails.create(email=email)
 
     @factory.post_generation
+    def application_permission_list(self, create, extracted, **kwargs):
+
+        if not create:
+            return
+
+        if extracted:
+            for app in extracted:
+                self.application_permissions.add(app)
+
+    @factory.post_generation
     def add_access_profiles(self, create, extracted, **kwargs):
         if not create:
             return
@@ -60,3 +70,10 @@ class AccessProfileFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = 'user.AccessProfile'
+
+
+class ApplicationPermissionFactory(factory.django.DjangoModelFactory):
+    permission = factory.Sequence(lambda n: f'permission{n+1}')
+
+    class Meta:
+        model = 'user.ApplicationPermission'

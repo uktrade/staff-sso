@@ -435,12 +435,12 @@ SAML_IDP_CONFIG = {
             }
         },
     },
-
     'metadata': {
         'local': [
             os.path.join(SAML_IDP_CONFIG_DIR, 'sp_google_metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'aws-metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'invision-metadata.xml'),
+            os.path.join(SAML_IDP_CONFIG_DIR, 'elk-metadata.xml'),
         ],
     },
     # Signing
@@ -471,6 +471,10 @@ SAML_IDP_SPCONFIG = {
     },
     'https://departmentforinternationaltrade.invisionapp.com': {
         'processor': 'sso.samlidp.processors.InvisionProcessor',
+        'attribute_mapping': {},
+    },
+    'https://elk.ci.uktrade.io:443/': {
+        'processor': 'sso.samlidp.processors.EmailIdProcessor',
         'attribute_mapping': {},
     }
 }

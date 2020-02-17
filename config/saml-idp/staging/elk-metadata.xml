@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?><md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="https://elk.ci.uktrade.io:443/">
+  <md:SPSSODescriptor AuthnRequestsSigned="true" WantAssertionsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <md:KeyDescriptor use="signing">
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:X509Data>
+          <ds:X509Certificate>MIIDHjCCAgYCCQDuKNn5raOhVTANBgkqhkiG9w0BAQsFADBRMQswCQYDVQQGEwJHQjEPMA0GA1UE
+CAwGTG9uZG9uMRQwEgYDVQQHDAtXZXN0bWluc3RlcjEMMAoGA1UECgwDRElUMQ0wCwYDVQQLDARE
+RGFUMB4XDTIwMDIxMjE1MTQyNloXDTIwMDMxMzE1MTQyNlowUTELMAkGA1UEBhMCR0IxDzANBgNV
+BAgMBkxvbmRvbjEUMBIGA1UEBwwLV2VzdG1pbnN0ZXIxDDAKBgNVBAoMA0RJVDENMAsGA1UECwwE
+RERhVDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKg1quqzv5Mcf4XIuJhSdwEwqEti
+wsl9GWg39vy1GUXPc860ZOYOxe5uhUHET+XKecrhDEHgwx1YfnK+izUkx33bwzeH7cPH8LQ9LFTm
+TtJFqPX86P0EKzX4fnV9U21rBmWhx2g8udaIoxKpmJQvmGxktdFBD/di9FQ1qB4MKov9nP0oYHoX
+8NGHcXJuHM0jjaO6CyyGxAWrc58n9GQ08SlXgZ0mZsX61i5tA4VfbFPl/JGfdGv8t4WbG4ag/auk
+iPsfU/eBEtzC1/VZQqwYtcKV6X9dU5vWrQTIfRv5aHP13Y4ALZfAX1dLxEjwOUElXZ7BNw+4WDJg
+PzyXqcU6DP8CAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAKWOnYGo2md7aEEi5qfvnl28jSsxyhRNU
+HnWtrm0XDtgGI1uIiD7910xm6UPmiopm03fV34mX5w8XGNI02Ah+dPjCH6Fdd6eOYmzBO3s8TFGe
+pYBRl8VyC4ygxRwJM42n3x4ViWFO9d5Xs6B6y7YoM9wXEwmKFh5d0ZXcyV3cvvpmKszhQd5irBbg
+lJr+bxLKlyBUlIWpgqxUWagidWKQNb0YVye09NYgfKJ4z3ioVhRECjouNJNTficvjhxlyeVoZ+id
+STs45b28aPvjgiAcufPXQugtvyDo8XOnqdCIhczfxKRvaMcZXg70JwahFvRa8pIAoY15VE7UVItt
+3WhUsg==</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+    <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://elk.ci.uktrade.io/logout"/>
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+    <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://elk.ci.uktrade.io:443/api/security/v1/saml" index="1" isDefault="true"/>
+    <md:AttributeConsumingService index="1" isDefault="true">
+      <md:ServiceName xml:lang="en-US">elk-cluster</md:ServiceName>
+      <md:RequestedAttribute FriendlyName="groups" Name="groups" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"/>
+      <md:RequestedAttribute FriendlyName="nameid" Name="principal" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"/>
+    </md:AttributeConsumingService>
+  </md:SPSSODescriptor>
+</md:EntityDescriptor>

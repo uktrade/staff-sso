@@ -1,9 +1,9 @@
 import pytest
 
 from sso.samlidp.models import SamlApplication
-from sso.samlidp.processors import AWSProcessor, GoogleProcessor, ModelProcessor
+from sso.samlidp.processors import AWSProcessor, EmailIdProcessor, GoogleProcessor, ModelProcessor
 from sso.tests.factories.saml import SamlApplicationFactory
-from sso.tests.factories.user import AccessProfileFactory, UserFactory
+from sso.tests.factories.user import ApplicationPermissionFactory, AccessProfileFactory, UserFactory
 
 
 pytestmark = [
@@ -174,3 +174,34 @@ class TestGoogleProcessor:
 
         processor = GoogleProcessor(entity_id='an_entity_id')
         assert processor.get_user_id(user) == 'hello_world@test.com'
+
+
+class TestEmailIdProcessor:
+    def test_email_id_is_supplied(self):
+        SamlApplicationFactory(entity_id='an_entity_id')
+        user = UserFactory(email='hello@world.com')
+
+        processor = EmailIdProcessor()
+        assert user.email_user_id == processor.get_user_id(user)
+
+    def test_groups_are_supplied(self):
+        app1 = SamlApplicationFactory(entity_id='an_entity_id')
+        app2 = SamlApplicationFactory(entity_id='an_second_entity_id')
+
+        ap1 = ApplicationPermissionFactory(saml2_application=app1)
+        ap2 = ApplicationPermissionFactory(saml2_application=app1)
+        ap3 = ApplicationPermissionFactory()
+        ap4 = ApplicationPermissionFactory(saml2_application=app2)
+        ApplicationPermissionFactory(saml2_application=app1)
+        ApplicationPermissionFactory()
+        ap7 = ApplicationPermissionFactory(saml2_application=app2)
+        ap8 = ApplicationPermissionFactory(saml2_application=app1)
+
+        processor = EmailIdProcessor(entity_id='an_entity_id')
+
+        user = UserFactory(email='hello@world.com', application_permission_list=[ap1, ap3, ap4, ap8])
+        UserFactory(email='goodbye@world.com', application_permission_list=[ap2, ap3, ap7])
+
+        identity = processor.create_identity(user, {})
+
+        assert set(identity['groups']) == {ap1.permission, ap8.permission}
