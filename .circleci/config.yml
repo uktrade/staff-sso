@@ -6,7 +6,10 @@ jobs:
 
       - image: postgres:9.6
         environment:
-          POSTGRES_DB=staffsso
+          POSTGRES_DB: staffsso
+          POSTGRES_USERNAME: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_HOST_AUTH_METHOD: trust
 
     environment:
       DATABASE_URL: postgresql://postgres@localhost/staffsso
