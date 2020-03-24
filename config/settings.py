@@ -308,7 +308,7 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console'],
-        'level': 'WARN',
+        'level': 'INFO',
     },
     'loggers': {
         'x-auth': {
