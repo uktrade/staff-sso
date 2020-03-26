@@ -244,14 +244,6 @@ def assertion_consumer_service(request,
     oq_cache = OutstandingQueriesCache(request.session)
     outstanding_queries = oq_cache.outstanding_queries()
 
-    logger.info('------------ START LOGGING ------------')
-    decoded_xml = base64.b64decode(xmlstr)
-    logger.info(f'Saml response: {decoded_xml}')
-    logger.info(f'Outstanding queries: {request.session.items()}')
-    logger.info(f'Session key: {request.session.session_key}')
-    logger.info(f'cookies: {request.COOKIES.items()}')
-    logger.info('------------ END LOGGING ------------')
-
     try:
         response = client.parse_authn_request_response(xmlstr, BINDING_HTTP_POST, outstanding_queries)
     except (StatusError, ToEarly):
