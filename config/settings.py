@@ -60,6 +60,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'sso.core.middleware.SessionCookieFixMiddleware',
     'sso.healthcheck.middleware.HealthCheckMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -72,7 +73,6 @@ MIDDLEWARE = [
     'sso.core.middleware.NeverCacheMiddleware',
     'sso.user.middleware.UpdatedLastAccessedMiddleware',
     'sso.core.middleware.AdminIpRestrictionMiddleware',
-
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -367,7 +367,8 @@ EMAIL_FROM = env('EMAIL_FROM', default='test@example.com')
 # session settings
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_AGE = env.int('SESSION_COOKIE_AGE_SECONDS')
-SESSION_COOKIE_SAMESITE = None
+SESSION_COOKIE_SAMESITE = 'Lax' # this is currently overridden in middleware
+SESSION_COOKIE_SECURE = True
 SESSION_SAVE_EVERY_REQUEST = True
 
 # google analytics
