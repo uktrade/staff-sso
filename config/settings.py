@@ -442,6 +442,7 @@ SAML_IDP_CONFIG = {
             os.path.join(SAML_IDP_CONFIG_DIR, 'aws-metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'invision-metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'elk-metadata.xml'),
+            os.path.join(SAML_IDP_CONFIG_DIR, 'elk-digital-metadata.xml'),
         ],
     },
     # Signing
@@ -475,6 +476,10 @@ SAML_IDP_SPCONFIG = {
         'attribute_mapping': {},
     },
     'https://elk.ci.uktrade.io:443/': {
+        'processor': 'sso.samlidp.processors.EmailIdProcessor',
+        'attribute_mapping': {},
+    },
+    'https://elk.uktrade.digital:443/': {
         'processor': 'sso.samlidp.processors.EmailIdProcessor',
         'attribute_mapping': {},
     }
