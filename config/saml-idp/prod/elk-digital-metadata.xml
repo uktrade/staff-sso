@@ -27,7 +27,7 @@ STs45b28aPvjgiAcufPXQugtvyDo8XOnqdCIhczfxKRvaMcZXg70JwahFvRa8pIAoY15VE7UVItt
     <md:AttributeConsumingService index="1" isDefault="true">
       <md:ServiceName xml:lang="en-US">elk-elasticsearch</md:ServiceName>
       <md:RequestedAttribute FriendlyName="groups" Name="groups" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"/>
-      <md:RequestedAttribute FriendlyName="nameid" Name="nameid" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"/>
+      <md:RequestedAttribute FriendlyName="nameid" Name="principal" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"/>
     </md:AttributeConsumingService>
   </md:SPSSODescriptor>
 </md:EntityDescriptor>
