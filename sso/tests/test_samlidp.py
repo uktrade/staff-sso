@@ -181,7 +181,7 @@ class TestEmailIdProcessor:
         SamlApplicationFactory(entity_id='an_entity_id')
         user = UserFactory(email='hello@world.com')
 
-        processor = EmailIdProcessor()
+        processor = EmailIdProcessor(entity_id='an_entity_id')
         assert user.email_user_id == processor.get_user_id(user)
 
     def test_groups_are_supplied(self):
