@@ -1,5 +1,7 @@
 import logging
 
+from raven.contrib.django.raven_compat.models import client
+
 from djangosaml2idp.views import IdPHandlerViewMixin
 
 from django.conf import settings
@@ -36,6 +38,7 @@ class LoginProcessView(LoginRequiredMixin, IdPHandlerViewMixin, View):
         try:
             req_info = self.IDP.parse_authn_request(request.session['SAMLRequest'], binding)
         except Exception as excp:
+            client.captureException()
             return self.handle_error(request, exception=excp)
 
         # Signature verification
@@ -50,11 +53,13 @@ class LoginProcessView(LoginRequiredMixin, IdPHandlerViewMixin, View):
         try:
             resp_args = self.IDP.response_args(req_info.message)
         except (UnknownPrincipal, UnsupportedBinding) as excp:
+            client.captureException()
             return self.handle_error(request, exception=excp, status=400)
 
         try:
             sp_config = settings.SAML_IDP_SPCONFIG[resp_args['sp_entity_id']]
-        except Exception:
+        except Exception as excp:
+            client.captureException()
             return self.handle_error(request, exception=ImproperlyConfigured("No config for SP %s defined in SAML_IDP_SPCONFIG" % resp_args['sp_entity_id']), status=400)
 
         processor = self.get_processor(resp_args['sp_entity_id'], sp_config)
@@ -72,15 +77,21 @@ class LoginProcessView(LoginRequiredMixin, IdPHandlerViewMixin, View):
         user_id = processor.get_user_id(request.user)
 
         # Construct SamlResponse message
+
+        # if the AuthN response does not contain a NameIDPolicy field, we set it to our preferred format
+        name_id_policy_format = resp_args['name_id_policy'].format \
+            if resp_args['name_id_policy'] else settings.SAML_IDP_CONFIG['service']['idp']['name_id_format'][0]
+
         try:
             authn_resp = self.IDP.create_authn_response(
                 identity=identity, userid=user_id,
-                name_id=NameID(format=resp_args['name_id_policy'].format, sp_name_qualifier=resp_args['sp_entity_id'], text=user_id),
+                name_id=NameID(format=name_id_policy_format, sp_name_qualifier=resp_args['sp_entity_id'], text=user_id),
                 authn=AUTHN_BROKER.get_authn_by_accr(req_authn_context),
                 sign_response=self.IDP.config.getattr("sign_response", "idp") or False,
                 sign_assertion=self.IDP.config.getattr("sign_assertion", "idp") or False,
                 **resp_args)
         except Exception as excp:
+            client.captureException()
             return self.handle_error(request, exception=excp, status=500)
 
         http_args = self.IDP.apply_binding(

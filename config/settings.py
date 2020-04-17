@@ -443,6 +443,7 @@ SAML_IDP_CONFIG = {
             os.path.join(SAML_IDP_CONFIG_DIR, 'invision-metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'elk-metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'elk-digital-metadata.xml'),
+            os.path.join(SAML_IDP_CONFIG_DIR, 'zoom-metadata.xml'),
         ],
     },
     # Signing
@@ -482,7 +483,11 @@ SAML_IDP_SPCONFIG = {
     'https://elk.uktrade.digital:443/': {
         'processor': 'sso.samlidp.processors.EmailIdProcessor',
         'attribute_mapping': {},
-    }
+    },
+    'trade.zoom.us': {
+        'processor': 'sso.samlidp.processors.EmailIdProcessor',
+        'attribute_mapping': {},
+    },
 }
 
 SAML_IDP_ERROR_VIEW_CLASS = 'sso.samlidp.error_views.CustomSamlIDPErrorView'
