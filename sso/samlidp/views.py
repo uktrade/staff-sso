@@ -77,10 +77,15 @@ class LoginProcessView(LoginRequiredMixin, IdPHandlerViewMixin, View):
         user_id = processor.get_user_id(request.user)
 
         # Construct SamlResponse message
+
+        # if the AuthN response does not contain a NameIDPolicy field, we set it to our preferred format
+        name_id_policy_format = resp_args['name_id_policy'].format \
+            if resp_args['name_id_policy'] else settings.SAML_IDP_CONFIG['service']['idp']['name_id_format'][0]
+
         try:
             authn_resp = self.IDP.create_authn_response(
                 identity=identity, userid=user_id,
-                name_id=NameID(format=resp_args['name_id_policy'].format, sp_name_qualifier=resp_args['sp_entity_id'], text=user_id),
+                name_id=NameID(format=name_id_policy_format, sp_name_qualifier=resp_args['sp_entity_id'], text=user_id),
                 authn=AUTHN_BROKER.get_authn_by_accr(req_authn_context),
                 sign_response=self.IDP.config.getattr("sign_response", "idp") or False,
                 sign_assertion=self.IDP.config.getattr("sign_assertion", "idp") or False,
