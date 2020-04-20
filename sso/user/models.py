@@ -260,11 +260,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     def can_access(self, application: Union[OAuthApplication, SamlApplication]):
         """ Can the user access this application?"""
 
+        if self._is_allowed_email(application):
+            return True
+
         if isinstance(application, OAuthApplication):
             # Saml permissions can only be granted via an AccessProfile
 
             # does the application grant access?
-            if application.default_access_allowed or self._is_allowed_email(application):
+            if application.default_access_allowed:
                 return True
 
             # is the user permitted to access the application directly?

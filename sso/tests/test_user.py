@@ -335,22 +335,46 @@ class TestUser:
 
         assert not user.can_access(app)
 
-    def test_can_access_with_email(self):
+    @pytest.mark.parametrize('application_func, email, expected',
+        [
+            # OAuth2 application user has matching email
+            (
+                lambda: ApplicationFactory(default_access_allowed=False,
+                                           allow_access_by_email_suffix='testing.com,testing123.com'),
+                'hello@testing.com',
+                True
+            ),
+            # OAuth2 application user does not have matching email
+            (
+                lambda: ApplicationFactory(default_access_allowed=False,
+                                           allow_access_by_email_suffix='testing.com,testing123.com'),
+                'hello@notinlist.com',
+                False
+            ),
+            # Saml2 application user has matching email
+            (
+                lambda: SamlApplicationFactory(allow_access_by_email_suffix='testing.com,testing123.com'),
+                'hello@testing.com',
+                True
+            ),
+            # Saml2 application user does not have matching email
+            (
+                lambda: SamlApplicationFactory(allow_access_by_email_suffix='testing.com,testing123.com'),
+                'hello@notinlist.com',
+                False
+            ),
+        ]
+    )
+    def test_can_access_with_email(self, application_func, email, expected):
         """
         Test that `can_access()` returns True when the user's email is in the
         `Application.allow_access_by_email_suffix` list
         """
-        app = ApplicationFactory(
-            default_access_allowed=False,
-            allow_access_by_email_suffix='testing.com, testing123.com'
-        )
+        app = application_func()
 
-        user = UserFactory(email='hello@notinlist.com')
+        user = UserFactory(email=email)
 
-        assert not user.can_access(app)
-
-        user = UserFactory(email='joe.blogs@testing.com')
-        assert user.can_access(app)
+        assert user.can_access(app) == expected
 
     def test_get_emails_for_application_app_email_ordering(self):
         app = ApplicationFactory(email_ordering='aaa.com, bbb.com, ccc.com, ddd.com, eee.com')

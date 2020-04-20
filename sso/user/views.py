@@ -110,7 +110,7 @@ class UserListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     ordering_fields = ('first_name', 'last_name')
     _default_ordering = ('first_name', 'last_name')
 
-    def _allowed_by_email_suffix_qs(self, application):
+    def _allowed_by_email_domain_qs(self, application):
         return reduce(
                 or_,
                 (
@@ -129,7 +129,7 @@ class UserListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         permitted_qs = queryset.filter(permitted_applications=application)
         access_qs = queryset.filter(access_profiles__oauth2_applications=application)
         if application.allow_access_by_email_suffix:
-            email_qs = queryset.filter(self._allowed_by_email_suffix_qs(application))
+            email_qs = queryset.filter(self._allowed_by_email_domain_qs(application))
             qs = email_qs | permitted_qs | access_qs
         else:
             qs = permitted_qs | access_qs
