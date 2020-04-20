@@ -37,6 +37,17 @@ class SamlApplication(models.Model):
         null=True,
         blank=True,
     )
+    allow_access_by_email_suffix = models.CharField(
+        _('allow access by email'),
+        null=True,
+        blank=True,
+        max_length=255,
+        help_text=_(
+            ('A comma separated list of email domains, e.g. "mobile.ukti.gov.uk, trade.gsi.gov.uk, fco.gov.uk" '
+             'User\'s with an email in this list will be given access.  NOTE: all user emails are checked - '
+             'including aliases.')
+        )
+    )
     enabled = models.BooleanField(
         _('Enabled?'),
         default=True,

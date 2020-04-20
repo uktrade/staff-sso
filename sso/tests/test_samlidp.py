@@ -131,6 +131,21 @@ class TestModelProcessor:
 
         mock_create_x_access_log.assert_called_once_with(request, 403, application=saml_app.name)
 
+    @pytest.mark.parametrize('email, allowed_emails, expected', [
+        ('me@testing.com', 'testing.com', True),
+        ('me@testing.com', '', False),
+        ('me@testing.com', '123testing.com ', False),
+        ('me@testing.com', 'helloworld.com,testing.com,yolo.com', True),
+    ])
+    def test_has_access_by_email_domain(self, rf, email, allowed_emails, expected):
+        SamlApplicationFactory(entity_id='an_entity_id', allow_access_by_email_suffix=allowed_emails)
+        processor = ModelProcessor('an_entity_id')
+
+        request = rf.get('/whatever/')
+        request.user = UserFactory(email=email)
+
+        assert processor.has_access(request) == expected
+
 
 class TestAWSProcessor:
     def test_create_identity_role_is_provided(self, settings):
