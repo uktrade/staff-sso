@@ -482,7 +482,7 @@ SAML_IDP_SPCONFIG = {
         'processor': 'sso.samlidp.processors.GoogleProcessor',
         'attribute_mapping': {}
     },
-    'https://departmentforinternationaltrade.invisionapp.com': {
+    'https://trade.invisionapp.com': {
         'processor': 'sso.samlidp.processors.InvisionProcessor',
         'attribute_mapping': {},
     },
