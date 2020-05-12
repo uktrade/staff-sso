@@ -459,9 +459,19 @@ SAML_IDP_CONFIG = {
 }
 
 SAML2_APPSTREAM_AWS_ROLE_ARN = env('SAML2_APPSTREAM_AWS_ROLE_ARN')
+SAML2_QUICKSIGHT_AWS_ROLE_ARN = env('SAML2_QUICKSIGHT_AWS_ROLE_ARN')
 
 SAML_IDP_SPCONFIG = {
-    'urn:amazon:webservices': {
+    'aws-quicksight': {
+        'entity_id': 'urn:amazon:webservices',
+        'processor': 'sso.samlidp.processors.AWSProcessor',
+        'attribute_mapping': {},
+        'extra_config': {
+            'role': SAML2_QUICKSIGHT_AWS_ROLE_ARN,
+        }
+    },
+    'aws-appstream': {
+        'entity_id': 'urn:amazon:webservices',
         'processor': 'sso.samlidp.processors.AWSProcessor',
         'attribute_mapping': {},
         'extra_config': {

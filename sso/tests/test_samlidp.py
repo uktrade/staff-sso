@@ -1,4 +1,7 @@
+import os
 import pytest
+
+from django.urls import reverse
 
 from sso.samlidp.models import SamlApplication
 from sso.samlidp.processors import AWSProcessor, EmailIdProcessor, GoogleProcessor, ModelProcessor
@@ -220,3 +223,39 @@ class TestEmailIdProcessor:
         identity = processor.create_identity(user, {})
 
         assert set(identity['groups']) == {ap1.permission, ap8.permission}
+
+
+class TestIdpInitiatedLogin():
+    def test_alias_entry(self, client, settings):
+
+        settings.SAML_IDP_CONFIG['metadata']['local'] = [
+            os.path.join(settings.SAML_IDP_CONFIG_DIR, 'sp_metadata.xml')
+        ]
+
+        settings.SAML_IDP_SPCONFIG = {
+            'an-alias': {
+                'entity_id': 'http://test-idp'
+            }
+        }
+
+        saml_application = SamlApplicationFactory(entity_id='http://test-idp')
+
+        access_profile = AccessProfileFactory(saml_apps_list=[saml_application])
+
+        credentials = {
+            'email': 'test1@test.com',
+            'password': 'testing123',
+        }
+
+        user = UserFactory(**credentials, add_access_profiles=[access_profile])
+        user.set_password(user.password)
+        user.save()
+
+        assert client.login(**credentials)
+
+        url = reverse('saml_idp_init') + '?sp=an-alias&RelayState=http://testing123.com'
+
+        response = client.get(url)
+
+        assert b'<form action="http://localhost:7000/saml2/acs/" method="post">' in response.content
+        assert b'<input type="hidden" name="RelayState" value="http://testing123.com"/>' in response.content

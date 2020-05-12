@@ -7,7 +7,7 @@ from django.views.generic.base import RedirectView, TemplateView
 from sso.healthcheck.views import HealthCheckView
 from . import api_urls
 from sso.admin.views import admin_login_view
-from sso.samlidp.views import LoginProcessView
+from sso.samlidp.views import LoginProcessView, SSOInitView
 
 app_name = 'staff_sso'
 
@@ -23,6 +23,7 @@ urlpatterns = [
 
     # override saml idp login url
     url(r'^idp/login/process/$', LoginProcessView.as_view(), name='saml_login_process_overridden'),
+    url(r'^idp/sso/init$', SSOInitView.as_view(), name="saml_idp_init"),
 
     url(r'^saml2/', include('sso.samlauth.urls')),
     url(r'^idp/', include('djangosaml2idp.urls')),
