@@ -115,3 +115,78 @@ class LoginProcessView(LoginRequiredMixin, IdPHandlerViewMixin, View):
             return HttpResponseRedirect(reverse('saml_multi_factor'))
         logger.debug("Performing SAML redirect")
         return HttpResponse(http_args['data'])
+
+
+@method_decorator(never_cache, name='dispatch')
+class SSOInitView(LoginRequiredMixin, IdPHandlerViewMixin, View):
+
+    def post(self, request, *args, **kwargs):
+        return self.get(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        passed_data = request.POST if request.method == 'POST' else request.GET
+
+        # get sp information from the parameters
+        try:
+            sp_entity_id = passed_data['sp']
+        except KeyError as excp:
+            return self.handle_error(request, exception=excp, status=400)
+
+        try:
+            sp_config = settings.SAML_IDP_SPCONFIG[sp_entity_id]
+
+        except Exception:
+            return self.handle_error(request, exception=ImproperlyConfigured("No config for SP %s defined in SAML_IDP_SPCONFIG" % sp_entity_id), status=400)
+
+        # the entity id is overridden for this entry; this solves the issue of all AWS services
+        # using the same entity_id, but requiring different configuration
+        if 'entity_id' in sp_config:
+            sp_entity_id = sp_config['entity_id']
+
+        binding_out, destination = self.IDP.pick_binding(
+            service="assertion_consumer_service",
+            entity_id=sp_entity_id)
+
+        processor = self.get_processor(sp_entity_id, sp_config)
+
+        # Check if user has access to the service of this SP
+        if not processor.has_access(request):
+            return self.handle_error(request, exception=PermissionDenied("You do not have access to this resource"), status=403)
+
+        identity = self.get_identity(processor, request.user, sp_config)
+
+        req_authn_context = PASSWORD
+        AUTHN_BROKER = AuthnBroker()
+        AUTHN_BROKER.add(authn_context_class_ref(req_authn_context), "")
+
+        user_id = processor.get_user_id(request.user)
+
+        # Construct SamlResponse messages
+        try:
+            name_id_formats = self.IDP.config.getattr("name_id_format", "idp") or [NAMEID_FORMAT_UNSPECIFIED]
+            name_id = NameID(format=name_id_formats[0], text=user_id)
+            authn = AUTHN_BROKER.get_authn_by_accr(req_authn_context)
+            sign_response = self.IDP.config.getattr("sign_response", "idp") or False
+            sign_assertion = self.IDP.config.getattr("sign_assertion", "idp") or False
+            authn_resp = self.IDP.create_authn_response(
+                identity=identity,
+                in_response_to="IdP_Initiated_Login",
+                destination=destination,
+                sp_entity_id=sp_entity_id,
+                userid=user_id,
+                name_id=name_id,
+                authn=authn,
+                sign_response=sign_response,
+                sign_assertion=sign_assertion,
+                **passed_data)
+        except Exception as excp:
+            return self.handle_error(request, exception=excp, status=500)
+
+        # Return as html with self-submitting form.
+        http_args = self.IDP.apply_binding(
+            binding=binding_out,
+            msg_str="%s" % authn_resp,
+            destination=destination,
+            relay_state=passed_data['RelayState'],
+            response=True)
+        return HttpResponse(http_args['data'])
