@@ -445,6 +445,7 @@ SAML_IDP_CONFIG = {
             os.path.join(SAML_IDP_CONFIG_DIR, 'elk-metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'elk-digital-metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'zoom-metadata.xml'),
+            os.path.join(SAML_IDP_CONFIG_DIR, 'adobe-metadata.xml'),
         ],
     },
     # Signing
@@ -499,6 +500,10 @@ SAML_IDP_SPCONFIG = {
         'processor': 'sso.samlidp.processors.EmailIdProcessor',
         'attribute_mapping': {},
     },
+    'https://federatedid-na1.services.adobe.com/federated/saml/metadata/alias/13fe47fc-6651-4d4f-8380-66d40192b1ac': {
+        'processor': 'sso.samlidp.processors.EmailIdProcessor',
+        'attribute_mapping': {},
+    }
 }
 
 SAML_IDP_ERROR_VIEW_CLASS = 'sso.samlidp.error_views.CustomSamlIDPErrorView'
