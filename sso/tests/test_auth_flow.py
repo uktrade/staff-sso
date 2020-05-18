@@ -425,6 +425,29 @@ class TestSAMLLogin:
 
         assert client.post(SAML_ACS_URL, data).status_code == 403
 
+    def test_invalid_idp_is_ignored(self, client, mocker):
+        """
+        if an incorrect idp is supplied in query string it should be ignored
+
+        e.g.
+
+        /saml2/login/?idp=does-not-exist
+        """
+
+        available_idps = mocker.patch('sso.samlauth.views.available_idps')
+
+        available_idps.return_value = {
+            'http://an-idp.com': 'idp1',
+            'https://another-idp.com': 'idp2'
+        }
+
+        response = client.get(SAML_LOGIN_URL + '?idp=WRONG')
+
+        assert response.status_code == 200
+        # this is the idp selection page which would have been bypassed if the idp was preselected with ?idp=
+        # previously a wrong idp would result in a 500
+        assert response.templates[0].name == 'djangosaml2/wayf.html'
+
 
 class TestOAuthToken:
     def _obtain_auth_code(self, client, authorize_params):

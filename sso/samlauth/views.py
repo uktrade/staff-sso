@@ -117,11 +117,16 @@ def login(request,  # noqa: C901
                 }
             )
 
-    selected_idp = request.GET.get('idp', None)
+
     conf = get_config(config_loader_path, request)
 
     # is a embedded wayf needed?
     idps = available_idps(conf)
+
+    selected_idp = request.GET.get('idp')
+    if selected_idp and selected_idp not in idps:
+        selected_idp = None
+
     if selected_idp is None and len(idps) > 1:
         logger.debug('A discovery process is needed')
         idps = sorted(idps.items(), key=lambda x: x[1])
