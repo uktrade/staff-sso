@@ -503,6 +503,11 @@ SAML_IDP_SPCONFIG = {
     'https://federatedid-na1.services.adobe.com/federated/saml/metadata/alias/13fe47fc-6651-4d4f-8380-66d40192b1ac': {
         'processor': 'sso.samlidp.processors.EmailIdProcessor',
         'attribute_mapping': {},
+    },
+    # prod
+    'https://federatedid-na1.services.adobe.com/federated/saml/metadata/alias/fe5a27cc-c28c-43e6-87f8-f1079e5eb3e4': {
+        'processor': 'sso.samlidp.processors.EmailIdProcessor',
+        'attribute_mapping': {},
     }
 }
 
