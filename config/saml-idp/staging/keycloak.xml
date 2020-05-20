@@ -1,0 +1,11 @@
+<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" entityID="https://keycloak.staging-ci.uktrade.digital/auth/realms/ci-staging">
+    <SPSSODescriptor AuthnRequestsSigned="false" WantAssertionsSigned="false"
+            protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol urn:oasis:names:tc:SAML:1.1:protocol http://schemas.xmlsoap.org/ws/2003/07/secext">
+        <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://keycloak.staging-ci.uktrade.digital/auth/realms/ci-staging/broker/staff%20sso/endpoint"/>
+        <NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
+        </NameIDFormat>
+        <AssertionConsumerService
+                Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://keycloak.staging-ci.uktrade.digital/auth/realms/ci-staging/broker/staff%20sso/endpoint"
+                index="1" isDefault="true" />
+    </SPSSODescriptor>
+</EntityDescriptor>

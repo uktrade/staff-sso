@@ -444,6 +444,7 @@ SAML_IDP_CONFIG = {
             os.path.join(SAML_IDP_CONFIG_DIR, 'elk-metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'elk-digital-metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'zoom-metadata.xml'),
+            os.path.join(SAML_IDP_CONFIG_DIR, 'keycloak.xml'),
         ],
     },
     # Signing
@@ -495,6 +496,10 @@ SAML_IDP_SPCONFIG = {
         'attribute_mapping': {},
     },
     'trade.zoom.us': {
+        'processor': 'sso.samlidp.processors.EmailIdProcessor',
+        'attribute_mapping': {},
+    },
+    'https://keycloak.staging-ci.uktrade.digital/auth/realms/ci-staging': {
         'processor': 'sso.samlidp.processors.EmailIdProcessor',
         'attribute_mapping': {},
     },
