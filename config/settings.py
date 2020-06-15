@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'axes',
     'raven.contrib.django.raven_compat',
     'django_filters',
+    'elasticapm.contrib.django',
 
     'sso.core',
     'sso.user',
@@ -508,3 +509,13 @@ MI_GOOGLE_SERVICE_ACCOUNT_DELEGATED_USER = env('MI_GOOGLE_SERVICE_ACCOUNT_DELEGA
 MI_GOOGLE_USER_SYNC_SAML_APPLICATION_SLUG = env('MI_GOOGLE_USER_SYNC_SAML_APPLICATION_SLUG')
 AUTH_EMAIL_TO_IPD_MAP=env.json('AUTH_EMAIL_TO_IPD_MAP', default={})
 EMAIL_ID_DOMAIN = env('EMAIL_ID_DOMAIN')
+
+
+# Elastic APM settings
+
+ELASTIC_APM = {
+  'SERVICE_NAME': 'staff-sso',
+  'SECRET_TOKEN': env('ELASTIC_APM_SECRET_TOKEN'),
+  'SERVER_URL' : env('ELASTIC_APM_URL'),
+  'ENVIRONMENT': env('ELASTIC_APM_ENVIRONMENT'),
+}
