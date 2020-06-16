@@ -1,6 +1,11 @@
+import urllib.parse
+import time
+
 import mohawk
 from django.urls import reverse
 import pytest
+
+from .factories.user import UserFactory
 
 
 def test_via_public_internet_then_403(api_client):
@@ -50,6 +55,7 @@ def test_bad_auth_header_then_403(api_client, get_hawk_params):
     assert response.json() == {}
 
 
+@pytest.mark.django_db
 def test_via_internal_networking_with_content_type_then_200(api_client):
     # The Activity Stream does not send a content-type header. However, we
     # shouldn't be brittle WRT that
@@ -64,6 +70,7 @@ def test_via_internal_networking_with_content_type_then_200(api_client):
     assert response.status_code == 200
 
 
+@pytest.mark.django_db
 def test_via_internal_networking_with_query_string_then_200(api_client):
     path = reverse('api-v1:core:activity-stream') + '?some=param&another=param'
     host = 'localhost:8080'
@@ -76,6 +83,7 @@ def test_via_internal_networking_with_query_string_then_200(api_client):
     assert response.status_code == 200
 
 
+@pytest.mark.django_db
 def test_via_internal_networking_no_content_type_then_200(api_client):
     path = reverse('api-v1:core:activity-stream')
     host = 'localhost:8080'
@@ -88,9 +96,122 @@ def test_via_internal_networking_no_content_type_then_200(api_client):
     assert response.status_code == 200
 
 
+@pytest.mark.django_db
+def test_if_no_users_no_activities_one_page(api_client):
+    host = 'localhost:8080'
+    path = reverse('api-v1:core:activity-stream')
+    response = hawk_request(api_client, host, path)
+    response_dict = response.json()
+    assert response_dict['orderedItems'] == []
+    assert 'next' not in response_dict
+
+
+@pytest.mark.django_db
+def test_if_one_user_one_activity_two_pages_then_updates(api_client):
+    UserFactory()
+
+    host = 'localhost:8080'
+    path = reverse('api-v1:core:activity-stream')
+
+    response_1 = hawk_request(api_client, host, path)
+    assert response_1.status_code == 200
+    response_1_dict = response_1.json()
+
+    assert len(response_1_dict['orderedItems']) == 1
+    assert 'next' in response_1_dict
+
+    next_str = response_1_dict['next']
+    next_url = urllib.parse.urlsplit(next_str)
+    assert next_url.netloc == host
+
+    response_2 = hawk_request(api_client, host, next_url.path + (f'?{next_url.query}' if next_url.query else ''))
+    response_2_dict = response_2.json()
+    assert response_2_dict['orderedItems'] == []
+    assert 'next' not in response_2_dict
+
+    UserFactory()
+
+    response_3 = hawk_request(api_client, host, next_url.path + (f'?{next_url.query}' if next_url.query else ''))
+    response_3_dict = response_3.json()
+    assert len(response_3_dict['orderedItems']) == 1
+    assert 'next' in response_3_dict
+
+    next_str = response_3_dict['next']
+    next_url = urllib.parse.urlsplit(next_str)
+    assert next_url.netloc == host
+
+    response_4 = hawk_request(api_client, host, next_url.path + (f'?{next_url.query}' if next_url.query else ''))
+    response_4_dict = response_4.json()
+    assert response_4_dict['orderedItems'] == []
+    assert 'next' not in response_4_dict
+
+
+@pytest.mark.django_db
+def test_if_50_users_two_pages(api_client):
+    UserFactory.create_batch(50)
+
+    host = 'localhost:8080'
+    path = reverse('api-v1:core:activity-stream')
+
+    response_1 = hawk_request(api_client, host, path)
+    response_1_dict = response_1.json()
+
+    assert len(response_1_dict['orderedItems']) == 50
+    assert 'next' in response_1_dict
+
+    next_str = response_1_dict['next']
+    next_url = urllib.parse.urlsplit(next_str)
+    assert next_url.netloc == host
+
+    response_2 = hawk_request(api_client, host, next_url.path + (f'?{next_url.query}' if next_url.query else ''))
+    response_2_dict = response_2.json()
+    assert response_2_dict['orderedItems'] == []
+    assert 'next' not in response_2_dict
+
+
+@pytest.mark.django_db
+def test_if_51_users_three_pages(api_client):
+    UserFactory.create_batch(51)
+
+    host = 'localhost:8080'
+    path = reverse('api-v1:core:activity-stream')
+
+    response_1 = hawk_request(api_client, host, path)
+    response_1_dict = response_1.json()
+    assert len(response_1_dict['orderedItems']) == 50
+    assert 'next' in response_1_dict
+
+    next_str = response_1_dict['next']
+    next_url = urllib.parse.urlsplit(next_str)
+    assert next_url.netloc == host
+
+    response_2 = hawk_request(api_client, host, next_url.path + (f'?{next_url.query}' if next_url.query else ''))
+    response_2_dict = response_2.json()
+    assert len(response_2_dict['orderedItems']) == 1
+    assert 'next' in response_2_dict
+
+    next_str = response_2_dict['next']
+    next_url = urllib.parse.urlsplit(next_str)
+    assert next_url.netloc == host
+
+    response_3 = hawk_request(api_client, host, next_url.path + (f'?{next_url.query}' if next_url.query else ''))
+    response_3_dict = response_3.json()
+    assert response_3_dict['orderedItems'] == []
+    assert 'next' not in response_3_dict
+
+
 def hawk_auth_header(key_id, secret_key, url, method, content, content_type):
     return mohawk.Sender({
         'id': key_id,
         'key': secret_key,
         'algorithm': 'sha256',
     }, url, method, content=content, content_type=content_type).request_header
+
+
+def hawk_request(api_client, host, path):
+    url = f'http://{host}{path}'
+    return api_client.get(path,
+        content_type=None,
+        HTTP_HOST='localhost:8080',
+        HTTP_AUTHORIZATION=hawk_auth_header('the-id', 'the-secret', url, 'GET', b'', ''),
+    )
