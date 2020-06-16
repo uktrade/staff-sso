@@ -17,3 +17,4 @@ flake8-print
 flake8-quotes
 
 lxml
+mohawk==1.1.0

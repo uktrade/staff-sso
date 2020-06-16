@@ -4,7 +4,7 @@
 #
 #    pip-compile
 #
--e git+https://github.com/OTA-Insight/djangosaml2idp.git@v0.5.0#egg=djangosaml2idp
+-e git+https://github.com/OTA-Insight/djangosaml2idp.git@v0.5.0#egg=djangosaml2idp  # via -r requirements.in
 asn1crypto==0.24.0        # via cryptography
 cachetools==2.1.0         # via google-auth, zenpy
 certifi==2018.4.16        # via elastic-apm, requests
@@ -27,6 +27,7 @@ future==0.16.0            # via pysaml2, zenpy
 google-api-python-client==1.7.6
 google-auth-httplib2==0.0.3  # via google-api-python-client
 google-auth==1.6.1        # via google-api-python-client, google-auth-httplib2
+hawk-server==0.0.12       # via -r requirements.in
 httplib2==0.12.0          # via google-api-python-client, google-auth-httplib2, oauth2client
 idna==2.7                 # via cryptography, requests
 oauth2client==4.1.3
