@@ -78,7 +78,7 @@ def activity_stream(request):
 
     per_page = 50
     User = get_user_model()
-    users = list(User.objects.only('user_id').extra(
+    users = list(User.objects.only('user_id', 'last_modified').extra(
         where=['(last_modified, user_id) > (%s, %s)', 'last_modified < STATEMENT_TIMESTAMP()'],
         params=(after_ts, after_user_id),
     ).order_by('last_modified', 'user_id')[:per_page])
@@ -101,6 +101,7 @@ def activity_stream(request):
         'orderedItems': [
             {
                 'id': f'dit:StaffSSO:User:{user.user_id}:Update',
+                'published': user.last_modified,
                 'object': {
                     'id': f'dit:StaffSSO:User:{user.user_id}',
                 }
