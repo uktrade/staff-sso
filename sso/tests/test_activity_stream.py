@@ -200,6 +200,17 @@ def test_if_51_users_three_pages(api_client):
     assert 'next' not in response_3_dict
 
 
+@pytest.mark.django_db
+def test_no_n_plus_1_query(api_client, django_assert_num_queries):
+    UserFactory.create_batch(50)
+
+    host = 'localhost:8080'
+    path = reverse('api-v1:core:activity-stream')
+
+    with django_assert_num_queries(1):
+        response_1 = hawk_request(api_client, host, path)
+
+
 def hawk_auth_header(key_id, secret_key, url, method, content, content_type):
     return mohawk.Sender({
         'id': key_id,
