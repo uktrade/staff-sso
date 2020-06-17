@@ -40,7 +40,7 @@ google-api-python-client==1.7.6  # via -r requirements.txt
 google-auth-httplib2==0.0.3  # via -r requirements.txt, google-api-python-client
 google-auth==1.6.1        # via -r requirements.txt, google-api-python-client, google-auth-httplib2
 hawk-server==0.0.12       # via -r requirements.txt
-httplib2==0.12.0          # via -r requirements.txt, google-api-python-client, google-auth-httplib2, oauth2client
+httplib2==0.18.0          # via -r requirements.txt, google-api-python-client, google-auth-httplib2, oauth2client
 idna==2.7                 # via -r requirements.txt, cryptography, requests
 lxml==4.2.4               # via -r requirements-dev.in
 mccabe==0.6.1             # via flake8
