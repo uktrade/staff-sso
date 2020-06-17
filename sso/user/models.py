@@ -184,6 +184,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
 
     last_accessed = models.DateTimeField(blank=True, null=True)
+    last_modified = models.DateTimeField(auto_now=True, null=False)
 
     objects = UserManager()
 
