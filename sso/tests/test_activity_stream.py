@@ -6,6 +6,7 @@ from django.urls import reverse
 import pytest
 
 from .factories.user import UserFactory
+from sso.user.middleware import UpdatedLastAccessedMiddleware
 
 
 def test_via_public_internet_then_403(api_client):
@@ -250,6 +251,36 @@ def test_without_contact_email(api_client):
     assert response_1_dict['orderedItems'][0]['object']['dit:emailAddress'] == [
         'test@a.com', 'test@b.com', 'test@c.com',
     ]
+
+
+@pytest.mark.django_db
+def test_user_access_does_not_result_in_update(api_client, rf, mocker):
+    user = UserFactory(email='test@a.com', email_list=['test@b.com', 'test@c.com'])
+    time.sleep(1)
+
+    host = 'localhost:8080'
+    path = reverse('api-v1:core:activity-stream')
+
+    response_1 = hawk_request(api_client, host, path)
+    assert response_1.status_code == 200
+    response_1_dict = response_1.json()
+
+    assert len(response_1_dict['orderedItems']) == 1
+
+    middleware = UpdatedLastAccessedMiddleware(get_response=mocker.MagicMock())
+    request = rf.get('/')
+    request.user = user
+    middleware(request)
+
+    time.sleep(1)
+
+    next_str = response_1_dict['next']
+    next_url = urllib.parse.urlsplit(next_str)
+    assert next_url.netloc == host
+
+    response_2 = hawk_request(api_client, host, next_url.path + (f'?{next_url.query}' if next_url.query else ''))
+    response_2_dict = response_2.json()
+    assert response_2_dict['orderedItems'] == []
 
 
 def hawk_auth_header(key_id, secret_key, url, method, content, content_type):
