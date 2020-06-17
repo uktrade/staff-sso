@@ -76,13 +76,24 @@ def activity_stream(request):
     ##########################################################
     ## Fetch activities after cursor (i.e. user modifications)
 
+    # `STATEMENT_TIMESTAMP`: it is often more typical to use CURRENT_TIMESTAMP,
+    # however, CURRENT_TIMESTAMP is the time of the start of the current
+    # transaction, and pytest tests are run in a transaction, so
+    # CURRENT_TIMESTAMP does not progress
+    #
+    # `- INTERVAL 1 second`: `last_modified` is not strictly monotonically
+    # increasing due to overlapping transactions committed in a non-guarenteed
+    # order. It's technically an eventually consistent situation, so updates
+    # can be missed if serveral are close together. We mitigate this risk by
+    # adding a delay before activities appear in the stream.
+
     per_page = 50
     User = get_user_model()
     users = list(User.objects.only(
         'user_id', 'last_modified', 'first_name', 'last_name',
         'email', 'contact_email',
     ).prefetch_related('emails').extra(
-        where=['(last_modified, user_id) > (%s, %s)', 'last_modified < STATEMENT_TIMESTAMP()'],
+        where=['(last_modified, user_id) > (%s, %s)', "last_modified < STATEMENT_TIMESTAMP() - INTERVAL '1 second'"],
         params=(after_ts, after_user_id),
     ).order_by('last_modified', 'user_id')[:per_page])
 

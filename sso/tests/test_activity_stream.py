@@ -109,6 +109,7 @@ def test_if_no_users_no_activities_one_page(api_client):
 @pytest.mark.django_db
 def test_if_one_user_one_activity_two_pages_then_updates(api_client):
     UserFactory()
+    time.sleep(1)
 
     host = 'localhost:8080'
     path = reverse('api-v1:core:activity-stream')
@@ -130,6 +131,7 @@ def test_if_one_user_one_activity_two_pages_then_updates(api_client):
     assert 'next' not in response_2_dict
 
     UserFactory()
+    time.sleep(1)
 
     response_3 = hawk_request(api_client, host, next_url.path + (f'?{next_url.query}' if next_url.query else ''))
     response_3_dict = response_3.json()
@@ -149,6 +151,7 @@ def test_if_one_user_one_activity_two_pages_then_updates(api_client):
 @pytest.mark.django_db
 def test_if_50_users_two_pages(api_client):
     UserFactory.create_batch(50)
+    time.sleep(1)
 
     host = 'localhost:8080'
     path = reverse('api-v1:core:activity-stream')
@@ -172,6 +175,7 @@ def test_if_50_users_two_pages(api_client):
 @pytest.mark.django_db
 def test_if_51_users_three_pages(api_client):
     UserFactory.create_batch(51)
+    time.sleep(1)
 
     host = 'localhost:8080'
     path = reverse('api-v1:core:activity-stream')
@@ -203,6 +207,7 @@ def test_if_51_users_three_pages(api_client):
 @pytest.mark.django_db
 def test_no_n_plus_1_query(api_client, django_assert_num_queries):
     UserFactory.create_batch(50)
+    time.sleep(1)
 
     host = 'localhost:8080'
     path = reverse('api-v1:core:activity-stream')
@@ -214,6 +219,7 @@ def test_no_n_plus_1_query(api_client, django_assert_num_queries):
 @pytest.mark.django_db
 def test_with_contact_email(api_client):
     UserFactory(email='test@a.com', contact_email='test@b.com', email_list=['test@c.com', 'test@d.com'])
+    time.sleep(1)
 
     host = 'localhost:8080'
     path = reverse('api-v1:core:activity-stream')
@@ -231,6 +237,7 @@ def test_with_contact_email(api_client):
 @pytest.mark.django_db
 def test_without_contact_email(api_client):
     UserFactory(email='test@a.com', email_list=['test@b.com', 'test@c.com'])
+    time.sleep(1)
 
     host = 'localhost:8080'
     path = reverse('api-v1:core:activity-stream')
