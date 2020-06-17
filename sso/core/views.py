@@ -78,7 +78,10 @@ def activity_stream(request):
 
     per_page = 50
     User = get_user_model()
-    users = list(User.objects.only('user_id', 'last_modified', 'first_name', 'last_name').extra(
+    users = list(User.objects.only(
+        'user_id', 'last_modified', 'first_name', 'last_name',
+        'email', 'contact_email',
+    ).prefetch_related('emails').extra(
         where=['(last_modified, user_id) > (%s, %s)', 'last_modified < STATEMENT_TIMESTAMP()'],
         params=(after_ts, after_user_id),
     ).order_by('last_modified', 'user_id')[:per_page])
@@ -107,6 +110,9 @@ def activity_stream(request):
                     'name': user.get_full_name(),
                     'dit:firstName': user.first_name,
                     'dit:lastName': user.last_name,
+                    'dit:emailAddress': \
+                        ([user.contact_email] if user.contact_email else []) +
+                        sorted([email.email for email in user.emails.all()]),
                 }
             }
             for user in users

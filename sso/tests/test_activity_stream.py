@@ -207,8 +207,42 @@ def test_no_n_plus_1_query(api_client, django_assert_num_queries):
     host = 'localhost:8080'
     path = reverse('api-v1:core:activity-stream')
 
-    with django_assert_num_queries(1):
+    with django_assert_num_queries(2):
         response_1 = hawk_request(api_client, host, path)
+
+
+@pytest.mark.django_db
+def test_with_contact_email(api_client):
+    UserFactory(email='test@a.com', contact_email='test@b.com', email_list=['test@c.com', 'test@d.com'])
+
+    host = 'localhost:8080'
+    path = reverse('api-v1:core:activity-stream')
+
+    response_1 = hawk_request(api_client, host, path)
+    assert response_1.status_code == 200
+    response_1_dict = response_1.json()
+
+    assert len(response_1_dict['orderedItems']) == 1
+    assert response_1_dict['orderedItems'][0]['object']['dit:emailAddress'] == [
+        'test@b.com', 'test@a.com', 'test@c.com', 'test@d.com',
+    ]
+
+
+@pytest.mark.django_db
+def test_without_contact_email(api_client):
+    UserFactory(email='test@a.com', email_list=['test@b.com', 'test@c.com'])
+
+    host = 'localhost:8080'
+    path = reverse('api-v1:core:activity-stream')
+
+    response_1 = hawk_request(api_client, host, path)
+    assert response_1.status_code == 200
+    response_1_dict = response_1.json()
+
+    assert len(response_1_dict['orderedItems']) == 1
+    assert response_1_dict['orderedItems'][0]['object']['dit:emailAddress'] == [
+        'test@a.com', 'test@b.com', 'test@c.com',
+    ]
 
 
 def hawk_auth_header(key_id, secret_key, url, method, content, content_type):
