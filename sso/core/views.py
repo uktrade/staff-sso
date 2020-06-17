@@ -90,7 +90,7 @@ def activity_stream(request):
     per_page = 50
     User = get_user_model()
     users = list(User.objects.only(
-        'user_id', 'last_modified', 'first_name', 'last_name',
+        'user_id', 'email_user_id', 'last_modified', 'first_name', 'last_name',
         'email', 'contact_email',
     ).prefetch_related('emails').extra(
         where=['(last_modified, user_id) > (%s, %s)', "last_modified < STATEMENT_TIMESTAMP() - INTERVAL '1 second'"],
@@ -119,6 +119,8 @@ def activity_stream(request):
                 'object': {
                     'id': f'dit:StaffSSO:User:{user.user_id}',
                     'name': user.get_full_name(),
+                    'dit:StaffSSO:User:UserId': user.user_id,
+                    'dit:StaffSSO:User:EmailUserId': user.email_user_id,
                     'dit:firstName': user.first_name,
                     'dit:lastName': user.last_name,
                     'dit:emailAddress': \
