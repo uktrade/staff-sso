@@ -118,9 +118,10 @@ def activity_stream(request):
                 'published': user.last_modified,
                 'object': {
                     'id': f'dit:StaffSSO:User:{user.user_id}',
+                    'type': 'dit:StaffSSO:User',
                     'name': user.get_full_name(),
-                    'dit:StaffSSO:User:UserId': user.user_id,
-                    'dit:StaffSSO:User:EmailUserId': user.email_user_id,
+                    'dit:StaffSSO:User:userId': user.user_id,
+                    'dit:StaffSSO:User:emailUserId': user.email_user_id,
                     'dit:firstName': user.first_name,
                     'dit:lastName': user.last_name,
                     'dit:emailAddress': \
