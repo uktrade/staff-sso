@@ -126,7 +126,7 @@ def activity_stream(request):
                     'name': user.get_full_name(),
                     'dit:StaffSSO:User:userId': user.user_id,
                     'dit:StaffSSO:User:emailUserId': user.email_user_id,
-                    'dit:StaffSSO:contactEmailAddress': user.contact_email if user.contact_email else None,
+                    'dit:StaffSSO:User:contactEmailAddress': user.contact_email if user.contact_email else None,
                     'dit:firstName': user.first_name,
                     'dit:lastName': user.last_name,
                     'dit:emailAddress': without_duplicates(
