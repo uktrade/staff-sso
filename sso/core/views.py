@@ -106,6 +106,10 @@ def activity_stream(request):
             request.build_absolute_uri(reverse('api-v1:core:activity-stream')) + \
             '?cursor={}_{}'.format(str(after_ts.timestamp()), str(after_user_id))
 
+    def without_duplicates(seq):
+        seen = set()
+        return [x for x in seq if not (x in seen or seen.add(x))]
+
     page = {
         '@context': [
             'https://www.w3.org/ns/activitystreams',
@@ -122,11 +126,14 @@ def activity_stream(request):
                     'name': user.get_full_name(),
                     'dit:StaffSSO:User:userId': user.user_id,
                     'dit:StaffSSO:User:emailUserId': user.email_user_id,
+                    'dit:StaffSSO:contactEmailAddress': user.contact_email if user.contact_email else None,
                     'dit:firstName': user.first_name,
                     'dit:lastName': user.last_name,
-                    'dit:emailAddress': \
+                    'dit:emailAddress': without_duplicates(
                         ([user.contact_email] if user.contact_email else []) +
-                        sorted([email.email for email in user.emails.all()]),
+                        [user.email] +
+                        [email.email for email in user.emails.all()]
+                    )
                 }
             }
             for user in users
