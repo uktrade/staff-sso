@@ -132,7 +132,7 @@ def activity_stream(request):
                     'dit:emailAddress': without_duplicates(
                         ([user.contact_email] if user.contact_email else []) +
                         [user.email] +
-                        sorted(email.email for email in user.emails.all())
+                        sorted([email.email for email in user.emails.all()])
                     )
                 }
             }
