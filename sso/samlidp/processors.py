@@ -90,3 +90,8 @@ class EmailIdProcessor(ModelProcessor):
         identity['groups'] = permissions
 
         return identity
+
+
+class ContactEmailProcessor(EmailIdProcessor):
+    def get_user_id(self, user):
+        return user.contact_email
