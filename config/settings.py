@@ -481,7 +481,7 @@ SAML_IDP_SPCONFIG = {
         }
     },
     'google.com': {
-        'processor': 'sso.samlidp.processors.GoogleProcessor',
+        'processor': 'sso.samlidp.processors.SelectEmailProcessor',
         'attribute_mapping': {}
     },
     'https://trade.invisionapp.com': {

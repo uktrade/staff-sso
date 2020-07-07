@@ -50,6 +50,9 @@ class ModelProcessor(BaseProcessor):
 
         return access
 
+    def require_email_selection(self):
+        return False
+
 
 class AWSProcessor(ModelProcessor):
     def create_identity(self, user, sp_mapping, **extra_config):
@@ -95,3 +98,11 @@ class EmailIdProcessor(ModelProcessor):
 class ContactEmailProcessor(EmailIdProcessor):
     def get_user_id(self, user):
         return user.contact_email
+
+
+class SelectEmailProcessor(ModelProcessor):
+    """If the user has > 1 emails then allow them to choose the email to supply to the service provider"""
+
+    def require_email_selection(self):
+        return True
+

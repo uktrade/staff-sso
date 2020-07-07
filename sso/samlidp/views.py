@@ -2,23 +2,38 @@ import logging
 
 from raven.contrib.django.raven_compat.models import client
 
-from djangosaml2idp.views import IdPHandlerViewMixin
+from djangosaml2idp.views import IdPHandlerViewMixin as IdPHandlerViewMixinBase
 
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.http import (HttpResponse, HttpResponseRedirect)
 from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.views.generic.edit import FormView
 from django.views import View
 from django.views.decorators.cache import never_cache
+from django.shortcuts import redirect, render
 from saml2 import BINDING_HTTP_POST
 from saml2.authn_context import PASSWORD, AuthnBroker, authn_context_class_ref
 from saml2.ident import NameID
 from saml2.s_utils import UnknownPrincipal, UnsupportedBinding
 
+from .forms import SelectEmailForm
+
 
 logger = logging.getLogger(__name__)
+
+
+class IdPHandlerViewMixin(IdPHandlerViewMixinBase):
+    def render_email_selection_form(self, qs_args):
+
+        user_emails = list(self.request.user.emails.all().values_list('email', flat=True))
+
+        form = SelectEmailForm(email_choices=user_emails)
+
+        return render(self.request, 'djangosaml2idp/select-email.html', {'form': form, 'qs_args': qs_args or []})
 
 
 @method_decorator(never_cache, name='dispatch')
@@ -68,13 +83,24 @@ class LoginProcessView(LoginRequiredMixin, IdPHandlerViewMixin, View):
         if not processor.has_access(request):
             return self.handle_error(request, exception=PermissionDenied("You do not have access to this resource"), status=403)
 
+        # does the user need to select their email?
+        passed_data = request.GET
+        if processor.require_email_selection(request.user) and request.user.emails.count() > 1:
+            selected_email = passed_data.get('email', None)
+            if not selected_email or not request.user.emails.filter(email=selected_email).exists():
+                return self.render_email_selection_form(passed_data.items())
+            else:
+                user_id = selected_email
+        else:
+            user_id = processor.get_user_id(request.user)
+
         identity = self.get_identity(processor, request.user, sp_config)
 
         req_authn_context = req_info.message.requested_authn_context or PASSWORD
         AUTHN_BROKER = AuthnBroker()
         AUTHN_BROKER.add(authn_context_class_ref(req_authn_context), "")
 
-        user_id = processor.get_user_id(request.user)
+        # user_id = processor.get_user_id(request.user)
 
         # Construct SamlResponse message
 
@@ -153,13 +179,21 @@ class SSOInitView(LoginRequiredMixin, IdPHandlerViewMixin, View):
         if not processor.has_access(request):
             return self.handle_error(request, exception=PermissionDenied("You do not have access to this resource"), status=403)
 
+        # does the user need to select their email?
+        if processor.require_email_selection(request.user) and request.user.emails.count() > 1:
+            selected_email = passed_data.get('email', None)
+            if not selected_email or not request.user.emails.filter(email=selected_email).exists():
+                return self.render_email_selection_form(passed_data.items())
+            else:
+                user_id = selected_email
+        else:
+            user_id = processor.get_user_id(request.user)
+
         identity = self.get_identity(processor, request.user, sp_config)
 
         req_authn_context = PASSWORD
         AUTHN_BROKER = AuthnBroker()
         AUTHN_BROKER.add(authn_context_class_ref(req_authn_context), "")
-
-        user_id = processor.get_user_id(request.user)
 
         # Construct SamlResponse messages
         try:
@@ -190,3 +224,17 @@ class SSOInitView(LoginRequiredMixin, IdPHandlerViewMixin, View):
             relay_state=passed_data['RelayState'],
             response=True)
         return HttpResponse(http_args['data'])
+
+
+# @method_decorator(login_required, name='dispatch')
+# class SelectEmailView(FormView):
+#     template_name = 'djangosaml2idp/select-email.html'
+#     form_class = SelectEmailForm
+#
+#     def get_form_kwargs(self):
+#
+#         kwargs = super().get_form_kwargs()
+#
+#         kwargs['email_choices'] = list(self.request.user.emails.all().values_list('email', flat=True))
+#
+#         return kwargs

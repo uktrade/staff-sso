@@ -1,0 +1,24 @@
+{% extends 'sso/base.html' %}
+
+{% block inner_content %}
+
+<div class="container">
+    <h1 class="heading-large">Which email?</h1>
+
+    <p>Choose which email address you would like to use to log into this service.</p>
+
+    <form method="get" action="">
+        {% for name,value in qs_args %}
+        <input type="hidden" name="{{ name }}" value="{{ value }}" />
+        {% endfor %}
+        <p>
+            {{ form.email }}
+        </p>
+
+        <p>
+            <button type="submit" class="button">Submit</button>
+        </p>
+    </form>
+</div>
+
+{% endblock %}
