@@ -85,7 +85,7 @@ class LoginProcessView(LoginRequiredMixin, IdPHandlerViewMixin, View):
 
         # does the user need to select their email?
         passed_data = request.GET
-        if processor.require_email_selection(request.user) and request.user.emails.count() > 1:
+        if processor.require_email_selection() and request.user.emails.count() > 1:
             selected_email = passed_data.get('email', None)
             if not selected_email or not request.user.emails.filter(email=selected_email).exists():
                 return self.render_email_selection_form(passed_data.items())
@@ -180,7 +180,7 @@ class SSOInitView(LoginRequiredMixin, IdPHandlerViewMixin, View):
             return self.handle_error(request, exception=PermissionDenied("You do not have access to this resource"), status=403)
 
         # does the user need to select their email?
-        if processor.require_email_selection(request.user) and request.user.emails.count() > 1:
+        if processor.require_email_selection() and request.user.emails.count() > 1:
             selected_email = passed_data.get('email', None)
             if not selected_email or not request.user.emails.filter(email=selected_email).exists():
                 return self.render_email_selection_form(passed_data.items())
