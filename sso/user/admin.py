@@ -10,7 +10,7 @@ from oauth2_provider.admin import ApplicationAdmin as OAuth2ApplicationAdmin
 
 from sso.oauth2.models import Application
 from .filter import ApplicationFilter
-from .models import AccessProfile, ApplicationPermission, EmailAddress, User
+from .models import AccessProfile, ApplicationPermission, EmailAddress, ServiceEmailAddress, User
 
 
 class UserForm(ModelForm):
@@ -34,6 +34,19 @@ class EmailInline(admin.TabularInline):
     readonly_fields = ('last_login',)
 
 
+class ServiceEmailInline(admin.TabularInline):
+    model = ServiceEmailAddress
+    verbose_name_plural = (
+        'Service Email Addresses - note if you add a new email you may need to '
+        ' click "save and continue" for that email to appear below'
+    )
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'email':
+            kwargs['queryset'] = EmailAddress.objects.filter(user=request.user)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     class Media:
@@ -51,7 +64,8 @@ class UserAdmin(admin.ModelAdmin):
     list_display = ('email', 'email_list', 'is_superuser', 'use_new_journey', 'last_login', 'last_accessed',
                     'list_permitted_applications', 'list_access_profiles', 'show_permissions_link')
     inlines = [
-        EmailInline
+        EmailInline,
+        ServiceEmailInline,
     ]
 
     def get_form(self, request, obj=None, **kwargs):

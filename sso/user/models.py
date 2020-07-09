@@ -365,5 +365,20 @@ class EmailAddress(models.Model):
 
         return super().save(*args, **kwargs)
 
+    def __str__(self):
+        return self.email
+
     class Meta:
         verbose_name_plural = 'email addresses'
+
+
+class ServiceEmailAddress(models.Model):
+    user = models.ForeignKey(User, related_name='service_emails', on_delete=models.CASCADE)
+    saml_application = models.ForeignKey('samlidp.SamlApplication', on_delete=models.CASCADE)
+    email = models.ForeignKey(EmailAddress, related_name='service_emails', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.user} - {self.saml_application.name} - {self.email}'
+
+    class Meta:
+        unique_together = ('user', 'saml_application', 'email')

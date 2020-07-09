@@ -6,7 +6,7 @@ from djangosaml2idp.processors import BaseProcessor
 
 
 from .models import SamlApplication
-from sso.user.models import EmailAddress
+from sso.user.models import EmailAddress, ServiceEmailAddress
 from sso.core.logging import create_x_access_log
 
 
@@ -36,6 +36,15 @@ class ModelProcessor(BaseProcessor):
 
     def __init__(self, entity_id, *args, **kwargs):
         self._application = SamlApplication.objects.get(entity_id=entity_id)
+
+    def get_user_id(self, user):
+        return self.get_service_email() or user.email
+
+    def get_service_email(self, user):
+        try:
+            return user.service_emails.get(saml_application=self._application).email
+        except ServiceEmailAddress.DoesNotExist:
+            return None
 
     def has_access(self, request):
 
@@ -90,8 +99,3 @@ class EmailIdProcessor(ModelProcessor):
         identity['groups'] = permissions
 
         return identity
-
-
-class ContactEmailProcessor(EmailIdProcessor):
-    def get_user_id(self, user):
-        return user.contact_email
