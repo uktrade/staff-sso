@@ -1,6 +1,7 @@
 import urllib.parse
 import time
 
+from freezegun import freeze_time
 import mohawk
 from django.urls import reverse
 import pytest
@@ -252,9 +253,43 @@ def test_without_contact_email(api_client):
         'test@a.com', 'test@b.com', 'test@c.com',
     ]
 
+@pytest.mark.django_db
+def test_last_accessed_in_full_ingest(api_client, rf, mocker):
+    user = UserFactory(email='test@a.com', email_list=['test@b.com', 'test@c.com'])
+    time.sleep(1)
+
+    host = 'localhost:8080'
+    path = reverse('api-v1:core:activity-stream')
+
+    response_1 = hawk_request(api_client, host, path)
+    assert response_1.status_code == 200
+    response_1_dict = response_1.json()
+
+    assert len(response_1_dict['orderedItems']) == 1
+    assert response_1_dict['orderedItems'][0]['object']['dit:StaffSSO:User:lastAccessed'] is None
+
+    middleware = UpdatedLastAccessedMiddleware(get_response=mocker.MagicMock())
+    request = rf.get('/')
+    request.user = user
+    with freeze_time('1995-01-16 15:50:00'):
+        middleware(request)
+
+    response_2 = hawk_request(api_client, host, path)
+    assert response_2.status_code == 200
+    response_2_dict = response_2.json()
+
+    assert len(response_2_dict['orderedItems']) == 1
+    assert response_2_dict['orderedItems'][0]['object']['dit:StaffSSO:User:lastAccessed'] == '1995-01-16T15:50:00Z'
 
 @pytest.mark.django_db
 def test_user_access_does_not_result_in_update(api_client, rf, mocker):
+    # If a client wants to have the last login for a user, they have to wait for the next full
+    # ingest from the Activity Stream: we do this to not pollute real-time updates which at the
+    # time of writing are only used for email addresses. If we need real-time update of last access
+    # we would probably want another type of activity, with two interplexed streams of activities.
+    # Note also at the time of writing, a full ingest takes < 1 min, so it's still not a long time
+    # for last accessed to get into the Activity Stream
+
     user = UserFactory(email='test@a.com', email_list=['test@b.com', 'test@c.com'])
     time.sleep(1)
 
