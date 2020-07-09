@@ -445,6 +445,7 @@ SAML_IDP_CONFIG = {
             os.path.join(SAML_IDP_CONFIG_DIR, 'elk-metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'elk-digital-metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'zoom-metadata.xml'),
+            os.path.join(SAML_IDP_CONFIG_DIR, 'adobe-metadata.xml'),
         ],
     },
     # Signing
@@ -484,7 +485,7 @@ SAML_IDP_SPCONFIG = {
         'attribute_mapping': {}
     },
     'https://trade.invisionapp.com': {
-        'processor': 'sso.samlidp.processors.InvisionProcessor',
+        'processor': 'sso.samlidp.processors.ModelProcessor',
         'attribute_mapping': {},
     },
     'https://elk.ci.uktrade.io:443/': {
@@ -499,6 +500,15 @@ SAML_IDP_SPCONFIG = {
         'processor': 'sso.samlidp.processors.EmailIdProcessor',
         'attribute_mapping': {},
     },
+    'https://federatedid-na1.services.adobe.com/federated/saml/metadata/alias/13fe47fc-6651-4d4f-8380-66d40192b1ac': {
+        'processor': 'sso.samlidp.processors.ModelProcessor',
+        'attribute_mapping': {},
+    },
+    # prod
+    'https://federatedid-na1.services.adobe.com/federated/saml/metadata/alias/fe5a27cc-c28c-43e6-87f8-f1079e5eb3e4': {
+        'processor': 'sso.samlidp.processors.ModelProcessor',
+        'attribute_mapping': {},
+    }
 }
 
 SAML_IDP_ERROR_VIEW_CLASS = 'sso.samlidp.error_views.CustomSamlIDPErrorView'

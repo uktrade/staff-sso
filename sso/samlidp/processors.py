@@ -31,6 +31,9 @@ class ModelProcessor(BaseProcessor):
     Load an associated `sso.samlidp.models.SamlApplication` model
     """
 
+    def get_user_id(self, user):
+        return user.email
+
     def __init__(self, entity_id, *args, **kwargs):
         self._application = SamlApplication.objects.get(entity_id=entity_id)
 
@@ -69,11 +72,6 @@ class AWSProcessor(ModelProcessor):
 class GoogleProcessor(ModelProcessor):
     def get_user_id(self, user):
         return build_google_user_id(user)
-
-
-class InvisionProcessor(ModelProcessor):
-    def get_user_id(self, user):
-        return user.email
 
 
 class EmailIdProcessor(ModelProcessor):
