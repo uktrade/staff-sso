@@ -497,7 +497,7 @@ SAML_IDP_SPCONFIG = {
         'attribute_mapping': {},
     },
     'trade.zoom.us': {
-        'processor': 'sso.samlidp.processors.EmailIdProcessor',
+        'processor': 'sso.samlidp.processors.ContactEmailProcessor',
         'attribute_mapping': {},
     },
     'https://federatedid-na1.services.adobe.com/federated/saml/metadata/alias/13fe47fc-6651-4d4f-8380-66d40192b1ac': {
