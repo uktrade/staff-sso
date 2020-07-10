@@ -4,7 +4,13 @@ import pytest
 from django.urls import reverse
 
 from sso.samlidp.models import SamlApplication
-from sso.samlidp.processors import AWSProcessor, EmailIdProcessor, GoogleProcessor, ModelProcessor
+from sso.samlidp.processors import (
+    AWSProcessor,
+    ContactEmailProcessor,
+    EmailIdProcessor,
+    GoogleProcessor,
+    ModelProcessor,
+)
 from sso.tests.factories.saml import SamlApplicationFactory
 from sso.tests.factories.user import (
     ApplicationPermissionFactory,
@@ -188,6 +194,16 @@ class TestModelProcessor:
 
         assert processor.get_user_id(user) == service_email
 
+    def test_user_id_field(self):
+        user = UserFactory(email='email@testing.com', contact_email='testing@test.com')
+
+        SamlApplicationFactory(entity_id='an_entity_id')
+        processor = ModelProcessor(entity_id='an_entity_id')
+
+        processor.USER_ID_FIELD = 'contact_email'
+
+        assert processor.get_user_id(user) == user.contact_email
+
 
 class TestAWSProcessor:
     def test_create_identity_role_is_provided(self, settings):
@@ -264,7 +280,7 @@ class TestEmailIdProcessor:
         assert set(identity['groups']) == {ap1.permission, ap8.permission}
 
 
-class TestIdpInitiatedLogin():
+class TestIdpInitiatedLogin:
     def test_alias_entry(self, client, settings):
 
         settings.SAML_IDP_CONFIG['metadata']['local'] = [

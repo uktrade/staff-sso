@@ -31,11 +31,13 @@ class ModelProcessor(BaseProcessor):
     Load an associated `sso.samlidp.models.SamlApplication` model
     """
 
+    USER_ID_FIELD = 'email'
+
     def __init__(self, entity_id, *args, **kwargs):
         self._application = SamlApplication.objects.get(entity_id=entity_id)
 
     def get_user_id(self, user):
-        return self.get_service_email(user) or user.email
+        return self.get_service_email(user) or getattr(user, self.USER_ID_FIELD)
 
     def get_service_email(self, user):
         """Get the email address specified for this user & service.
@@ -84,8 +86,7 @@ class GoogleProcessor(ModelProcessor):
 
 
 class EmailIdProcessor(ModelProcessor):
-    def get_user_id(self, user):
-        return user.email_user_id
+    USER_ID_FIELD = 'email_user_id'
 
     def create_identity(self, user, sp_mapping, **extra_config):
 
@@ -99,3 +100,7 @@ class EmailIdProcessor(ModelProcessor):
         identity['groups'] = permissions
 
         return identity
+
+
+class ContactEmailProcessor(ModelProcessor):
+    USER_ID_FIELD = 'contact_email'
