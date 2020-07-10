@@ -31,18 +31,18 @@ class ModelProcessor(BaseProcessor):
     Load an associated `sso.samlidp.models.SamlApplication` model
     """
 
-    def get_user_id(self, user):
-        return user.email
-
     def __init__(self, entity_id, *args, **kwargs):
         self._application = SamlApplication.objects.get(entity_id=entity_id)
 
     def get_user_id(self, user):
-        return self.get_service_email() or user.email
+        return self.get_service_email(user) or user.email
 
     def get_service_email(self, user):
+        """Get the email address specified for this user & service.
+
+        Returns None if a service email isn't defined """
         try:
-            return user.service_emails.get(saml_application=self._application).email
+            return user.service_emails.get(saml_application=self._application).email.email
         except ServiceEmailAddress.DoesNotExist:
             return None
 

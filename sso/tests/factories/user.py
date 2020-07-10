@@ -77,3 +77,9 @@ class ApplicationPermissionFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = 'user.ApplicationPermission'
+
+
+class ServiceEmailAddressFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = 'user.ServiceEmailAddress'

@@ -6,7 +6,12 @@ from django.urls import reverse
 from sso.samlidp.models import SamlApplication
 from sso.samlidp.processors import AWSProcessor, EmailIdProcessor, GoogleProcessor, ModelProcessor
 from sso.tests.factories.saml import SamlApplicationFactory
-from sso.tests.factories.user import ApplicationPermissionFactory, AccessProfileFactory, UserFactory
+from sso.tests.factories.user import (
+    ApplicationPermissionFactory,
+    AccessProfileFactory,
+    ServiceEmailAddressFactory,
+    UserFactory,
+)
 
 
 pytestmark = [
@@ -148,6 +153,40 @@ class TestModelProcessor:
         request.user = UserFactory(email=email)
 
         assert processor.has_access(request) == expected
+
+    def test_get_service_email(self):
+
+        ap = SamlApplicationFactory(entity_id='an_entity_id')
+        processor = ModelProcessor(entity_id='an_entity_id')
+
+        user = UserFactory(email='email1@testing.com', email_list=['extra1@testing.com'])
+        user2 = UserFactory(email='email2@testing.com')
+
+        ServiceEmailAddressFactory(user=user, saml_application=ap, email=user.emails.get(email='extra1@testing.com'))
+
+        assert processor.get_service_email(user) == 'extra1@testing.com'
+        assert not processor.get_service_email(user2)
+
+    def test_get_user_id(self):
+        user = UserFactory(email='email1@testing.com')
+
+        SamlApplicationFactory(entity_id='an_entity_id')
+        processor = ModelProcessor(entity_id='an_entity_id')
+
+        assert processor.get_user_id(user) == user.email
+
+    def test_get_user_id_with_service_override(self):
+
+        service_email = 'another@test.com'
+
+        user = UserFactory(email='email1@testing.com', email_list=[service_email, 'testing123@testing.com'])
+
+        ap = SamlApplicationFactory(entity_id='an_entity_id')
+        processor = ModelProcessor(entity_id='an_entity_id')
+
+        ServiceEmailAddressFactory(user=user, saml_application=ap, email=user.emails.get(email=service_email))
+
+        assert processor.get_user_id(user) == service_email
 
 
 class TestAWSProcessor:
