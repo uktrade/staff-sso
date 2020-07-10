@@ -6,7 +6,6 @@ from django.urls import reverse
 from sso.samlidp.models import SamlApplication
 from sso.samlidp.processors import (
     AWSProcessor,
-    ContactEmailProcessor,
     EmailIdProcessor,
     GoogleProcessor,
     ModelProcessor,
@@ -203,6 +202,18 @@ class TestModelProcessor:
         processor.USER_ID_FIELD = 'contact_email'
 
         assert processor.get_user_id(user) == user.contact_email
+
+    def test_user_id_field_uses_email_if_contact_email_is_empty(self):
+
+        user = UserFactory(email='email@testing.com', contact_email='')
+
+        SamlApplicationFactory(entity_id='an_entity_id')
+        processor = ModelProcessor(entity_id='an_entity_id')
+
+        processor.USER_ID_FIELD = 'contact_email'
+
+        assert not user.contact_email
+        assert processor.get_user_id(user) == user.email
 
 
 class TestAWSProcessor:
