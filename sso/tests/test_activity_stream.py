@@ -237,23 +237,6 @@ def test_with_contact_email(api_client):
 
 
 @pytest.mark.django_db
-def test_without_contact_email(api_client):
-    UserFactory(email='test@a.com', email_list=['test@b.com', 'test@c.com'])
-    time.sleep(1)
-
-    host = 'localhost:8080'
-    path = reverse('api-v1:core:activity-stream')
-
-    response_1 = hawk_request(api_client, host, path)
-    assert response_1.status_code == 200
-    response_1_dict = response_1.json()
-
-    assert len(response_1_dict['orderedItems']) == 1
-    assert response_1_dict['orderedItems'][0]['object']['dit:emailAddress'] == [
-        'test@a.com', 'test@b.com', 'test@c.com',
-    ]
-
-@pytest.mark.django_db
 def test_last_accessed_in_full_ingest(api_client, rf, mocker):
     user = UserFactory(email='test@a.com', email_list=['test@b.com', 'test@c.com'])
     time.sleep(1)
