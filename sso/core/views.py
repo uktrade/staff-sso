@@ -10,6 +10,8 @@ from django.views.decorators.http import require_GET
 from django.views.decorators.csrf import csrf_exempt
 from hawkserver import authenticate_hawk_header
 
+from sso.oauth2.models import Application as OAuthApplication
+
 
 @require_GET
 @csrf_exempt
@@ -92,7 +94,9 @@ def activity_stream(request):
     users = list(User.objects.only(
         'user_id', 'email_user_id', 'last_modified', 'last_accessed',
         'first_name', 'last_name', 'email', 'contact_email',
-    ).prefetch_related('emails').extra(
+    ).prefetch_related(
+        'emails', 'permitted_applications', 'access_profiles__oauth2_applications', 'access_profiles__saml2_applications')
+    .extra(
         where=['(last_modified, user_id) > (%s, %s)', "last_modified < STATEMENT_TIMESTAMP() - INTERVAL '1 second'"],
         params=(after_ts, after_user_id),
     ).order_by('last_modified', 'user_id')[:per_page])
@@ -109,6 +113,8 @@ def activity_stream(request):
     def without_duplicates(seq):
         seen = set()
         return [x for x in seq if not (x in seen or seen.add(x))]
+
+    default_access_apps = OAuthApplication.get_default_access_applications()
 
     page = {
         '@context': [
@@ -128,6 +134,16 @@ def activity_stream(request):
                     'dit:StaffSSO:User:emailUserId': user.email_user_id,
                     'dit:StaffSSO:User:contactEmailAddress': user.contact_email if user.contact_email else None,
                     'dit:StaffSSO:User:lastAccessed': user.last_accessed,
+                    'dit:StaffSSO:User:permittedApplications': [
+                        {
+                            # name and url are both in the W3C Activity Streams 2.0 Vocab
+                            'name': app['name'],
+                            'url': app['url']
+                        }
+                        for app in user.get_permitted_applications(
+                            include_non_public=True,
+                            get_default_access_allowed_apps=lambda: default_access_apps)
+                    ],
                     'dit:firstName': user.first_name,
                     'dit:lastName': user.last_name,
                     'dit:emailAddress': without_duplicates(

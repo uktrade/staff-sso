@@ -45,6 +45,15 @@ class UserFactory(factory.django.DjangoModelFactory):
             for profile in extracted:
                 self.access_profiles.add(profile)
 
+    @factory.post_generation
+    def add_permitted_applications(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if extracted:
+            for app in extracted:
+                self.permitted_applications.add(app)
+
 
 class AccessProfileFactory(factory.django.DjangoModelFactory):
     slug = factory.Sequence(lambda n: f'access-profile-{n+1}')

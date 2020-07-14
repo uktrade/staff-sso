@@ -92,3 +92,7 @@ class Application(AbstractApplication):
             return []
 
         return [email.strip() for email in ordering.split(',')]
+
+    @staticmethod
+    def get_default_access_applications():
+        return Application.objects.filter(default_access_allowed=True)

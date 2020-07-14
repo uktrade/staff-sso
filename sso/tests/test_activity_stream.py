@@ -6,7 +6,9 @@ import mohawk
 from django.urls import reverse
 import pytest
 
-from .factories.user import UserFactory
+from .factories.oauth import ApplicationFactory
+from .factories.saml import SamlApplicationFactory
+from .factories.user import UserFactory, AccessProfileFactory
 from sso.user.middleware import UpdatedLastAccessedMiddleware
 
 
@@ -208,15 +210,54 @@ def test_if_51_users_three_pages(api_client):
 
 @pytest.mark.django_db
 def test_no_n_plus_1_query(api_client, django_assert_num_queries):
-    UserFactory.create_batch(50)
+    ap = AccessProfileFactory()
+    ap.oauth2_applications.add(ApplicationFactory())
+    ap.saml2_applications.add(SamlApplicationFactory())
+    app_direct = ApplicationFactory()
+    users = UserFactory.create_batch(50, add_access_profiles=[ap], add_permitted_applications=[app_direct])
+
     time.sleep(1)
 
     host = 'localhost:8080'
     path = reverse('api-v1:core:activity-stream')
 
-    with django_assert_num_queries(2):
+    with django_assert_num_queries(7):
         response_1 = hawk_request(api_client, host, path)
 
+@pytest.mark.django_db
+def test_with_permitted_apps(api_client, django_assert_num_queries):
+    ap = AccessProfileFactory()
+    ap.oauth2_applications.add(ApplicationFactory(display_name='App C', start_url='https://c.com/'))
+    ap.saml2_applications.add(SamlApplicationFactory(name='App B', start_url='https://b.com/'))
+    app_direct = ApplicationFactory(display_name='App A', start_url='https://a.com/')
+    app_no_access = ApplicationFactory(display_name='App D', start_url='https://d.com/')
+    users = UserFactory(add_access_profiles=[ap], add_permitted_applications=[app_direct])
+
+    default_app = ApplicationFactory(display_name='App E', start_url='https://e.com/', default_access_allowed=True)
+
+    time.sleep(1)
+
+    host = 'localhost:8080'
+    path = reverse('api-v1:core:activity-stream')
+
+    response = hawk_request(api_client, host, path)
+    response_dict = response.json()
+
+    assert len(response_dict['orderedItems']) == 1
+
+    assert response_dict['orderedItems'][0]['object']['dit:StaffSSO:User:permittedApplications'] == [{
+        'name': 'App A',
+        'url': 'https://a.com/',
+    }, {
+        'name': 'App B',
+        'url': 'https://b.com/',
+    }, {
+        'name': 'App C',
+        'url': 'https://c.com/',
+    }, {
+        'name': 'App E',
+        'url': 'https://e.com/',
+    }]
 
 @pytest.mark.django_db
 def test_with_contact_email(api_client):
