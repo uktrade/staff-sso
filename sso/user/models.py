@@ -326,7 +326,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         else:
             return self.get_emails_for_application(application)[0]
 
-    def get_permitted_applications(self, include_non_public=False):
+    def get_permitted_applications(self, include_non_public=False,
+        get_default_access_allowed_apps=OAuthApplication.get_default_access_applications):
         """Return a list of applications that this user has access to"""
 
         def _extract(app):
@@ -340,8 +341,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         for ap in self.access_profiles.all():
             apps.update(set(ap.oauth2_applications.all()))
+            apps.update(set(ap.saml2_applications.all()))
 
-        apps.update(set(OAuthApplication.objects.filter(default_access_allowed=True)))
+        apps.update(set(get_default_access_allowed_apps()))
 
         permitted_apps = sorted(list(apps), key=lambda el: el.display_name)
 

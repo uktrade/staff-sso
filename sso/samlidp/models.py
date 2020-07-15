@@ -54,6 +54,18 @@ class SamlApplication(models.Model):
         help_text=_('Is this integration enabled?'),
     )
 
+    @property
+    def public(self):
+        return False
+
+    @property
+    def display_name(self):
+        return self.name
+
+    @property
+    def application_key(self):
+        return self.entity_id
+
     def __str__(self):
         return self.name
 
