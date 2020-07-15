@@ -421,7 +421,7 @@ class TestApiUserIntrospect:
     def test_with_email_user_id(self, api_client):
         user, token = get_oauth_token(scope='introspection')
 
-        app = ApplicationFactory(users=[user])
+        app = ApplicationFactory(users=[user], display_name='a second test app')
         api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
         response = api_client.get(self.GET_USER_INTROSPECT_URL + '?email_user_id={}'.format(user.email_user_id))
 
@@ -431,7 +431,7 @@ class TestApiUserIntrospect:
                 'name': app.display_name,
                 'url': app.start_url
             }
-            for app in Application.objects.all()
+            for app in Application.objects.all().order_by('display_name')
         ]
 
         assert response.status_code == 200
