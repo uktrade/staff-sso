@@ -267,6 +267,8 @@ class TestSAMLLogin:
         overridden by the attribute mapping
         """
 
+        assert User.objects.count() == 0
+
         settings.SAML_IDPS_USE_NAME_ID_AS_USERNAME = ['http://localhost:8080/simplesaml/saml2/idp/metadata.php']
 
         application, authorize_params = create_oauth_application()
@@ -296,6 +298,7 @@ class TestSAMLLogin:
         assert user.email == 'user1(nameid)@example.com'
         assert user.first_name == 'John'
         assert user.last_name == 'Doe'
+        assert user.is_active == True
 
     @freeze_time('2017-06-22 15:50:00.000000+00:00')
     def test_saml_login_without_permissions_results_in_access_denied(self, client, mocker):

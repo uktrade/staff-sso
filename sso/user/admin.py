@@ -115,6 +115,9 @@ class UserAdmin(admin.ModelAdmin):
 
     list_user_settings_wrapper.short_description = 'User Settings'
 
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 
 class ApplicationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
