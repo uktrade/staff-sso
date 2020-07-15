@@ -4,8 +4,11 @@ from django.conf import settings
 
 def lookup_idp_ref_from_email(email_domain):
     idp_ref = None
+
+    domain = email_domain.lower()
+
     for ref, allowed_email_domains in settings.AUTH_EMAIL_TO_IPD_MAP.items():
-        if email_domain in allowed_email_domains:
+        if domain in allowed_email_domains:
             idp_ref = ref
             break
 
@@ -26,7 +29,7 @@ class EmailForm(forms.Form):
 
         idp_ref = lookup_idp_ref_from_email(email_domain)
 
-        if not idp_ref and email_domain not in settings.EMAIL_TOKEN_DOMAIN_WHITELIST:
+        if not idp_ref and email_domain.lower() not in settings.EMAIL_TOKEN_DOMAIN_WHITELIST:
             raise forms.ValidationError('__unsupported_email__')
 
         self.idp_ref = idp_ref

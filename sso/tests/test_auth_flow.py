@@ -734,10 +734,27 @@ class TestEmailBasedAuthFlow:
 
         assert response.url == reverse('emailauth:email-auth-initiate-success')
 
+    def test_email_token_based_email_is_case_insensitive(self, client, settings):
+        settings.EMAIL_TOKEN_DOMAIN_WHITELIST = ['@test.com']
+
+        response = client.post(reverse('saml2_login_start'), {'email': 'test@TEST.com'})
+
+        assert response.status_code == 302
+
+        assert response.url == reverse('emailauth:email-auth-initiate-success')
+
     def test_redirect_to_idp(self, settings, client):
 
         settings.AUTH_EMAIL_TO_IPD_MAP={'a-test': ['@test.com']}
         response = client.post(reverse('saml2_login_start'), {'email': 'test@test.com'})
+
+        assert response.status_code == 302
+        assert response.url == '/saml2/login/?idp=http%3A//localhost%3A8080/simplesaml/saml2/idp/metadata.php'
+
+    def test_redirect_to_idp_is_case_insensitive(self, settings, client):
+
+        settings.AUTH_EMAIL_TO_IPD_MAP={'a-test': ['@test.com']}
+        response = client.post(reverse('saml2_login_start'), {'email': 'test@TEST.com'})
 
         assert response.status_code == 302
         assert response.url == '/saml2/login/?idp=http%3A//localhost%3A8080/simplesaml/saml2/idp/metadata.php'
