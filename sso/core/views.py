@@ -93,7 +93,7 @@ def activity_stream(request):
     User = get_user_model()
     users = list(User.objects.only(
         'user_id', 'email_user_id', 'last_modified', 'last_accessed',
-        'first_name', 'last_name', 'email', 'contact_email',
+        'first_name', 'last_name', 'email', 'contact_email', 'date_joined',
     ).prefetch_related(
         'emails', 'permitted_applications', 'access_profiles__oauth2_applications', 'access_profiles__saml2_applications')
     .extra(
@@ -133,6 +133,7 @@ def activity_stream(request):
                     'dit:StaffSSO:User:userId': user.user_id,
                     'dit:StaffSSO:User:emailUserId': user.email_user_id,
                     'dit:StaffSSO:User:contactEmailAddress': user.contact_email if user.contact_email else None,
+                    'dit:StaffSSO:User:joined': user.date_joined,
                     'dit:StaffSSO:User:lastAccessed': user.last_accessed,
                     'dit:StaffSSO:User:permittedApplications': [
                         {
