@@ -37,7 +37,7 @@ class ModelProcessor(BaseProcessor):
         self._application = SamlApplication.objects.get(entity_id=entity_id)
 
     def get_user_id(self, user):
-        return self.get_service_email(user) or getattr(user, self.USER_ID_FIELD) or user.email
+        return str(self.get_service_email(user) or getattr(user, self.USER_ID_FIELD) or user.email)
 
     def get_service_email(self, user):
         """Get the email address specified for this user & service.
@@ -63,6 +63,8 @@ class ModelProcessor(BaseProcessor):
 
 
 class AWSProcessor(ModelProcessor):
+    USER_ID_FIELD = 'user_id'
+
     def create_identity(self, user, sp_mapping, **extra_config):
 
         role_arn = extra_config.pop('role', None)
