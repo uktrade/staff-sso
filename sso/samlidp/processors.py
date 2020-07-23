@@ -4,7 +4,6 @@ from django.conf import settings
 
 from djangosaml2idp.processors import BaseProcessor
 
-
 from .models import SamlApplication
 from sso.user.models import EmailAddress, ServiceEmailAddress
 from sso.core.logging import create_x_access_log
@@ -32,9 +31,12 @@ class ModelProcessor(BaseProcessor):
     """
 
     USER_ID_FIELD = 'email'
+    _application = None
+    _sp_config = None
 
     def __init__(self, entity_id, *args, **kwargs):
         self._application = SamlApplication.objects.get(entity_id=entity_id)
+        self._sp_config = kwargs.get('sp_config', {})
 
     def get_user_id(self, user):
         return self.get_service_email(user) or getattr(user, self.USER_ID_FIELD) or user.email
@@ -63,7 +65,12 @@ class ModelProcessor(BaseProcessor):
 
 
 class AWSProcessor(ModelProcessor):
-    USER_ID_FIELD = 'user_id'
+    def get_user_id(self, user):
+        try:
+            user_id_field =self._sp_config['extra_config']['user_id_field']
+            return str(getattr(user, user_id_field))
+        except KeyError:
+            return super().get_user_id(user)
 
     def create_identity(self, user, sp_mapping, **extra_config):
 

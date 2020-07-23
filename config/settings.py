@@ -478,6 +478,7 @@ SAML_IDP_SPCONFIG = {
         'attribute_mapping': {},
         'extra_config': {
             'role': SAML2_APPSTREAM_AWS_ROLE_ARN,
+            'user_id_field': 'user_id',
         }
     },
     'google.com': {

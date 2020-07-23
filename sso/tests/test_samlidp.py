@@ -237,6 +237,29 @@ class TestAWSProcessor:
 
         assert identity['https://aws.amazon.com/SAML/Attributes/RoleSessionName'] == str(user.user_id)
 
+    def test_get_user_field_supplies_email(self):
+        user = UserFactory()
+
+        SamlApplicationFactory(entity_id='an_entity_id')
+        processor = AWSProcessor(entity_id='an_entity_id', sp_config={})
+
+        assert processor.get_user_id(user) == user.email
+
+    def test_get_user_field_overrideable_by_config(self):
+        user = UserFactory()
+
+        sp_config = {
+            'attribute_mapping': {},
+            'extra_config': {
+                'user_id_field': 'user_id',
+            }
+        }
+
+        SamlApplicationFactory(entity_id='an_entity_id')
+        processor = AWSProcessor(entity_id='an_entity_id', sp_config=sp_config)
+
+        assert processor.get_user_id(user) ==  str(user.user_id)
+
 
 class TestGoogleProcessor:
     def test_correct_email_is_supplied(self, settings):
@@ -300,7 +323,7 @@ class TestIdpInitiatedLogin:
 
         settings.SAML_IDP_SPCONFIG = {
             'an-alias': {
-                'entity_id': 'http://test-idp'
+                'entity_id': 'http://test-idp',
             }
         }
 

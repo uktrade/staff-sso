@@ -2,7 +2,7 @@ import logging
 
 from raven.contrib.django.raven_compat.models import client
 
-from djangosaml2idp.views import IdPHandlerViewMixin
+from djangosaml2idp.views import IdPHandlerViewMixin as IdPHandlerViewMixinBase
 
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -10,6 +10,7 @@ from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.http import (HttpResponse, HttpResponseRedirect)
 from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.utils.module_loading import import_string
 from django.views import View
 from django.views.decorators.cache import never_cache
 from saml2 import BINDING_HTTP_POST
@@ -17,9 +18,25 @@ from saml2.authn_context import PASSWORD, AuthnBroker, authn_context_class_ref
 from saml2.ident import NameID
 from saml2.s_utils import UnknownPrincipal, UnsupportedBinding
 
+from .processors import ModelProcessor
+
 
 logger = logging.getLogger(__name__)
 
+
+class IdPHandlerViewMixin(IdPHandlerViewMixinBase):
+    def get_processor(self, entity_id, sp_config):
+        """ Instantiate user-specified processor or default to an all-access base processor.
+            Raises an exception if the configured processor class can not be found or initialized.
+        """
+        processor_string = sp_config.get('processor', None)
+        if processor_string:
+            try:
+                return import_string(processor_string)(entity_id, sp_config=sp_config)
+            except Exception as e:
+                logger.error("Failed to instantiate processor: {} - {}".format(processor_string, e), exc_info=True)
+                raise
+        return ModelProcessor(entity_id, sp_config=sp_config)
 
 @method_decorator(never_cache, name='dispatch')
 class LoginProcessView(LoginRequiredMixin, IdPHandlerViewMixin, View):
