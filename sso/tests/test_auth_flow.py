@@ -425,6 +425,26 @@ class TestSAMLLogin:
 
         assert client.post(SAML_ACS_URL, data).status_code == 403
 
+    @freeze_time('2017-06-22 15:50:00.000000+00:00')
+    def test_saml_login_contact_email_is_set(self, client, mocker):
+
+        data = {
+            'SAMLResponse': [base64.b64encode(get_saml_response(action='login'))],
+            'RelayState': ''
+        }
+
+        MockOutstandingQueriesCache = mocker.patch('sso.samlauth.views.OutstandingQueriesCache')
+        MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
+
+        MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
+        MockCryptoBackendXmlSec1().validate_signature.return_value = True
+
+        client.post(SAML_ACS_URL, data)
+
+        assert User.objects.count() == 1
+        user = User.objects.first()
+        assert user.contact_email == user.email
+
 
 class TestOAuthToken:
     def _obtain_auth_code(self, client, authorize_params):

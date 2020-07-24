@@ -50,7 +50,8 @@ class EmailToken(models.Model):
 
         defaults = {
             'first_name': self.first_name,
-            'last_name': self.last_name
+            'last_name': self.last_name,
+            'contact_email': self.email,
         }
 
         user, _ = User.objects.get_or_create(email=self.email, defaults=defaults)

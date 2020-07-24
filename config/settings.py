@@ -263,7 +263,7 @@ elif ENV_NAME == 'prod':
 
 
 SAML_ATTRIBUTE_MAPPING = {
-    'email': ('email',),
+    'email': ('email','contact_email'),
     'first_name': ('first_name',),
     'last_name': ('last_name',),
 }

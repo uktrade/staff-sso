@@ -56,6 +56,14 @@ class TestEmailTokenModel:
         assert user.first_name == 'John'
         assert user.last_name == 'Smith'
 
+    def test_get_user_sets_contact_email(self):
+        email = 'john.smith@testing.com'
+        token_obj = _get_email_token_obj(email)
+
+        user = token_obj.get_user()
+
+        assert user.contact_email == email
+
 
 class TestEmailTokenManager:
     def test_create_user_populates_name_field(self):

@@ -26,7 +26,7 @@ def get_oauth_token(expires=None, user=None, scope='read'):
 
     user.groups.add(GroupFactory.create_batch(2)[1])  # create 2 groups but only assign the 2nd
 
-    application = ApplicationFactory(default_access_allowed=True)
+    application = ApplicationFactory(default_access_allowed=True, provide_immutable_email=True)
 
     access_token = AccessTokenFactory(
         application=application,
@@ -62,7 +62,7 @@ class TestAPIGetUserMe:
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': [],
-            'contact_email': '',
+            'contact_email': user.contact_email,
             'groups': [],
             'permitted_applications': [
                 {
@@ -115,6 +115,7 @@ class TestAPIGetUserMe:
         assert Application.objects.count() == 1
 
         app = Application.objects.first()
+        app.provide_immutable_email = False
         app.email_ordering = 'zzz.com, aaa.com, bbb.com'
         app.save()
 
@@ -270,7 +271,7 @@ class TestApiUserIntrospect:
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': [],
-            'contact_email': '',
+            'contact_email': user.contact_email,
             'groups': [],
             'permitted_applications': [
                 {
@@ -303,7 +304,7 @@ class TestApiUserIntrospect:
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': ['test@bbb.com', 'test@aaa.com'],
-            'contact_email': '',
+            'contact_email': user.contact_email,
             'groups': [],
             'permitted_applications': [
                 {
@@ -338,7 +339,7 @@ class TestApiUserIntrospect:
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': ['test@bbb.com', 'test@aaa.com'],
-            'contact_email': '',
+            'contact_email': user.contact_email,
             'groups': [],
             'permitted_applications': [
                 {
@@ -372,13 +373,13 @@ class TestApiUserIntrospect:
 
         assert response.status_code == 200
         assert response.json() == {
-            'email': 'user1@example.com',
+            'email': user.email,
             'user_id': str(user.user_id),
             'email_user_id': user.email_user_id,
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': ['test@bbb.com', 'test@aaa.com'],
-            'contact_email': '',
+            'contact_email': user.contact_email,
             'groups': [],
             'permitted_applications': permitted_applications,
             'access_profiles': []
@@ -408,7 +409,7 @@ class TestApiUserIntrospect:
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': [],
-            'contact_email': '',
+            'contact_email': user.contact_email,
             'groups': [],
             'permitted_applications': permitted_applications,
             'access_profiles': []
@@ -438,7 +439,7 @@ class TestApiUserIntrospect:
             'first_name': 'John',
             'last_name': 'Doe',
             'related_emails': [],
-            'contact_email': '',
+            'contact_email': user.contact_email,
             'groups': [],
             'permitted_applications': permitted_applications,
             'access_profiles': []
