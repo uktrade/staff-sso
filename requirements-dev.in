@@ -6,6 +6,8 @@ pytest-sugar==0.9.1
 pytest-mock
 pytest-env
 pytest-cov
+pysaml2==5.0.0
+httplib2==0.18.0
 factory-boy
 freezegun
 
