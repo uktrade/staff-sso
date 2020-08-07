@@ -26,7 +26,10 @@ def get_oauth_token(expires=None, user=None, scope='read'):
 
     user.groups.add(GroupFactory.create_batch(2)[1])  # create 2 groups but only assign the 2nd
 
-    application = ApplicationFactory(default_access_allowed=True)
+    application = ApplicationFactory(
+        default_access_allowed=True,
+        provide_immutable_email=True,
+    )
 
     access_token = AccessTokenFactory(
         application=application,
@@ -116,6 +119,7 @@ class TestAPIGetUserMe:
 
         app = Application.objects.first()
         app.email_ordering = 'zzz.com, aaa.com, bbb.com'
+        app.provide_immutable_email = False
         app.save()
 
         api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
@@ -302,7 +306,7 @@ class TestApiUserIntrospect:
             'email_user_id': user.email_user_id,
             'first_name': 'John',
             'last_name': 'Doe',
-            'related_emails': ['test@bbb.com', 'test@aaa.com'],
+            'related_emails': ['test@aaa.com', 'test@bbb.com'],
             'contact_email': '',
             'groups': [],
             'permitted_applications': [
@@ -337,7 +341,7 @@ class TestApiUserIntrospect:
             'email_user_id': user.email_user_id,
             'first_name': 'John',
             'last_name': 'Doe',
-            'related_emails': ['test@bbb.com', 'test@aaa.com'],
+            'related_emails': ['test@aaa.com', 'test@bbb.com'],
             'contact_email': '',
             'groups': [],
             'permitted_applications': [
@@ -377,7 +381,7 @@ class TestApiUserIntrospect:
             'email_user_id': user.email_user_id,
             'first_name': 'John',
             'last_name': 'Doe',
-            'related_emails': ['test@bbb.com', 'test@aaa.com'],
+            'related_emails': ['test@aaa.com', 'test@bbb.com'],
             'contact_email': '',
             'groups': [],
             'permitted_applications': permitted_applications,
@@ -387,7 +391,7 @@ class TestApiUserIntrospect:
     def test_with_user_id(self, api_client):
         user, token = get_oauth_token(scope='introspection')
 
-        app = ApplicationFactory(users=[user])
+        app = ApplicationFactory(display_name="second app", users=[user])
         api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
         response = api_client.get(self.GET_USER_INTROSPECT_URL + '?user_id={}'.format(str(user.user_id)))
 
