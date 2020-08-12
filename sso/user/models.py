@@ -175,14 +175,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         max_length=254, blank=True
     )
 
-    use_new_journey = models.BooleanField(
-        _('use new journey'),
-        default=False,
-        help_text=_(
-            'Enable the new user journey',
-        ),
-    )
-
     last_accessed = models.DateTimeField(blank=True, null=True)
     last_modified = models.DateTimeField(auto_now=True, null=False)
 

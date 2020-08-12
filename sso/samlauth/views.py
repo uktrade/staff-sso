@@ -507,10 +507,3 @@ class LoginStartView(FormView):
             [email],
             fail_silently=False,
         )
-
-
-class LoginJourneySelectionView(View):
-
-    def get(self, request, *args, **kwargs):
-
-        return redirect('saml2_login_start')
