@@ -76,7 +76,7 @@ class AWSProcessor(ModelProcessor):
 
         identity = super().create_identity(user, sp_mapping)
 
-        identity['https://aws.amazon.com/SAML/Attributes/RoleSessionName'] = str(user.user_id)
+        identity['https://aws.amazon.com/SAML/Attributes/RoleSessionName'] = self.get_user_id(user)
         identity['https://aws.amazon.com/SAML/Attributes/Role'] = role_arn
 
         return identity
