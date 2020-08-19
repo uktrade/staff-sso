@@ -298,7 +298,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
 
         if not application or application.provide_immutable_email:
-            return self.email, list(self.emails.exclude(email=self.email).values_list('email', flat=True))
+            return self.email, sorted(list(
+                self.emails.exclude(email=self.email).values_list('email', flat=True)))
 
         emails = self._get_domain_to_email_mapping()
 
@@ -314,7 +315,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             # or is this an edge case?
             _, primary_email = emails.popitem()
 
-        return primary_email, emails.values()
+        return primary_email, sorted(emails.values())
 
     def get_application_username(self, application=None):
         """
