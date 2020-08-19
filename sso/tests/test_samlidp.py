@@ -237,6 +237,20 @@ class TestAWSProcessor:
 
         assert identity['https://aws.amazon.com/SAML/Attributes/RoleSessionName'] == str(user.user_id)
 
+    def test_role_session_name_can_be_overridden(self):
+        user = UserFactory()
+
+        app = SamlApplicationFactory(entity_id='an_entity_id')
+        processor = AWSProcessor(entity_id='an_entity_id')
+
+        email = user.emails.first()
+
+        user.service_emails.create(email=user.emails.first(), saml_application=app)
+
+        identity = processor.create_identity(user, {}, role='test_role')
+
+        assert identity['https://aws.amazon.com/SAML/Attributes/RoleSessionName'] == email.email
+
 
 class TestGoogleProcessor:
     def test_correct_email_is_supplied(self, settings):
