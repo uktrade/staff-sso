@@ -416,9 +416,21 @@ class LoginStartView(FormView):
 
         return super().dispatch(request, *args, **kwargs)
 
+    def get_next_url(self):
+        """extract the next url from the querystring, if present"""
+
+        if 'next' in self.request.GET:
+            next_url = self.request.GET['next']
+
+            if is_safe_url(url=next_url, allowed_hosts=settings.ALLOWED_HOSTS):
+                return next_url
+
+        return None
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['next'] = self.request.GET.get('next', settings.LOGIN_REDIRECT_URL)
+
+        context['next'] = self.get_next_url()
 
         return context
 
@@ -463,6 +475,11 @@ class LoginStartView(FormView):
         return response
 
     def extract_redirect_url(self, next_url):
+        """Attempt to extract the domain of the redirect_uri querystring param
+        in the next url, e.g:
+
+        ?next=/o/authorize/%3Fredirect_uri%3Dhttps%253A%252F%252Fworkspace ...
+        """
         oauth2_url = urlparse(next_url)
 
         qs_items = parse_qs(oauth2_url.query)
@@ -482,11 +499,10 @@ class LoginStartView(FormView):
         Generate an EmailToken and send a sign in email to the user
         """
         token = EmailToken.objects.create_token(email)
-        next_url = self.request.GET.get('next', '')
+        next_url = self.get_next_url()
 
         if next_url:
-            next_url = self.extract_redirect_url(next_url)
-            next_url = quote_plus(next_url)
+            next_url = quote_plus(self.extract_redirect_url(next_url))
 
         path = reverse('emailauth:email-auth-signin', kwargs=dict(token=token))
 
@@ -494,7 +510,7 @@ class LoginStartView(FormView):
             scheme='https://',
             host=self.request.get_host(),
             path=path,
-            next_url=next_url
+            next_url=next_url,
         )
 
         subject = render_to_string('emailauth/email_subject.txt').strip()

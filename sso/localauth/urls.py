@@ -5,5 +5,5 @@ from sso.localauth import views
 
 urlpatterns = [
     url(r'^login/$', axes_dispatch(views.LoginView.as_view()), name='login'),
-    url(r'^logout/$', views.session_logout, name='session-logout'),
+    url(r'^logout/$', views.LogoutView.as_view(), name='session-logout'),
 ]

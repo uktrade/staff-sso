@@ -798,9 +798,15 @@ class TestEmailBasedAuthFlow:
 
     def test_next_querystring_is_retained(self, client):
 
-        response = client.post(reverse('saml2_login_start') + '?next=http://whatever', {'email': 'bad@invalid.com'})
+        response = client.post(reverse('saml2_login_start') + '?next=/some-local-url/', {'email': 'bad@invalid.com'})
 
-        assert '<a href="/saml2/login/?next=http://whatever">Sign in using a different method</a>' in \
+        assert '<a href="/saml2/login/?next=/some-local-url/">Sign in using a different method</a>' in \
+               response.content.decode('utf-8')
+
+    def test_unsafe_next_url_is_dropped(self, client):
+        response = client.post(reverse('saml2_login_start') + '?next=http://www.unsafe.com', {'email': 'bad@invalid.com'})
+
+        assert '<a href="/saml2/login/">Sign in using a different method</a>' in \
                response.content.decode('utf-8')
 
 
