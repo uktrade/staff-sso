@@ -1,11 +1,12 @@
 import pytest
+from django.conf import settings
 from django.urls import reverse
 
 from .factories.user import UserFactory
 
-pytestmark = [
-    pytest.mark.django_db
-]
+from sso.localauth.models import DomainWhitelist
+
+pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
@@ -27,3 +28,24 @@ class TestLogin:
 
         assert response.status_code == 302
         assert response.url == reverse('saml2_logged_in')
+
+
+class TestLogout:
+    @pytest.mark.parametrize('url, expected', [
+        ('/local-url/', '/local-url/'),
+        ('http://whitelisted.com/some/path/', 'http://whitelisted.com/some/path/'),
+        ('http://whitelisted.com', 'http://whitelisted.com'),
+        ('http://subdomain.whitelisted.com', settings.LOGOUT_REDIRECT_URL),
+        ('https://danger.com', settings.LOGOUT_REDIRECT_URL)
+    ])
+    def test_invalid_next_url(self, url, expected, client):
+        user = UserFactory()
+
+        client.force_login(user)
+
+        DomainWhitelist.objects.create(domain='whitelisted.com')
+
+        response = client.get(reverse('localauth:session-logout') + '?next=' + url)
+
+        assert response.status_code == 302
+        assert response.url == expected

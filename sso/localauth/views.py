@@ -1,6 +1,9 @@
 from django.conf import settings
 from django.contrib.auth import views
 from django.shortcuts import Http404, redirect
+from django.utils.http import is_safe_url
+
+from .models import DomainWhitelist
 
 
 class FeatureFlaggedMixin:
@@ -14,15 +17,18 @@ class LoginView(FeatureFlaggedMixin, views.LoginView):
     pass
 
 
-def session_logout(request):
-    """
-    Basic logout that destroys session to logout the user and remove any saml2
-    remnants.
-    """
-    request.session.flush()
+class LogoutView(views.LogoutView):
+    def get_success_url_allowed_hosts(self):
+        domains = list(DomainWhitelist.objects.all().values_list('domain', flat=True))
+        return {self.request.get_host(), *domains}
 
-    came_from = request.GET.get('next', settings.LOGOUT_REDIRECT_URL)
-    if not came_from:
-        came_from = settings.LOGIN_REDIRECT_URL
+    def get_next_page(self):
+        next_page = super().get_next_page()
 
-    return redirect(came_from)
+        # the stock get_next_page method redirects to request.path if the url is
+        # deemed unsafe.  Instead we want to send the user to
+        # settings.LOGOUT_REDIRECT_URL
+        if next_page == self.request.path:
+            next_page = settings.LOGOUT_REDIRECT_URL
+
+        return next_page

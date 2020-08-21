@@ -19,7 +19,7 @@
                     {% if error == '__unsupported_email__' %}
                         <li>
                             <span class="error-message">You can't use this email address to access DIT's internal services.
-                            <a href="{% url 'saml2_login' %}?next={{ next }}">Sign in using a different method</a></span>
+                            <a href="{% url 'saml2_login' %}{% if next %}?next={{ next }}{% endif %}">Sign in using a different method</a></span>
                         </li>
                     {% else %}
                         <li><span class="error-message">{{ error }}</span></li>
