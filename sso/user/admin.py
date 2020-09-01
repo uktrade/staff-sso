@@ -43,9 +43,12 @@ class ServiceEmailInline(admin.TabularInline):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'email':
-            object_id = request.resolver_match.kwargs['object_id']
-            user = User.objects.get(pk=object_id)
-            kwargs['queryset'] = EmailAddress.objects.filter(user=user)
+            object_id = request.resolver_match.kwargs.get('object_id')
+            if object_id:
+                user = User.objects.get(pk=object_id)
+                kwargs['queryset'] = EmailAddress.objects.filter(user=user)
+            else:
+                kwargs['queryset'] = EmailAddress.objects.none()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
