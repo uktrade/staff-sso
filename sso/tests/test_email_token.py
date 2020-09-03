@@ -55,6 +55,7 @@ class TestEmailTokenModel:
 
         assert user.first_name == 'John'
         assert user.last_name == 'Smith'
+        assert user.is_active == True
 
 
 class TestEmailTokenManager:

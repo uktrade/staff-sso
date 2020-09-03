@@ -68,8 +68,19 @@ class MultiEmailSaml2Backend(Saml2Backend):
         # instead we use get_or_create when creating unknown users since it has
         # built-in safeguards for multiple threads.
 
-        return self.get_saml2_user(
+        user = self.get_saml2_user(
             create_unknown_user, main_attribute, attributes, attribute_mapping)
+
+        if user and self.user_can_authenticate(user):
+            return user
+
+    def user_can_authenticate(self, user):
+        """
+        Reject users with is_active=False. Custom user models that don't have
+        that attribute are allowed.
+        """
+        is_active = getattr(user, 'is_active', None)
+        return is_active or is_active is None
 
     def update_user(self, user, attributes, attribute_mapping,
                     force_save=False):

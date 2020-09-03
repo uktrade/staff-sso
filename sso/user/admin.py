@@ -60,13 +60,13 @@ class UserAdmin(admin.ModelAdmin):
         }
 
     search_fields = ('emails__email', 'email', 'first_name', 'last_name', 'user_id', 'email_user_id')
-    list_filter = (ApplicationFilter, 'access_profiles__name', 'is_superuser')
-    fields = ('email_user_id', 'user_id', 'email', 'first_name', 'last_name', 'contact_email', 'date_joined', 'last_login',
-              'last_accessed', 'access_profiles', 'permitted_applications',
+    list_filter = (ApplicationFilter, 'access_profiles__name', 'is_superuser', 'is_active')
+    fields = ('email_user_id', 'user_id', 'email', 'first_name', 'last_name', 'contact_email', 'is_active',
+              'date_joined', 'last_login', 'last_accessed', 'access_profiles', 'permitted_applications',
               'list_user_settings_wrapper', 'application_permissions')
     readonly_fields = ('date_joined', 'last_login', 'last_accessed', 'user_id', 'email_user_id',
                        'list_user_settings_wrapper')
-    list_display = ('email', 'email_list', 'is_superuser', 'last_login', 'last_accessed',
+    list_display = ('email', 'email_list', 'is_superuser', 'is_active', 'last_login', 'last_accessed',
                     'list_permitted_applications', 'list_access_profiles', 'show_permissions_link')
     inlines = [
         EmailInline,
@@ -114,6 +114,9 @@ class UserAdmin(admin.ModelAdmin):
         )
 
     list_user_settings_wrapper.short_description = 'User Settings'
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 class ApplicationForm(forms.ModelForm):

@@ -335,6 +335,12 @@ class TestUser:
 
         assert not user.can_access(app)
 
+    def test_can_access_with_inactive_account(self):
+        app = ApplicationFactory(default_access_allowed=True)
+        user = UserFactory(is_active=False)
+
+        assert not user.can_access(app)
+
     @pytest.mark.parametrize('application_func, email, expected',
         [
             # OAuth2 application user has matching email

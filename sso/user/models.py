@@ -148,6 +148,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         default=False,
         help_text=_('Designates whether the user can log into this admin site.'),
     )
+    is_active = models.BooleanField(
+        _('is active'),
+        default=True,
+        help_text=_('is the account active?'),
+    )
     permitted_applications = models.ManyToManyField(
         settings.OAUTH2_PROVIDER_APPLICATION_MODEL,
         related_name='users',
@@ -252,6 +257,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def can_access(self, application: Union[OAuthApplication, SamlApplication]):
         """ Can the user access this application?"""
+
+        if not self.is_active:
+            return False
 
         if self._is_allowed_email(application):
             return True

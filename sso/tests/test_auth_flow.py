@@ -226,6 +226,31 @@ class TestSAMLLogin:
         assert 'code' in authorize_qs
 
     @freeze_time('2017-06-22 15:50:00.000000+00:00')
+    def test_saml_login_with_inactive_user_fails(self, client, mocker):
+        """
+        If `user.is_active` is False, the user should not be able to authenticate.
+        """
+
+        UserFactory(email='user1@example.com', is_active=False)
+
+        data = {
+            'SAMLResponse': [base64.b64encode(get_saml_response(action='login'))],
+            'RelayState': ''
+        }
+
+        assert User.objects.count() == 1
+
+        MockOutstandingQueriesCache = mocker.patch('sso.samlauth.views.OutstandingQueriesCache')
+        MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
+
+        MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
+        MockCryptoBackendXmlSec1().validate_signature.return_value = True
+
+        response = client.post(SAML_ACS_URL, data)
+
+        assert response.status_code == 403
+
+    @freeze_time('2017-06-22 15:50:00.000000+00:00')
     def test_x_application_saml_log_message(self, client, mocker):
         """
         Test that an x-application log message is created
@@ -267,6 +292,8 @@ class TestSAMLLogin:
         overridden by the attribute mapping
         """
 
+        assert User.objects.count() == 0
+
         settings.SAML_IDPS_USE_NAME_ID_AS_USERNAME = ['http://localhost:8080/simplesaml/saml2/idp/metadata.php']
 
         application, authorize_params = create_oauth_application()
@@ -296,6 +323,7 @@ class TestSAMLLogin:
         assert user.email == 'user1(nameid)@example.com'
         assert user.first_name == 'John'
         assert user.last_name == 'Doe'
+        assert user.is_active == True
 
     @freeze_time('2017-06-22 15:50:00.000000+00:00')
     def test_saml_login_without_permissions_results_in_access_denied(self, client, mocker):

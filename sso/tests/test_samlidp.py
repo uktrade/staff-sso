@@ -159,6 +159,15 @@ class TestModelProcessor:
 
         assert processor.has_access(request) == expected
 
+    def test_user_has_access_is_disabled(self, rf):
+        SamlApplicationFactory(entity_id='an_entity_id')
+        processor = ModelProcessor('an_entity_id')
+
+        request = rf.get('/whatever/')
+        request.user = UserFactory(is_active=False)
+
+        assert not processor.has_access(request)
+
     def test_get_service_email(self):
 
         ap = SamlApplicationFactory(entity_id='an_entity_id')
