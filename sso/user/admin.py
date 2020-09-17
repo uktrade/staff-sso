@@ -1,10 +1,15 @@
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.contrib.admin import helpers
+from django.core.exceptions import PermissionDenied
+
 from django.forms import ModelForm
 from django.forms.widgets import CheckboxSelectMultiple
+from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext as _
 
 from oauth2_provider.admin import ApplicationAdmin as OAuth2ApplicationAdmin
 
@@ -59,6 +64,8 @@ class UserAdmin(admin.ModelAdmin):
             'all': ('/static/stylesheets/admin.css',)
         }
 
+    merge_users_confirmation_template = 'admin/merge_users_confirmation.html'
+
     search_fields = ('emails__email', 'email', 'first_name', 'last_name', 'user_id', 'email_user_id')
     list_filter = (ApplicationFilter, 'access_profiles__name', 'is_superuser', 'is_active')
     fields = ('email_user_id', 'user_id', 'email', 'first_name', 'last_name', 'contact_email', 'is_active',
@@ -72,6 +79,8 @@ class UserAdmin(admin.ModelAdmin):
         EmailInline,
         ServiceEmailInline,
     ]
+
+    actions = ['merge_users']
 
     def get_form(self, request, obj=None, **kwargs):
         kwargs['form'] = UserForm
@@ -117,6 +126,94 @@ class UserAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+    def _log_user_deletion(self, request, object, object_repr, change_message):
+        from django.contrib.admin.models import DELETION, LogEntry
+        from django.contrib.admin.options import get_content_type_for_model
+        return LogEntry.objects.log_action(
+            user_id=request.user.pk,
+            content_type_id=get_content_type_for_model(object).pk,
+            object_id=object.pk,
+            object_repr=object_repr,
+            change_message=change_message,
+            action_flag=DELETION,
+        )
+
+    def merge_users(self, request, queryset):
+        opts = self.model._meta
+
+        n = queryset.count()
+
+        if n < 2:
+            self.message_user(
+                request,
+                'You need to select at least two records to use the merge function',
+                level=messages.ERROR
+            )
+            return
+
+        perms_needed = not (request.user.has_perm('user.delete_user') and request.user.has_perm('user.change_user'))
+
+        if request.POST.get('post'):
+            if perms_needed:
+                raise PermissionDenied
+
+            try:
+                primary_obj_id = int(request.POST.get('merge-primary-id'))
+                primary_obj = queryset.get(pk=primary_obj_id)
+            except (TypeError, User.DoesNotExist):
+                self.message_user(request, 'Specify a primary record.', messages.ERROR)
+            else:
+                primary_emails = set(primary_obj.emails.all().values_list('email', flat=True))
+                all_emails = set([email for obj in queryset for email in obj.emails.all()])
+
+                # add emails from merged user entries to the primary user
+                for email in all_emails - primary_emails:
+                    primary_obj.emails.add(email)
+
+                # delete the merged users
+                for obj in queryset:
+                    if obj.pk != primary_obj_id:
+                        # the deleted ids are recorded for audit purposes
+                        change_message = f'merged into {primary_obj.user_id}'
+                        object_repr = f'User(id={obj.pk}, user_id={obj.user_id}, email_user_id={obj.email_user_id})'
+                        self._log_user_deletion(request, obj, object_repr, change_message)
+
+                        obj.delete()
+
+                self.message_user(
+                    request,
+                    f'Successfully merged {n - 1} user(s) into primary user with id {primary_obj.email_user_id}',
+                    messages.SUCCESS
+                )
+                # Return None to display the change list page again.
+                return None
+
+        if perms_needed:
+            title = _('You do not have permission to merge user records')
+        else:
+            title = _('Merge user records')
+
+        context = {
+            **self.admin_site.each_context(request),
+            'title': title,
+            'queryset': queryset,
+            'perms_lacking': perms_needed,
+            'opts': opts,
+            'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
+            'media': self.media,
+        }
+
+        request.current_app = self.admin_site.name
+
+        # Display the confirmation page
+        return TemplateResponse(
+            request,
+            self.merge_users_confirmation_template,
+            context
+        )
+
+    merge_users.short_description = _('Merge users')
 
 
 class ApplicationForm(forms.ModelForm):
