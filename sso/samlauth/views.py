@@ -80,7 +80,16 @@ def login(request,  # noqa: C901
     will be rendered.
     """
 
-    logger.debug('Login process started')
+    # --- enhanced debug
+    logger.debug('COOKIES:')
+    for cookie_key, cookie_value in request.COOKIES.items():
+        logger.debug(f'Cookie: {cookie_key} = {cookie_value}')
+
+    logger.debug('SESSION:')
+    logger.debug('session id: {}'.format(request.session.session_key))
+    for session_key, session_value in request.COOKIES.items():
+        logger.debug(f'session: {session_key} = {session_value}')
+    # ----
 
     came_from = request.GET.get('next', settings.LOGIN_REDIRECT_URL)
     if not came_from:
@@ -116,7 +125,6 @@ def login(request,  # noqa: C901
                     'came_from': came_from,
                 }
             )
-
 
     conf = get_config(config_loader_path, request)
 
@@ -233,6 +241,17 @@ def assertion_consumer_service(request,
     djangosaml2.backends.Saml2Backend that should be
     enabled in the settings.py
     """
+
+    # --- enhanced debug
+    logger.debug('COOKIES:')
+    for cookie_key, cookie_value in request.COOKIES.items():
+        logger.debug(f'Cookie: {cookie_key} = {cookie_value}')
+
+    logger.debug('SESSION:')
+    logger.debug('session id: {}'.format(request.session.session_key))
+    for session_key, session_value in request.COOKIES.items():
+        logger.debug(f'session: {session_key} = {session_value}')
+    # ----
 
     attribute_mapping = attribute_mapping or get_custom_setting('SAML_ATTRIBUTE_MAPPING', {'uid': ('username', )})
     create_unknown_user = create_unknown_user if create_unknown_user is not None else \
@@ -413,6 +432,17 @@ class LoginStartView(FormView):
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             return redirect('saml2_logged_in')
+
+        # --- enhanced debug
+        logger.debug('COOKIES:')
+        for cookie_key, cookie_value in request.COOKIES.items():
+            logger.debug(f'Cookie: {cookie_key} = {cookie_value}')
+
+        logger.debug('SESSION:')
+        logger.debug('session id: {}'.format(request.session.session_key))
+        for session_key, session_value in request.COOKIES.items():
+            logger.debug(f'session: {session_key} = {session_value}')
+        # ----
 
         return super().dispatch(request, *args, **kwargs)
 

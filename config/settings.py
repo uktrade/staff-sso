@@ -322,6 +322,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'sso.samlauth': {
+            'handlers': ['console'],
+            'level': env('SAML_LOG_LEVEL', default='INFO'),
+            'propagate': False,
+        }
     }
 }
 
