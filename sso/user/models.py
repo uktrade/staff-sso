@@ -230,6 +230,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         """Django method that must be implemented"""
         return self.get_full_name()
 
+    def get_extra_emails(self):
+        return list(self.emails.exclude(email=self.email).values_list('email', flat=True))
+
     def _is_allowed_email(self, application):
         """Returns True if any of the user's emails are whitelisted in the OAuth2 app"""
 

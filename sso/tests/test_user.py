@@ -561,6 +561,12 @@ class TestUser:
 
         assert current_id == user.email_user_id
 
+    def test_get_extra_emails(self):
+
+        user = UserFactory(email='primar@test.com', email_list=['email1@test.com', 'email2@test.com'])
+
+        assert set(user.get_extra_emails()) == set(['email1@test.com', 'email2@test.com'])
+
 
 class TestAccessProfile:
     def test_is_allowed_true(self):

@@ -1,0 +1,60 @@
+{% extends "admin/base_site.html" %}
+{% load i18n l10n admin_urls static %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+&rsaquo; {% trans 'Merge users' %}
+</div>
+{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+    {{ media }}
+    <script type="text/javascript" src="{% static 'admin/js/cancel.js' %}"></script>
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} delete-confirmation merge-selected-confirmation{% endblock %}
+
+{% block content %}
+{% if perms_lacking %}
+    <p>{% blocktrans %}You do not have sufficient permissions to merge users.{% endblocktrans %}</p>
+{% else %}
+    <p>{% blocktrans %}Select the user entry to retain - the other users will be merged into this user.{% endblocktrans %}</p>
+    <h2>{% trans "Users" %}</h2>
+
+    <form method="post">{% csrf_token %}
+    <table>
+        <tr>
+            <td>Choose Primary</td>
+            <td>email user id</td>
+            <td>email</td>
+            <td>last accessed</td>
+            <td>is active?</td>
+            <td>additional emails</td>
+        </tr>
+    {% for obj in queryset %}
+        <tr>
+          <td style="text-align: center"><input type="radio" name="merge-primary-id" value="{{ obj.pk }}" required></td>
+          <td>{{ obj.email_user_id }}</td>
+          <td>{{ obj.email }}</td>
+          <td>{{ obj.last_accessed|default_if_none:"" }}</td>
+          <td>{{ obj.is_active }}</td>
+          <td>{{ obj.get_extra_emails|join:", " }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+    <div>
+    {% for obj in queryset %}
+    <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}">
+    {% endfor %}
+    <input type="hidden" name="action" value="merge_users">
+    <input type="hidden" name="post" value="yes">
+    <input type="submit" value="{% trans 'Merge users' %}">
+    <a href="#" class="button cancel-link">{% trans "No, take me back" %}</a>
+    </div>
+    </form>
+{% endif %}
+{% endblock %}
