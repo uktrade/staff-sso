@@ -446,6 +446,7 @@ SAML_IDP_CONFIG = {
             os.path.join(SAML_IDP_CONFIG_DIR, 'elk-digital-metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'zoom-metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'adobe-metadata.xml'),
+            os.path.join(SAML_IDP_CONFIG_DIR, 'github-metadata.xml'),
         ],
     },
     # Signing
@@ -508,7 +509,11 @@ SAML_IDP_SPCONFIG = {
     'https://federatedid-na1.services.adobe.com/federated/saml/metadata/alias/fe5a27cc-c28c-43e6-87f8-f1079e5eb3e4': {
         'processor': 'sso.samlidp.processors.ModelProcessor',
         'attribute_mapping': {},
-    }
+    },
+    'https://github.com/orgs/Uktrade-test-organsation': {
+        'processor': 'sso.samlidp.processors.ModelProcessor',
+        'attribute_mapping': {},
+    },
 }
 
 SAML_IDP_ERROR_VIEW_CLASS = 'sso.samlidp.error_views.CustomSamlIDPErrorView'
