@@ -38,7 +38,13 @@ class EmailTokenView(FormView):
         form.send_signin_email(self.request)
 
         response = super().form_valid(form)
-        response.set_cookie('sso_auth_email', form.email, expires=dt.datetime.today()+dt.timedelta(days=30))
+        response.set_cookie(
+            'sso_auth_email',
+            form.email,
+            expires=dt.datetime.today()+dt.timedelta(days=30),
+            secure=True,
+            httponly=True
+        )
 
         return response
 

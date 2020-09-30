@@ -330,7 +330,13 @@ def assertion_consumer_service(request,
     get_user_model().objects.set_email_last_login_time(email)
 
     # remember the email the user authenticated with
-    http_response.set_cookie(SSO_EMAIL_SESSION_KEY, email, expires=dt.datetime.today() + dt.timedelta(days=30))
+    http_response.set_cookie(
+        SSO_EMAIL_SESSION_KEY,
+        email,
+        expires=dt.datetime.today() + dt.timedelta(days=30),
+        secure=True,
+        httponly=True,
+    )
 
     return http_response
 

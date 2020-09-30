@@ -1,4 +1,4 @@
-import csv
+from defusedcsv import csv
 from io import StringIO
 
 from django.contrib.admin.views.decorators import staff_member_required

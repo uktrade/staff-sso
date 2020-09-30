@@ -14,6 +14,7 @@ cffi==1.11.5              # via -r requirements.txt, cryptography
 chardet==3.0.4            # via -r requirements.txt, requests
 coverage==4.5.1           # via pytest-cov
 cryptography==2.3         # via -r requirements.txt, pyopenssl, pysaml2
+defusedcsv==1.1.0         # via -r requirements.txt
 defusedxml==0.5.0         # via -r requirements.txt, djangosaml2, pysaml2
 dj-database-url==0.5.0    # via -r requirements.txt
 django-appconf==1.0.2     # via -r requirements.txt, django-axes
