@@ -25,7 +25,7 @@ from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from djangosaml2.cache import IdentityCache, OutstandingQueriesCache, StateCache
 from djangosaml2.conf import get_config
 from djangosaml2.utils import (
-    available_idps, fail_acs_response, get_custom_setting,
+    available_idps, get_custom_setting,
     get_idp_sso_supported_bindings, get_location, is_safe_url_compat,
 )
 from djangosaml2.views import _get_subject_id, _set_subject_id, finish_logout
@@ -227,6 +227,11 @@ def login(request,  # noqa: C901
     return http_response
 
 
+def fail_acs_response(request, status=403, **kwargs):
+    """ Renders a SAML-specific template with general authentication error description. """
+    return render(request, 'djangosaml2/login_error.html', status=status)
+
+
 @require_POST
 @csrf_exempt
 def assertion_consumer_service(request,
@@ -289,9 +294,8 @@ def assertion_consumer_service(request,
         logger.exception("SAML Identity Provider is not configured correctly: certificate key is missing!")
         return fail_acs_response(request)
     except UnsolicitedResponse:
-        logger.exception("Received SAMLResponse when no request has been made.")
+        logger.exception("Received SAMLResponse when no request has been made. User agent: %s", request.META['HTTP_USER_AGENT'])
         return fail_acs_response(request)
-
     if response is None:
         logger.warning("Invalid SAML Assertion received (unknown error).")
         return fail_acs_response(request, status=400, exc_class=SuspiciousOperation)
