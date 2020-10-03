@@ -80,17 +80,6 @@ def login(request,  # noqa: C901
     will be rendered.
     """
 
-    # --- enhanced debug
-    logger.debug('COOKIES:')
-    for cookie_key, cookie_value in request.COOKIES.items():
-        logger.debug(f'Cookie: {cookie_key} = {cookie_value}')
-
-    logger.debug('SESSION:')
-    logger.debug('session id: {}'.format(request.session.session_key))
-    for session_key, session_value in request.COOKIES.items():
-        logger.debug(f'session: {session_key} = {session_value}')
-    # ----
-
     came_from = request.GET.get('next', settings.LOGIN_REDIRECT_URL)
     if not came_from:
         logger.warning('The next parameter exists but is empty')
@@ -224,6 +213,14 @@ def login(request,  # noqa: C901
     oq_cache = OutstandingQueriesCache(request.session)
     oq_cache.set(session_id, came_from)
 
+    cookie_expires = dt.datetime.today() + dt.timedelta(hours=1)
+
+    # test cookies
+    http_response.set_cookie('test_ss_unset', 'test', expires=cookie_expires, secure=True, samesite=None)
+    http_response.set_cookie('test_ss_lax', 'test', expires=cookie_expires, secure=True, samesite='lax')
+    http_response.set_cookie('test_ss_none', 'test', expires=cookie_expires, secure=True, samesite='lax')
+    http_response.cookies['test_ss_none']['SameSite'] = 'None'
+
     return http_response
 
 
@@ -248,14 +245,12 @@ def assertion_consumer_service(request,
     """
 
     # --- enhanced debug
-    logger.debug('COOKIES:')
+    logger.debug('ACS session id: %s // UA: %s', request.session.session_key, request.META.get('HTTP_USER_AGENT'))
     for cookie_key, cookie_value in request.COOKIES.items():
-        logger.debug(f'Cookie: {cookie_key} = {cookie_value}')
-
-    logger.debug('SESSION:')
-    logger.debug('session id: {}'.format(request.session.session_key))
-    for session_key, session_value in request.COOKIES.items():
-        logger.debug(f'session: {session_key} = {session_value}')
+        logger.debug('ACS cookie: %s = %s', cookie_key, cookie_value)
+        
+    for session_key, session_value in request.session.items():
+        logger.debug(f'ACS session: {session_key} = {session_value}')
     # ----
 
     attribute_mapping = attribute_mapping or get_custom_setting('SAML_ATTRIBUTE_MAPPING', {'uid': ('username', )})
@@ -351,6 +346,11 @@ def assertion_consumer_service(request,
 
     create_x_access_log(request, 200, message='Remote IdP Auth', entity_id=session_info['issuer'], email=email)
     get_user_model().objects.set_email_last_login_time(email)
+
+    logger.debug(
+        'Successful SAML authentication. User agent: %s // Saml issuer: %s',
+        request.META.get('HTTP_USER_AGENT'), session_info['issuer']
+    )
 
     # remember the email the user authenticated with
     http_response.set_cookie(SSO_EMAIL_SESSION_KEY, email, expires=dt.datetime.today() + dt.timedelta(days=30))
