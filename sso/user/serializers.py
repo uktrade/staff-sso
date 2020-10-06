@@ -31,7 +31,8 @@ class UserSerializer(serializers.ModelSerializer):
             'contact_email': obj.contact_email,
             'groups': [],
             'permitted_applications': obj.get_permitted_applications(include_non_public=True),
-            'access_profiles': [profile.slug for profile in obj.access_profiles.all()]
+            'access_profiles': [profile.slug for profile in obj.access_profiles.all()],
+            'application_permissions': [permission.full_permission_name() for permission in obj.application_permissions.all()],
         }
 
 

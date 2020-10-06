@@ -69,6 +69,9 @@ class ApplicationPermission(models.Model):
 
         return app_key
 
+    def full_permission_name(self):
+        return f'{self.application_name()}: {self.permission}'
+
     def __str__(self):
         return f'{self.application_name()} - {self.permission}'
 
