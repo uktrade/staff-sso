@@ -11,7 +11,8 @@
 
 {% block content %}
 <div id="content-main">
-
+  
+{% comment %}
 <div class="module">
         <table>
         <caption>
@@ -29,6 +30,8 @@
             </tr>
         </table>
 </div>
+{% endcomment %}
+
 {% if app_list %}
     {% for app in app_list %}
         <div class="app-{{ app.app_label }} module">
