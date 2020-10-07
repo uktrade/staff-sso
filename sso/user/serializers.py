@@ -18,7 +18,6 @@ class UserSerializer(serializers.ModelSerializer):
 
     def to_representation(self, obj):
         app = self.context['request'].auth.application
-
         primary_email, related_emails = obj.get_emails_for_application(app)
 
         return {
@@ -32,8 +31,36 @@ class UserSerializer(serializers.ModelSerializer):
             'groups': [],
             'permitted_applications': obj.get_permitted_applications(include_non_public=True),
             'access_profiles': [profile.slug for profile in obj.access_profiles.all()],
-            'application_permissions': [permission.full_permission_name() for permission in obj.application_permissions.all()],
         }
+
+class UserIntrospectionSerializer(UserSerializer):
+    class Meta:
+        model = User
+
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+
+        app = self.context['request'].auth.application
+
+        representation['current_application_permissions'] = [
+            permission.permission for permission in obj.application_permissions.filter(
+                Q(oauth2_application_id=app.id) | Q(saml2_application_id=app.id)
+            ).order_by('permission')
+        ]
+        return representation
+
+
+class UserMeSerializer(UserSerializer):
+    class Meta:
+        model = User
+
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+
+        representation['application_permissions'] = sorted([
+            permission.full_permission_name() for permission in obj.application_permissions.all()
+        ])
+        return representation
 
 
 class UserParamSerializer(serializers.Serializer):

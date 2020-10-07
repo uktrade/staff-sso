@@ -13,7 +13,8 @@ from rest_framework.response import Response
 
 from sso.oauth2.models import Application as OAuthApplication
 from .serializers import (
-    UserSerializer,
+    UserIntrospectionSerializer,
+    UserMeSerializer,
     UserParamSerializer,
     UserDetailsSerializer,
     UserListSerializer
@@ -24,7 +25,7 @@ from .autocomplete import AutocompleteFilter
 
 class UserRetrieveViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = UserSerializer
+    serializer_class = UserMeSerializer
 
     def get_object(self):
         return self.request.user
@@ -55,7 +56,7 @@ class UserRetrieveViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 class UserIntrospectViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     permission_classes = [permissions.IsAuthenticated, TokenHasScope]
     required_scopes = ['introspection']
-    serializer_class = UserSerializer
+    serializer_class = UserIntrospectionSerializer
 
     def retrieve(self, request):
 
@@ -77,7 +78,7 @@ class UserIntrospectViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             # The user does not have permission to access this OAuth2 application
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        serializer = UserSerializer(selected_user, context=dict(request=request))
+        serializer = UserIntrospectionSerializer(selected_user, context=dict(request=request))
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

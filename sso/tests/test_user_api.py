@@ -16,7 +16,7 @@ pytestmark = [
 ]
 
 
-def get_oauth_token(expires=None, user=None, scope='read'):
+def get_oauth_token(expires=None, user=None, scope='read', application=None):
 
     if not user:
         user = UserFactory(
@@ -27,10 +27,11 @@ def get_oauth_token(expires=None, user=None, scope='read'):
 
     user.groups.add(GroupFactory.create_batch(2)[1])  # create 2 groups but only assign the 2nd
 
-    application = ApplicationFactory(
-        default_access_allowed=True,
-        provide_immutable_email=True,
-    )
+    if not application:
+        application = ApplicationFactory(
+            default_access_allowed=True,
+            provide_immutable_email=True,
+        )
 
     access_token = AccessTokenFactory(
         application=application,
@@ -254,6 +255,48 @@ class TestAPIGetUserMe:
         data = response.json()
         assert data['contact_email'] == ['Enter a valid email address.']
 
+    def test_with_valid_token_and_application_permissions(self, api_client):
+        app = ApplicationFactory()
+        user, token = get_oauth_token(scope='introspection', application=app)
+        app.users.add(user)
+
+        other_app = ApplicationFactory(users=[user])
+        saml_app = SamlApplicationFactory(entity_id='an_entity_id', enabled=True)
+
+        ap = AccessProfileFactory(saml_apps_list=[saml_app])
+        user.access_profiles.add(ap)
+
+        user.emails.create(email='test@aaa.com')
+        user.emails.create(email='test@bbb.com')
+
+        user.application_permissions.add(
+            *ApplicationPermissionFactory.create_batch(2, oauth2_application=app),
+            ApplicationPermissionFactory(oauth2_application=other_app),
+            *ApplicationPermissionFactory.create_batch(2, saml2_application=saml_app),
+        )
+
+        application_permissions = sorted([
+            permission.full_permission_name() for permission in user.application_permissions.all()
+        ])
+
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        response = api_client.get(self.GET_USER_ME_URL)
+
+        assert response.status_code == 200
+        assert response.json() == {
+            'email': 'user1@example.com',
+            'user_id': str(user.user_id),
+            'email_user_id': user.email_user_id,
+            'first_name': 'John',
+            'last_name': 'Doe',
+            'related_emails': ['test@aaa.com', 'test@bbb.com'],
+            'contact_email': '',
+            'groups': [],
+            'permitted_applications': user.get_permitted_applications(include_non_public=True),
+            'access_profiles': [ap.slug],
+            'application_permissions': application_permissions,
+        }
+
 
 class TestApiUserIntrospect:
     GET_USER_INTROSPECT_URL = reverse_lazy('api-v1:user:user-introspect')
@@ -286,7 +329,7 @@ class TestApiUserIntrospect:
                 }
             ],
             'access_profiles': [],
-            'application_permissions': [],
+            'current_application_permissions': [],
         }
 
     def test_with_valid_token_and_email_alias(self, api_client):
@@ -320,7 +363,7 @@ class TestApiUserIntrospect:
                 }
             ],
             'access_profiles': [],
-            'application_permissions': [],
+            'current_application_permissions': [],
         }
 
     def test_with_valid_token_and_access_profile(self, api_client):
@@ -356,7 +399,7 @@ class TestApiUserIntrospect:
                 }
             ],
             'access_profiles': [ap.slug],
-            'application_permissions': [],
+            'current_application_permissions': [],
         }
 
     def test_with_valid_token_and_permitted_applications(self, api_client):
@@ -391,13 +434,15 @@ class TestApiUserIntrospect:
             'groups': [],
             'permitted_applications': permitted_applications,
             'access_profiles': [],
-            'application_permissions': [],
+            'current_application_permissions': [],
         }
 
     def test_with_valid_token_and_application_permissions(self, api_client):
-        user, token = get_oauth_token(scope='introspection')
+        app = ApplicationFactory()
+        user, token = get_oauth_token(scope='introspection', application=app)
+        app.users.add(user)
 
-        app = ApplicationFactory(users=[user])
+        other_app = ApplicationFactory(users=[user])
         saml_app = SamlApplicationFactory(entity_id='an_entity_id', enabled=True)
 
         ap = AccessProfileFactory(saml_apps_list=[saml_app])
@@ -406,16 +451,15 @@ class TestApiUserIntrospect:
         user.emails.create(email='test@aaa.com')
         user.emails.create(email='test@bbb.com')
 
-        ap1 = ApplicationPermissionFactory(oauth2_application=app)
-        ap2 = ApplicationPermissionFactory(oauth2_application=app)
-        saml_ap1 = ApplicationPermissionFactory(saml2_application=saml_app)
-        saml_ap2 = ApplicationPermissionFactory(saml2_application=saml_app)
-        user.application_permissions.add(ap1)
-        user.application_permissions.add(ap2)
-        user.application_permissions.add(saml_ap1)
-        user.application_permissions.add(saml_ap2)
+        user.application_permissions.add(
+            *ApplicationPermissionFactory.create_batch(2, oauth2_application=app),
+            ApplicationPermissionFactory(oauth2_application=other_app),
+            *ApplicationPermissionFactory.create_batch(2, saml2_application=saml_app),
+        )
 
-        application_permissions = [permission.full_permission_name() for permission in user.application_permissions.all()]
+        current_application_permissions = [
+            permission.permission for permission in user.application_permissions.filter(oauth2_application=app).order_by('permission')
+        ]
 
         api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
         response = api_client.get(self.GET_USER_INTROSPECT_URL + '?email=test@aaa.com')
@@ -432,7 +476,7 @@ class TestApiUserIntrospect:
             'groups': [],
             'permitted_applications': user.get_permitted_applications(include_non_public=True),
             'access_profiles': [ap.slug],
-            'application_permissions': application_permissions,
+            'current_application_permissions': current_application_permissions,
         }
 
     def test_with_user_id(self, api_client):
@@ -463,7 +507,7 @@ class TestApiUserIntrospect:
             'groups': [],
             'permitted_applications': permitted_applications,
             'access_profiles': [],
-            'application_permissions': [],
+            'current_application_permissions': [],
         }
 
     def test_with_email_user_id(self, api_client):
@@ -494,7 +538,7 @@ class TestApiUserIntrospect:
             'groups': [],
             'permitted_applications': permitted_applications,
             'access_profiles': [],
-            'application_permissions': [],
+            'current_application_permissions': [],
         }
 
     def test_requires_email_or_user_id_or_email_user_id(self, api_client):
@@ -567,7 +611,7 @@ class TestApiUserIntrospect:
                 }
             ],
             'access_profiles': [],
-            'application_permissions': [],
+            'current_application_permissions': [],
         }
 
 
