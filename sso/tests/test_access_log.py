@@ -21,7 +21,7 @@ class TestAppAccessLog:
         assert json.loads(mock_logger.info.call_args[0][0]) == \
             {
                 "request_id": "",
-                "request_time": "2017-06-22 15:50:00",
+                "request_time": "2017-06-22T15:50:00",
                 "sso_user_id": None,
                 "local_user_id": None,
                 "path": "/whatever/",
@@ -47,7 +47,7 @@ class TestAppAccessLog:
         assert json.loads(mock_logger.info.call_args[0][0]) == \
             {
                 "request_id": "",
-                "request_time": "2017-06-22 15:50:00",
+                "request_time": "2017-06-22T15:50:00",
                 "sso_user_id": str(user.user_id),
                 "local_user_id": user.id,
                 "path": "/whatever/",
