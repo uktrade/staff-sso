@@ -447,6 +447,7 @@ SAML_IDP_CONFIG = {
             os.path.join(SAML_IDP_CONFIG_DIR, 'zoom-metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'adobe-metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'jobvite-metadata.xml'),
+            os.path.join(SAML_IDP_CONFIG_DIR, 'gitlab-metadata.xml'),
         ],
     },
     # Signing
@@ -511,6 +512,10 @@ SAML_IDP_SPCONFIG = {
         'attribute_mapping': {},
     },
     'talemetry-production-departmentforinternationaltradedigitaldataandtechnology': {
+        'processor': 'sso.samlidp.processors.ModelProcessor',
+        'attribute_mapping': {},
+    },
+    'https://gitlab.ci.uktrade.digital': {
         'processor': 'sso.samlidp.processors.ModelProcessor',
         'attribute_mapping': {},
     }
