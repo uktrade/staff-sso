@@ -322,6 +322,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'djangosaml2idp': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
     }
 }
 
