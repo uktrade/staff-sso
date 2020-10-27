@@ -5,7 +5,6 @@
 #    pip-compile --output-file=requirements-dev.txt requirements-dev.in
 #
 -e git+https://github.com/OTA-Insight/djangosaml2idp.git@v0.5.0#egg=djangosaml2idp  # via -r requirements.txt
-asn1crypto==0.24.0        # via -r requirements.txt, cryptography
 atomicwrites==1.1.5       # via pytest
 attrs==18.1.0             # via pytest
 cachetools==2.1.0         # via -r requirements.txt, google-auth, zenpy
@@ -13,7 +12,7 @@ certifi==2018.4.16        # via -r requirements.txt, elastic-apm, requests
 cffi==1.11.5              # via -r requirements.txt, cryptography
 chardet==3.0.4            # via -r requirements.txt, requests
 coverage==4.5.1           # via pytest-cov
-cryptography==2.3         # via -r requirements.txt, pyopenssl, pysaml2
+cryptography==3.2         # via -r requirements.txt, pyopenssl, pysaml2
 defusedxml==0.5.0         # via -r requirements.txt, djangosaml2, pysaml2
 dj-database-url==0.5.0    # via -r requirements.txt
 django-appconf==1.0.2     # via -r requirements.txt, django-axes
@@ -41,7 +40,7 @@ google-auth-httplib2==0.0.3  # via -r requirements.txt, google-api-python-client
 google-auth==1.6.1        # via -r requirements.txt, google-api-python-client, google-auth-httplib2
 hawk-server==0.0.12       # via -r requirements.txt
 httplib2==0.12.0          # via -r requirements.txt, google-api-python-client, google-auth-httplib2, oauth2client
-idna==2.7                 # via -r requirements.txt, cryptography, requests
+idna==2.7                 # via -r requirements.txt, requests
 lxml==4.2.4               # via -r requirements-dev.in
 mccabe==0.6.1             # via flake8
 mohawk==1.1.0             # via -r requirements-dev.in
