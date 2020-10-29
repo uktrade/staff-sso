@@ -522,7 +522,13 @@ SAML_IDP_SPCONFIG = {
     },
     'https://gitlab.ci.uktrade.digital': {
         'processor': 'sso.samlidp.processors.ModelProcessor',
-        'attribute_mapping': {},
+        'attribute_mapping': {
+            'email': 'email',
+            'user_id': 'user_id',
+            'email_user_id': 'email_user_id',
+            'first_name': 'first_name',
+            'last_name': 'last_name',
+        },
     }
 }
 
