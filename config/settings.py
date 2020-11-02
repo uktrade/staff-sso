@@ -446,6 +446,7 @@ SAML_IDP_CONFIG = {
             os.path.join(SAML_IDP_CONFIG_DIR, 'elk-digital-metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'zoom-metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'adobe-metadata.xml'),
+            os.path.join(SAML_IDP_CONFIG_DIR, 'jobvite-metadata.xml'),
         ],
     },
     # Signing
@@ -506,6 +507,10 @@ SAML_IDP_SPCONFIG = {
     },
     # prod
     'https://federatedid-na1.services.adobe.com/federated/saml/metadata/alias/fe5a27cc-c28c-43e6-87f8-f1079e5eb3e4': {
+        'processor': 'sso.samlidp.processors.ModelProcessor',
+        'attribute_mapping': {},
+    },
+    'talemetry-production-departmentforinternationaltradedigitaldataandtechnology': {
         'processor': 'sso.samlidp.processors.ModelProcessor',
         'attribute_mapping': {},
     }
