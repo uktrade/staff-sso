@@ -295,6 +295,23 @@ def test_without_contact_email(api_client):
     ]
 
 @pytest.mark.django_db
+def test_active_and_inactive(api_client):
+    UserFactory(is_active=True)
+    UserFactory(is_active=False)
+    time.sleep(1)
+
+    host = 'localhost:8080'
+    path = reverse('api-v1:core:activity-stream')
+
+    response_1 = hawk_request(api_client, host, path)
+    assert response_1.status_code == 200
+    response_1_dict = response_1.json()
+
+    assert len(response_1_dict['orderedItems']) == 2
+    response_1_dict['orderedItems'][0]['object']['dit:StaffSSO:User:status'] == 'active'
+    response_1_dict['orderedItems'][1]['object']['dit:StaffSSO:User:status'] == 'inactive'
+
+@pytest.mark.django_db
 def test_last_accessed_in_full_ingest(api_client, rf, mocker):
     user = UserFactory(email='test@a.com', email_list=['test@b.com', 'test@c.com'])
     time.sleep(1)
