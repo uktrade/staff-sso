@@ -92,7 +92,7 @@ def activity_stream(request):
     per_page = 50
     User = get_user_model()
     users = list(User.objects.only(
-        'user_id', 'email_user_id', 'last_modified', 'last_accessed',
+        'user_id', 'email_user_id', 'last_modified', 'last_accessed', 'is_active',
         'first_name', 'last_name', 'email', 'contact_email', 'date_joined',
     ).prefetch_related(
         'emails', 'permitted_applications', 'access_profiles__oauth2_applications', 'access_profiles__saml2_applications')
