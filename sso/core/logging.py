@@ -19,11 +19,10 @@ def create_x_access_log(request, status_code, message='', **extra_fields):
 
     log = {
         'request_id': '',
-        'request_time': str(dt.datetime.utcnow()),
+        'request_time': dt.datetime.utcnow().isoformat(sep='T'),
         'sso_user_id': str(user.user_id) if user else None,
         'local_user_id': user.id if user else None,
         'path': request.path,
-        'host': request.get_host(),
         'status': status_code,
         'ip': get_client_ip(request),
         'message': message,
@@ -33,4 +32,3 @@ def create_x_access_log(request, status_code, message='', **extra_fields):
     log.update(**extra_fields)
 
     logger.info(json.dumps(log))
-
