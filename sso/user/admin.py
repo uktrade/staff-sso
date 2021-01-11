@@ -7,6 +7,7 @@ from django.forms import ModelForm
 from django.forms.widgets import CheckboxSelectMultiple
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
@@ -28,6 +29,23 @@ class UserForm(ModelForm):
         self.fields['access_profiles'].widget = CheckboxSelectMultiple()
         self.fields['access_profiles'].queryset = AccessProfile.objects.all()
         self.fields['access_profiles'].help_text = ''
+
+    def save(self, *args, **kwargs):
+        """If the user account is deactivated, we record the time this occurred on
+        in the `disabled_on` field."""
+
+        kwargs['commit'] = False
+        object = super().save(*args, **kwargs)
+
+        if 'is_active' in self.changed_data:
+            if not self.cleaned_data['is_active'] and not object.disabled_on:
+                object.disabled_on = timezone.now()
+            if self.cleaned_data['is_active'] and object.disabled_on:
+                object.disabled_on = None
+
+        object.save()
+
+        return object
 
     class Meta:
         model = User
@@ -69,10 +87,10 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ('emails__email', 'email', 'first_name', 'last_name', 'user_id', 'email_user_id')
     list_filter = (ApplicationFilter, 'access_profiles__name', 'is_superuser', 'is_active')
     fields = ('email_user_id', 'user_id', 'email', 'first_name', 'last_name', 'contact_email', 'is_active',
-              'date_joined', 'last_login', 'last_accessed', 'access_profiles', 'permitted_applications',
+              'date_joined', 'last_login', 'last_accessed', 'disabled_on', 'access_profiles', 'permitted_applications',
               'list_user_settings_wrapper', 'application_permissions')
     readonly_fields = ('date_joined', 'last_login', 'last_accessed', 'user_id', 'email_user_id',
-                       'list_user_settings_wrapper')
+                       'list_user_settings_wrapper', 'disabled_on')
     list_display = ('email', 'email_list', 'is_superuser', 'is_active', 'last_login', 'last_accessed',
                     'list_permitted_applications', 'list_access_profiles', 'show_permissions_link')
     inlines = [

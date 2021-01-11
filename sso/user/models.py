@@ -180,6 +180,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         max_length=254, blank=True
     )
 
+    disabled_on = models.DateTimeField(
+        _('Disabled on'),
+        help_text=_('The date the user is disabled'),
+        blank=True, null=True,
+    )
+
     last_accessed = models.DateTimeField(blank=True, null=True)
     last_modified = models.DateTimeField(auto_now=True, null=False)
 
