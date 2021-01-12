@@ -1,13 +1,16 @@
+import datetime
 import re
 
+from freezegun import freeze_time
 import pytest
 
 from django.contrib.admin.models import LogEntry
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser, Permission
 from django.shortcuts import reverse
+from django.utils import timezone
 
-from sso.user.admin import UserAdmin
+from sso.user.admin import UserAdmin, UserForm
 from sso.user.admin_views import ShowUserPermissionsView
 
 from .factories.oauth import ApplicationFactory
@@ -251,3 +254,42 @@ class TestMergeAction:
         )
 
         assert response.status_code == expected_status
+
+
+class TestDisableUser:
+    def _get_post_data(self, user, is_active):
+        return {
+            'password': 'unusable',
+            'date_joined': user.date_joined,
+            'user_id': user.user_id,
+            'email_user_id': user.email_user_id,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_email': user.last_name,
+            'contact_email': user.contact_email,
+            'is_superuser': user.is_superuser,
+            'is_active': is_active
+        }
+
+    @freeze_time('2017-06-22 15:50:00.000000+00:00')
+    def test_disable_user(self, auth_client):
+        user = UserFactory(is_active=True)
+
+        form = UserForm(self._get_post_data(user, False), instance=user)
+        form.save()
+
+        user.refresh_from_db()
+
+        assert not user.is_active
+        assert user.became_inactive_on == timezone.now()
+
+    def test_enable_user(self, auth_client):
+        user = UserFactory(is_active=False)
+
+        form = UserForm(self._get_post_data(user, True), instance=user)
+        form.save()
+
+        user.refresh_from_db()
+
+        assert user.is_active
+        assert user.became_inactive_on == None

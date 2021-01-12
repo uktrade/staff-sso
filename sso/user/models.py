@@ -180,6 +180,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         max_length=254, blank=True
     )
 
+    became_inactive_on = models.DateTimeField(
+        help_text=_('The date the user is account is deactivated'),
+        blank=True, null=True,
+    )
+
     last_accessed = models.DateTimeField(blank=True, null=True)
     last_modified = models.DateTimeField(auto_now=True, null=False)
 

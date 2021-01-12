@@ -146,6 +146,7 @@ def activity_stream(request):
                             get_default_access_allowed_apps=lambda: default_access_apps)
                     ],
                     'dit:StaffSSO:User:status': 'active' if user.is_active else 'inactive',
+                    'dit:StaffSSO:User:becameInactiveOn': None if user.is_active else user.became_inactive_on,
                     'dit:firstName': user.first_name,
                     'dit:lastName': user.last_name,
                     'dit:emailAddress': without_duplicates(
