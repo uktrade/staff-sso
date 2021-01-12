@@ -180,9 +180,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         max_length=254, blank=True
     )
 
-    disabled_on = models.DateTimeField(
-        _('Disabled on'),
-        help_text=_('The date the user is disabled'),
+    became_inactive_on = models.DateTimeField(
+        help_text=_('The date the user is account is deactivated'),
         blank=True, null=True,
     )
 

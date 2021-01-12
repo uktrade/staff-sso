@@ -281,7 +281,7 @@ class TestDisableUser:
         user.refresh_from_db()
 
         assert not user.is_active
-        assert user.disabled_on == timezone.now()
+        assert user.became_inactive_on == timezone.now()
 
     def test_enable_user(self, auth_client):
         user = UserFactory(is_active=False)
@@ -292,4 +292,4 @@ class TestDisableUser:
         user.refresh_from_db()
 
         assert user.is_active
-        assert user.disabled_on == None
+        assert user.became_inactive_on == None
