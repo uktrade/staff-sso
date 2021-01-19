@@ -9,7 +9,7 @@ from django.contrib.auth.models import PermissionsMixin
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from sso.oauth2.models import Application as OAuthApplication
 from sso.samlidp.models import SamlApplication

@@ -1,8 +1,12 @@
 import logging
 
 from django.db import models
+<<<<<<< HEAD
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+=======
+from django.utils.translation import gettext_lazy as _
+>>>>>>> Django 3 upgrade preliminaries
 
 from sso.core.ip_filter import get_client_ip
 

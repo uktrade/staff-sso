@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'raven.contrib.django.raven_compat',
     'django_filters',
     'elasticapm.contrib.django',
+    'djangosaml2idp',
 
     'sso.core',
     'sso.user',
@@ -74,6 +75,7 @@ MIDDLEWARE = [
     'sso.core.middleware.NeverCacheMiddleware',
     'sso.user.middleware.UpdatedLastAccessedMiddleware',
     'sso.core.middleware.AdminIpRestrictionMiddleware',
+    'axes.middleware.AxesMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -155,6 +157,7 @@ SAML_IDPS_USE_NAME_ID_AS_USERNAME = [
 ]
 
 AUTHENTICATION_BACKENDS = (
+    'axes.backends.AxesBackend',
     'django.contrib.auth.backends.ModelBackend',
     'sso.samlauth.backends.MultiEmailSaml2Backend',
 )

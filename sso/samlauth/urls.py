@@ -7,8 +7,9 @@ urlpatterns = [
     url(r'^login/$', views.login, name='saml2_login'),
     url(r'^acs/$', views.assertion_consumer_service, name='saml2_acs'),
     url(r'^logout/$', views.logout, name='saml2_logout'),
-    url(r'^ls/post/$', djangosaml2_views.logout_service_post, name='saml2_ls_post'),
-    url(r'^metadata/$', djangosaml2_views.metadata, name='saml2_metadata'),
+    # FIXME: these don't exist in the latest version of djangosaml2
+    #url(r'^ls/post/$', djangosaml2_views.logout_service_post, name='saml2_ls_post'),
+    #url(r'^metadata/$', djangosaml2_views.metadata, name='saml2_metadata'),
     url(r'^logged-in/$', views.logged_in, name='saml2_logged_in'),
     url(r'^logged-out/$', views.logged_out, name='saml2_logged_out'),
     url(r'^login-start/$', views.LoginStartView.as_view(), name='saml2_login_start'),

@@ -15,7 +15,6 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import is_safe_url
-from django.utils.six import text_type
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import View
@@ -25,8 +24,8 @@ from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from djangosaml2.cache import IdentityCache, OutstandingQueriesCache, StateCache
 from djangosaml2.conf import get_config
 from djangosaml2.utils import (
-    available_idps, fail_acs_response, get_custom_setting,
-    get_idp_sso_supported_bindings, get_location, is_safe_url_compat,
+    available_idps, get_custom_setting,
+    get_idp_sso_supported_bindings, get_location
 )
 from djangosaml2.views import _get_subject_id, _set_subject_id, finish_logout
 from djangosaml2.signals import post_authenticated
@@ -174,7 +173,7 @@ def login(request,  # noqa: C901
                 binding=binding, sign=False, sigalg=sigalg)
         except TypeError as e:
             logger.error('Unable to know which IdP to use')
-            return HttpResponse(text_type(e))
+            return HttpResponse(e)
         else:
             http_response = HttpResponseRedirect(get_location(result))
     elif binding == BINDING_HTTP_POST:
@@ -187,7 +186,7 @@ def login(request,  # noqa: C901
                     sign_alg=SIG_RSA_SHA256)
             except TypeError as e:
                 logger.error('Unable to know which IdP to use')
-                return HttpResponse(text_type(e))
+                return HttpResponse(e)
             else:
                 http_response = HttpResponse(result['data'])
         # get request XML to build our own html based on the template
@@ -196,7 +195,7 @@ def login(request,  # noqa: C901
                 location = client.sso_location(selected_idp, binding)
             except TypeError as e:
                 logger.error('Unable to know which IdP to use')
-                return HttpResponse(text_type(e))
+                return HttpResponse(e)
             session_id, request_xml = client.create_authn_request(
                 location,
                 binding=binding,
@@ -217,6 +216,14 @@ def login(request,  # noqa: C901
     oq_cache.set(session_id, came_from)
 
     return http_response
+
+
+def fail_acs_response(request):
+    raise NotImplementedError("fix me")
+
+
+def is_safe_url_compat(request):
+    raise NotImplementedError("fix me")
 
 
 @require_POST
