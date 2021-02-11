@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.conf.urls import include, url
+from django.urls import path, include
 from django.contrib import admin
 from django.views.generic.base import RedirectView, TemplateView
 
@@ -16,29 +16,25 @@ admin.site.site_title = ''
 admin.site.index_title = ''
 
 urlpatterns = [
-    url(r'^$', RedirectView.as_view(pattern_name=settings.LOGIN_URL)),
-    url(r'^admin/login/$', admin_login_view),
-    url(r'^admin/', admin.site.urls),
-    url(r'^admin/', include('sso.user.admin_urls')),
+    path('', RedirectView.as_view(pattern_name=settings.LOGIN_URL)),
+    path('admin/login/', admin_login_view),
+    path('admin/', admin.site.urls),
+    path('admin/', include('sso.user.admin_urls')),
 
-    # override saml idp login url
-    url(r'^idp/login/process/$', LoginProcessView.as_view(), name='saml_login_process_overridden'),
-    url(r'^idp/sso/init$', SSOInitView.as_view(), name="saml_idp_init"),
-
-    url(r'^saml2/', include('sso.samlauth.urls')),
-    url(r'^idp/', include('djangosaml2idp.urls')),
+    path('saml2/', include('sso.samlauth.urls')),
+    path('idp/', include('sso.samlidp.urls')),
 
     # override authorisation and token introspection DOT views
-    url(r'^o/', include('sso.oauth2.urls', namespace='oauth2')),
-    url(r'^o/', include(('oauth2_provider.urls', 'oauth2_provider'), namespace='oauth2_provider')),
+    path('o/', include('sso.oauth2.urls', namespace='oauth2')),
+    path('o/', include(('oauth2_provider.urls', 'oauth2_provider'), namespace='oauth2_provider')),
 
-    url(r'^api/v1/', include((api_urls, 'api'), namespace='api-v1')),
+    path('api/v1/', include((api_urls, 'api'), namespace='api-v1')),
 
-    url(r'^', include(('sso.contact.urls', 'sso_contact'), namespace='contact')),
-    url(r'^email/', include(('sso.emailauth.urls', 'sso_emailauth'), namespace='emailauth')),
-    url(r'^', include(('sso.localauth.urls', 'sso_localauth'), namespace='localauth')),
+    path('', include(('sso.contact.urls', 'sso_contact'), namespace='contact')),
+    path('email/', include(('sso.emailauth.urls', 'sso_emailauth'), namespace='emailauth')),
+    path('', include(('sso.localauth.urls', 'sso_localauth'), namespace='localauth')),
 
-    url(r'^check/$', HealthCheckView.as_view(), name='healthcheck'),
+    path('check/', HealthCheckView.as_view(), name='healthcheck'),
 
-    url(r'^privacy-policy/$', TemplateView.as_view(template_name='sso/privacy-policy.html'), name='privacy_policy'),
+    path('privacy-policy/', TemplateView.as_view(template_name='sso/privacy-policy.html'), name='privacy_policy'),
 ]

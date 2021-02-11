@@ -1,9 +1,10 @@
-from django.conf.urls import url
+from django.urls import path
+from django.urls import path
 
 from .views import UserSettingsListView
 
 urlpatterns = [
-    url(r'^$',
+    path('',
         UserSettingsListView.as_view(),
         name='list-all-my-settings')
 ]

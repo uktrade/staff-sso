@@ -3,6 +3,8 @@ import os
 import shutil
 import sys
 
+from django.urls import reverse_lazy
+
 import dj_database_url
 import environ
 import saml2
@@ -31,6 +33,7 @@ DEBUG = env('DEBUG', default=False)
 ENV_NAME = env('ENV_NAME', default='test')  # 'test', 'staging' or 'prod' (maches config/saml/x/)
 
 ALLOWED_HOSTS = env('ALLOWED_HOSTS', default='localhost').split(',')
+SAML_ALLOWED_HOSTS = ALLOWED_HOSTS
 
 # Application definition
 
@@ -76,6 +79,7 @@ MIDDLEWARE = [
     'sso.user.middleware.UpdatedLastAccessedMiddleware',
     'sso.core.middleware.AdminIpRestrictionMiddleware',
     'axes.middleware.AxesMiddleware',
+    'djangosaml2.middleware.SamlSessionMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -145,8 +149,9 @@ STATIC_URL = '/static/'
 # Auth / SAML
 AUTH_USER_MODEL = 'user.user'
 LOGIN_URL = 'saml2_login_start'
-LOGOUT_REDIRECT_URL = '/saml2/logged-out/'
-LOGIN_REDIRECT_URL = '/saml2/logged-in/'
+LOGOUT_REDIRECT_URL = reverse_lazy('saml2_logged_out')
+LOGIN_REDIRECT_URL = reverse_lazy('saml2_logged_in')
+ACS_DEFAULT_REDIRECT_URL = LOGIN_REDIRECT_URL
 
 SAML_USER_MODEL = 'user.user'
 
@@ -206,6 +211,8 @@ SAML_CONFIG = {
             'authn_requests_signed': True,
             'want_assertions_signed': True,
             'want_response_signed': False,
+            "signing_algorithm": "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
+            "digest_algorithm": "http://www.w3.org/2001/04/xmlenc#sha256",
             'name': 'DIT SP',
             'endpoints': {
                 'assertion_consumer_service': [
