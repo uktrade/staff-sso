@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="https://ui.comaea.com/simplesaml/www/module.php/saml/sp/metadata.php/dit-sp">
+  <md:SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:1.1:protocol urn:oasis:names:tc:SAML:2.0:protocol">
+    <md:KeyDescriptor use="signing">
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:X509Data>
+          <ds:X509Certificate>MIIEIzCCAwugAwIBAgIJAJnKg1x83hGYMA0GCSqGSIb3DQEBBQUAMIGnMQswCQYDVQQGEwJTRTESMBAGA1UECAwJU3RvY2tob2xtMRcwFQYDVQQHDA5TdG9ja2hvbG0gQ2l0eTEgMB4GA1UECgwXQ29tYWVhIEludGVybmF0aW9uYWwgQUIxCzAJBgNVBAsMAklUMRUwEwYDVQQDDAxSYXNoaWQgSWRyaXMxJTAjBgkqhkiG9w0BCQEWFnJhc2hpZC5pZHJpc0Bjb21hZWEuc2cwHhcNMTQwMTE2MTExMjA4WhcNMjQwMTE2MTExMjA4WjCBpzELMAkGA1UEBhMCU0UxEjAQBgNVBAgMCVN0b2NraG9sbTEXMBUGA1UEBwwOU3RvY2tob2xtIENpdHkxIDAeBgNVBAoMF0NvbWFlYSBJbnRlcm5hdGlvbmFsIEFCMQswCQYDVQQLDAJJVDEVMBMGA1UEAwwMUmFzaGlkIElkcmlzMSUwIwYJKoZIhvcNAQkBFhZyYXNoaWQuaWRyaXNAY29tYWVhLnNnMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqlcVs6IaKJKgsfJnX7870LhWSV+roWr13TzN7UynKhgp+GL802pyIWhWKC8wvBljg9NTzhejYq+dftInL0ienC7kaG+zLj0wN8wuKvpPS9m8f4+dN08qSZMYZHlHAsZwpnlec+Al5GF7QzpQLcKJDwLrwOXZGPghg66lKbbAx1gnG24zL/SrB35ItTCYRCPjzwVyIJjMzS6IwTHAZY605T9iAFqU1pvtbIh0aj79yMtVPbmysAkZJ/AU9YIcnL5Ci6FDJMpwi/s7GC1WD7YYQ4YAatCIbQgdm48R/JEr9VllSZa616bLIFyhqwu0SkDr+noWcGKE8fCiJpEdGMIPNwIDAQABo1AwTjAdBgNVHQ4EFgQUfZWyUqmCrtVv9324EVU9tcsQu/kwHwYDVR0jBBgwFoAUfZWyUqmCrtVv9324EVU9tcsQu/kwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQUFAAOCAQEAqiS7ohsxEx147Wtyf1/GnaI+kkHSY8XlbuydKaqitqGY83W9QoDNlPlox9Q+rMEH82Z51IrJnGRI3fcIV141+LMOzDagLcZnyAx3IO7OuOxRdELwF/d5TFI/koEKSDiJaGCp58sxq48lOyeV/hSW/ziebKDc9hVTX6rpPv3z51/H420+JUruoAI2CoIx96Zz3O5R/pHlIHftB8U3xQuaQCr+w0AaDb5TR76TiIATmEhsaGTp/jSjVL/8vFDgiFIbxcWU98tlQP6JxiJCOHycR9SFmilAX4fxDJpfHgD5OBUC6Sv8oPJe4So6MuBgJ0dKIjE1L119ePa1IHC3hxp50A==</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+    <md:KeyDescriptor use="encryption">
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:X509Data>
+          <ds:X509Certificate>MIIEIzCCAwugAwIBAgIJAJnKg1x83hGYMA0GCSqGSIb3DQEBBQUAMIGnMQswCQYDVQQGEwJTRTESMBAGA1UECAwJU3RvY2tob2xtMRcwFQYDVQQHDA5TdG9ja2hvbG0gQ2l0eTEgMB4GA1UECgwXQ29tYWVhIEludGVybmF0aW9uYWwgQUIxCzAJBgNVBAsMAklUMRUwEwYDVQQDDAxSYXNoaWQgSWRyaXMxJTAjBgkqhkiG9w0BCQEWFnJhc2hpZC5pZHJpc0Bjb21hZWEuc2cwHhcNMTQwMTE2MTExMjA4WhcNMjQwMTE2MTExMjA4WjCBpzELMAkGA1UEBhMCU0UxEjAQBgNVBAgMCVN0b2NraG9sbTEXMBUGA1UEBwwOU3RvY2tob2xtIENpdHkxIDAeBgNVBAoMF0NvbWFlYSBJbnRlcm5hdGlvbmFsIEFCMQswCQYDVQQLDAJJVDEVMBMGA1UEAwwMUmFzaGlkIElkcmlzMSUwIwYJKoZIhvcNAQkBFhZyYXNoaWQuaWRyaXNAY29tYWVhLnNnMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqlcVs6IaKJKgsfJnX7870LhWSV+roWr13TzN7UynKhgp+GL802pyIWhWKC8wvBljg9NTzhejYq+dftInL0ienC7kaG+zLj0wN8wuKvpPS9m8f4+dN08qSZMYZHlHAsZwpnlec+Al5GF7QzpQLcKJDwLrwOXZGPghg66lKbbAx1gnG24zL/SrB35ItTCYRCPjzwVyIJjMzS6IwTHAZY605T9iAFqU1pvtbIh0aj79yMtVPbmysAkZJ/AU9YIcnL5Ci6FDJMpwi/s7GC1WD7YYQ4YAatCIbQgdm48R/JEr9VllSZa616bLIFyhqwu0SkDr+noWcGKE8fCiJpEdGMIPNwIDAQABo1AwTjAdBgNVHQ4EFgQUfZWyUqmCrtVv9324EVU9tcsQu/kwHwYDVR0jBBgwFoAUfZWyUqmCrtVv9324EVU9tcsQu/kwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQUFAAOCAQEAqiS7ohsxEx147Wtyf1/GnaI+kkHSY8XlbuydKaqitqGY83W9QoDNlPlox9Q+rMEH82Z51IrJnGRI3fcIV141+LMOzDagLcZnyAx3IO7OuOxRdELwF/d5TFI/koEKSDiJaGCp58sxq48lOyeV/hSW/ziebKDc9hVTX6rpPv3z51/H420+JUruoAI2CoIx96Zz3O5R/pHlIHftB8U3xQuaQCr+w0AaDb5TR76TiIATmEhsaGTp/jSjVL/8vFDgiFIbxcWU98tlQP6JxiJCOHycR9SFmilAX4fxDJpfHgD5OBUC6Sv8oPJe4So6MuBgJ0dKIjE1L119ePa1IHC3hxp50A==</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+    <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://ui.comaea.com/simplesaml/www/module.php/saml/sp/saml2-logout.php/dit-sp"/>
+    <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://ui.comaea.com/simplesaml/www/module.php/saml/sp/saml2-acs.php/dit-sp" index="0"/>
+    <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:1.0:profiles:browser-post" Location="https://ui.comaea.com/simplesaml/www/module.php/saml/sp/saml1-acs.php/dit-sp" index="1"/>
+    <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact" Location="https://ui.comaea.com/simplesaml/www/module.php/saml/sp/saml2-acs.php/dit-sp" index="2"/>
+    <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:1.0:profiles:artifact-01" Location="https://ui.comaea.com/simplesaml/www/module.php/saml/sp/saml1-acs.php/dit-sp/artifact" index="3"/>
+  </md:SPSSODescriptor>
+</md:EntityDescriptor>
