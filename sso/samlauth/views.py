@@ -25,7 +25,7 @@ from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from djangosaml2.cache import IdentityCache, OutstandingQueriesCache, StateCache
 from djangosaml2.conf import get_config
 from djangosaml2.utils import (
-    available_idps, fail_acs_response, get_custom_setting,
+    available_idps, get_custom_setting,
     get_idp_sso_supported_bindings, get_location, is_safe_url_compat,
 )
 from djangosaml2.views import _get_subject_id, _set_subject_id, finish_logout
@@ -80,8 +80,6 @@ def login(request,  # noqa: C901
     will be rendered.
     """
 
-    logger.debug('Login process started')
-
     came_from = request.GET.get('next', settings.LOGIN_REDIRECT_URL)
     if not came_from:
         logger.warning('The next parameter exists but is empty')
@@ -116,7 +114,6 @@ def login(request,  # noqa: C901
                     'came_from': came_from,
                 }
             )
-
 
     conf = get_config(config_loader_path, request)
 
@@ -216,7 +213,20 @@ def login(request,  # noqa: C901
     oq_cache = OutstandingQueriesCache(request.session)
     oq_cache.set(session_id, came_from)
 
+    cookie_expires = dt.datetime.today() + dt.timedelta(hours=1)
+
+    # test cookies
+    http_response.set_cookie('test_ss_unset', 'test', expires=cookie_expires, secure=True, samesite=None)
+    http_response.set_cookie('test_ss_lax', 'test', expires=cookie_expires, secure=True, samesite='lax')
+    http_response.set_cookie('test_ss_none', 'test', expires=cookie_expires, secure=True, samesite='lax')
+    http_response.cookies['test_ss_none']['SameSite'] = 'None'
+
     return http_response
+
+
+def fail_acs_response(request, status=403, **kwargs):
+    """ Renders a SAML-specific template with general authentication error description. """
+    return render(request, 'djangosaml2/login_error.html', status=status)
 
 
 @require_POST
@@ -233,6 +243,15 @@ def assertion_consumer_service(request,
     djangosaml2.backends.Saml2Backend that should be
     enabled in the settings.py
     """
+
+    # --- enhanced debug
+    logger.debug('ACS session id: %s // UA: %s', request.session.session_key, request.META.get('HTTP_USER_AGENT'))
+    for cookie_key, cookie_value in request.COOKIES.items():
+        logger.debug('ACS cookie: %s = %s', cookie_key, cookie_value)
+        
+    for session_key, session_value in request.session.items():
+        logger.debug(f'ACS session: {session_key} = {session_value}')
+    # ----
 
     attribute_mapping = attribute_mapping or get_custom_setting('SAML_ATTRIBUTE_MAPPING', {'uid': ('username', )})
     create_unknown_user = create_unknown_user if create_unknown_user is not None else \
@@ -270,9 +289,8 @@ def assertion_consumer_service(request,
         logger.exception("SAML Identity Provider is not configured correctly: certificate key is missing!")
         return fail_acs_response(request)
     except UnsolicitedResponse:
-        logger.exception("Received SAMLResponse when no request has been made.")
+        logger.exception("Received SAMLResponse when no request has been made. User agent: %s", request.META['HTTP_USER_AGENT'])
         return fail_acs_response(request)
-
     if response is None:
         logger.warning("Invalid SAML Assertion received (unknown error).")
         return fail_acs_response(request, status=400, exc_class=SuspiciousOperation)
@@ -328,6 +346,11 @@ def assertion_consumer_service(request,
 
     create_x_access_log(request, 200, message='Remote IdP Auth', entity_id=session_info['issuer'], email=email)
     get_user_model().objects.set_email_last_login_time(email)
+
+    logger.debug(
+        'Successful SAML authentication. User agent: %s // Saml issuer: %s',
+        request.META.get('HTTP_USER_AGENT'), session_info['issuer']
+    )
 
     # remember the email the user authenticated with
     http_response.set_cookie(SSO_EMAIL_SESSION_KEY, email, expires=dt.datetime.today() + dt.timedelta(days=30))
@@ -413,6 +436,17 @@ class LoginStartView(FormView):
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             return redirect('saml2_logged_in')
+
+        # --- enhanced debug
+        logger.debug('COOKIES:')
+        for cookie_key, cookie_value in request.COOKIES.items():
+            logger.debug(f'Cookie: {cookie_key} = {cookie_value}')
+
+        logger.debug('SESSION:')
+        logger.debug('session id: {}'.format(request.session.session_key))
+        for session_key, session_value in request.COOKIES.items():
+            logger.debug(f'session: {session_key} = {session_value}')
+        # ----
 
         return super().dispatch(request, *args, **kwargs)
 
