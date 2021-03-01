@@ -428,7 +428,7 @@ SAML_IDP_CONFIG = {
                     ),
                 ],
             },
-            "name_id_format": [saml2.saml.NAMEID_FORMAT_EMAILADDRESS],
+            "name_id_format": [saml2.saml.NAMEID_FORMAT_EMAILADDRESS, saml2.saml.NAMEID_FORMAT_UNSPECIFIED],
             "sign_response": True,
             "sign_assertion": True,
             "want_authn_requests_signed": False,
