@@ -5,7 +5,7 @@ from django.conf import settings
 from djangosaml2idp.processors import BaseProcessor
 
 
-from .models import SamlApplication
+from .models import ServiceProvider
 from sso.user.models import EmailAddress, ServiceEmailAddress
 from sso.core.logging import create_x_access_log
 
@@ -34,7 +34,7 @@ class ModelProcessor(BaseProcessor):
     USER_ID_FIELD = 'email'
 
     def __init__(self, entity_id, *args, **kwargs):
-        self._application = SamlApplication.objects.get(entity_id=entity_id)
+        self._application = ServiceProvider.objects.get(entity_id=entity_id)
 
     def get_user_id(self, user):
         return str(self.get_service_email(user) or getattr(user, self.USER_ID_FIELD) or user.email)
@@ -51,12 +51,12 @@ class ModelProcessor(BaseProcessor):
     def has_access(self, request):
 
         access = request.user.can_access(self._application) and \
-                 self._application.enabled and self._application.is_valid_ip(request)
+                 self._application.active and self._application.is_valid_ip(request)
 
         create_x_access_log(
             request,
             200 if access else 403,
-            application=self._application.name
+            application=self._application.pretty_name
         )
 
         return access
@@ -87,22 +87,22 @@ class GoogleProcessor(ModelProcessor):
         return build_google_user_id(user)
 
 
-class EmailIdProcessor(ModelProcessor):
-    USER_ID_FIELD = 'email_user_id'
-
-    def create_identity(self, user, sp_mapping, **extra_config):
-
-        identity = super().create_identity(user, sp_mapping)
-
-        permissions = list(
-            user.application_permissions
-                .filter(saml2_application=self._application)
-                .values_list('permission', flat=True))
-
-        identity['groups'] = permissions
-
-        return identity
-
-
-class ContactEmailProcessor(ModelProcessor):
-    USER_ID_FIELD = 'contact_email'
+# class EmailIdProcessor(ModelProcessor):
+#     USER_ID_FIELD = 'email_user_id'
+#
+#     def create_identity(self, user, sp_mapping, **extra_config):
+#
+#         identity = super().create_identity(user, sp_mapping)
+#
+#         permissions = list(
+#             user.application_permissions
+#                 .filter(saml2_application=self._application)
+#                 .values_list('permission', flat=True))
+#
+#         identity['groups'] = permissions
+#
+#         return identity
+#
+#
+# class ContactEmailProcessor(ModelProcessor):
+#     USER_ID_FIELD = 'contact_email'

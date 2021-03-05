@@ -751,7 +751,7 @@ class TestAPISearchUsers:
 
     def test_all_users_saml_app_enabled(self, api_client):
         search_user, def_oauth_app, token = self.setup_search_user()
-        saml_app = SamlApplicationFactory(entity_id='an_entity_id', enabled=True)
+        saml_app = SamlApplicationFactory(entity_id='an_entity_id', active=True)
         ap = AccessProfileFactory(saml_apps_list=[saml_app])
         user1 = UserFactory(
             email='first1.last1@example.com',
@@ -922,7 +922,7 @@ class TestAPISearchUsers:
         users back, none filtered
         """
         search_user, def_oauth_app, token = self.setup_search_user()
-        saml_app = SamlApplicationFactory(entity_id='an_entity_id', enabled=True)
+        saml_app = SamlApplicationFactory(entity_id='an_entity_id', active=True)
         ap = AccessProfileFactory(saml_apps_list=[saml_app])
         saml_user = UserFactory(
             email='saml.user@example.com',

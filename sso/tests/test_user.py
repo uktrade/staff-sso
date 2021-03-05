@@ -237,7 +237,7 @@ class TestUser:
         assert not user.can_access(app)
 
     def test_can_access_saml2_if_app_disabled(self):
-        app = SamlApplicationFactory(enabled=False)
+        app = SamlApplicationFactory(active=False)
         user = UserFactory()
         ap = AccessProfile.objects.create(name="test profile")
         ap.saml2_applications.add(app)
@@ -614,7 +614,7 @@ class TestAccessProfile:
 
     def test_saml2_is_access_allowed_if_app_is_disabled(self):
 
-        app = SamlApplicationFactory(enabled=False)
+        app = SamlApplicationFactory(active=False)
 
         ap = AccessProfile.objects.create()
         ap.saml2_applications.add(app)

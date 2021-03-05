@@ -228,7 +228,7 @@ def test_no_n_plus_1_query(api_client, django_assert_num_queries):
 def test_with_permitted_apps(api_client, django_assert_num_queries):
     ap = AccessProfileFactory()
     ap.oauth2_applications.add(ApplicationFactory(display_name='App C', start_url='https://c.com/'))
-    ap.saml2_applications.add(SamlApplicationFactory(name='App B', start_url='https://b.com/'))
+    ap.saml2_applications.add(SamlApplicationFactory(pretty_name='App B', start_url='https://b.com/'))
     app_direct = ApplicationFactory(display_name='App A', start_url='https://a.com/')
     app_no_access = ApplicationFactory(display_name='App D', start_url='https://d.com/')
     users = UserFactory(add_access_profiles=[ap], add_permitted_applications=[app_direct])

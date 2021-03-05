@@ -1,7 +1,6 @@
 Django==3.1.5
 django-environ
 psycopg2-binary
-#djangosaml2==1.0.0.post1
 -e git+https://github.com/lgarvey/djangosaml2@master#egg=djangosaml2
 django-oauth-toolkit==1.3.3
 djangorestframework==3.12.2
@@ -10,8 +9,7 @@ hawk-server==0.0.12
 zenpy
 requests==2.20.1
 defusedxml==0.5.0
-djangosaml2idp
-#-e git+https://github.com/OTA-Insight/djangosaml2idp.git@v0.5.0#egg=djangosaml2idp
+-e git+https://github.com/lgarvey/djangosaml2idp.git@v0.5.0#egg=djangosaml2idp
 google-api-python-client
 oauth2client
 elastic-apm

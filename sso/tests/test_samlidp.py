@@ -4,11 +4,9 @@ import pytest
 from django.http import HttpRequest
 from django.urls import reverse
 
-from sso.samlidp.models import SamlApplication
+from sso.samlidp.models import ServiceProvider
 from sso.samlidp.processors import (
     AWSProcessor,
-    EmailIdProcessor,
-    GoogleProcessor,
     ModelProcessor,
 )
 from sso.tests.factories.saml import SamlApplicationFactory
@@ -18,7 +16,6 @@ from sso.tests.factories.user import (
     ServiceEmailAddressFactory,
     UserFactory,
 )
-
 
 pytestmark = [pytest.mark.django_db]
 
@@ -31,11 +28,11 @@ class TestModelProcessor:
         assert processor._application == app
 
     def test_model_does_not_exist(self):
-        with pytest.raises(SamlApplication.DoesNotExist):
+        with pytest.raises(ServiceProvider.DoesNotExist):
             ModelProcessor("a_non_existent_entity_id")
 
     def test_has_access_application_enabled(self, rf):
-        saml_app = SamlApplicationFactory(entity_id="an_entity_id", enabled=True)
+        saml_app = SamlApplicationFactory(entity_id="an_entity_id", active=True)
         ap = AccessProfileFactory(saml_apps_list=[saml_app])
         processor = ModelProcessor("an_entity_id")
 
@@ -45,7 +42,7 @@ class TestModelProcessor:
         assert processor.has_access(request)
 
     def test_has_access_application_disabled(self, rf):
-        saml_app = SamlApplicationFactory(entity_id="an_entity_id", enabled=False)
+        saml_app = SamlApplicationFactory(entity_id="an_entity_id", active=False)
         ap = AccessProfileFactory(saml_apps_list=[saml_app])
         processor = ModelProcessor("an_entity_id")
 
@@ -293,64 +290,6 @@ class TestAWSProcessor:
             identity["https://aws.amazon.com/SAML/Attributes/RoleSessionName"]
             == email.email
         )
-
-
-class TestGoogleProcessor:
-    def test_correct_email_is_supplied(self, settings):
-        SamlApplicationFactory(entity_id="an_entity_id")
-        settings.MI_GOOGLE_EMAIL_DOMAIN = "test.com"
-
-        user = UserFactory(email="hello@world.com")
-
-        processor = GoogleProcessor(entity_id="an_entity_id")
-        assert processor.get_user_id(user) == "hello@test.com"
-
-    def test_email_can_be_overridden(self, settings):
-        SamlApplicationFactory(entity_id="an_entity_id")
-        settings.MI_GOOGLE_EMAIL_DOMAIN = "test.com"
-
-        user = UserFactory(
-            email="hello@world.com",
-            email_list=["hello_world@" + settings.MI_GOOGLE_EMAIL_DOMAIN],
-        )
-
-        processor = GoogleProcessor(entity_id="an_entity_id")
-        assert processor.get_user_id(user) == "hello_world@test.com"
-
-
-class TestEmailIdProcessor:
-    def test_email_id_is_supplied(self):
-        SamlApplicationFactory(entity_id="an_entity_id")
-        user = UserFactory(email="hello@world.com")
-
-        processor = EmailIdProcessor(entity_id="an_entity_id")
-        assert user.email_user_id == processor.get_user_id(user)
-
-    def test_groups_are_supplied(self):
-        app1 = SamlApplicationFactory(entity_id="an_entity_id")
-        app2 = SamlApplicationFactory(entity_id="an_second_entity_id")
-
-        ap1 = ApplicationPermissionFactory(saml2_application=app1)
-        ap2 = ApplicationPermissionFactory(saml2_application=app1)
-        ap3 = ApplicationPermissionFactory()
-        ap4 = ApplicationPermissionFactory(saml2_application=app2)
-        ApplicationPermissionFactory(saml2_application=app1)
-        ApplicationPermissionFactory()
-        ap7 = ApplicationPermissionFactory(saml2_application=app2)
-        ap8 = ApplicationPermissionFactory(saml2_application=app1)
-
-        processor = EmailIdProcessor(entity_id="an_entity_id")
-
-        user = UserFactory(
-            email="hello@world.com", application_permission_list=[ap1, ap3, ap4, ap8]
-        )
-        UserFactory(
-            email="goodbye@world.com", application_permission_list=[ap2, ap3, ap7]
-        )
-
-        identity = processor.create_identity(user, {})
-
-        assert set(identity["groups"]) == {ap1.permission, ap8.permission}
 
 
 class TestIdpInitiatedLogin:
