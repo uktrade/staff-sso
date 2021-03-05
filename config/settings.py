@@ -440,18 +440,8 @@ SAML_IDP_CONFIG = {
             },
         },
     },
-    'metadata': {
-        'local': [
-            os.path.join(SAML_IDP_CONFIG_DIR, 'sp_google_metadata.xml'),
-            os.path.join(SAML_IDP_CONFIG_DIR, 'aws-metadata.xml'),
-            os.path.join(SAML_IDP_CONFIG_DIR, 'invision-metadata.xml'),
-            os.path.join(SAML_IDP_CONFIG_DIR, 'elk-metadata.xml'),
-            os.path.join(SAML_IDP_CONFIG_DIR, 'elk-digital-metadata.xml'),
-            os.path.join(SAML_IDP_CONFIG_DIR, 'zoom-metadata.xml'),
-            os.path.join(SAML_IDP_CONFIG_DIR, 'adobe-metadata.xml'),
-            os.path.join(SAML_IDP_CONFIG_DIR, 'jobvite-metadata.xml'),
-            os.path.join(SAML_IDP_CONFIG_DIR, 'gitlab-metadata.xml'),
-            os.path.join(SAML_IDP_CONFIG_DIR, 'comaea.xml'),
+    "metadata": {
+        "local": [
         ],
     },
     # Signing
@@ -470,79 +460,9 @@ SAML_IDP_CONFIG = {
 SAML2_APPSTREAM_AWS_ROLE_ARN = env("SAML2_APPSTREAM_AWS_ROLE_ARN")
 SAML2_QUICKSIGHT_AWS_ROLE_ARN = env("SAML2_QUICKSIGHT_AWS_ROLE_ARN")
 
-SAML_IDP_SPCONFIG = {
-    "aws-quicksight": {
-        "entity_id": "urn:amazon:webservices",
-        "processor": "sso.samlidp.processors.AWSProcessor",
-        "attribute_mapping": {},
-        "extra_config": {
-            "role": SAML2_QUICKSIGHT_AWS_ROLE_ARN,
-        },
-    },
-    "aws-appstream": {
-        "entity_id": "urn:amazon:webservices",
-        "processor": "sso.samlidp.processors.AWSProcessor",
-        "attribute_mapping": {},
-        "extra_config": {
-            "role": SAML2_APPSTREAM_AWS_ROLE_ARN,
-        },
-    },
-    "google.com": {
-        "processor": "sso.samlidp.processors.GoogleProcessor",
-        "attribute_mapping": {},
-    },
-    "https://trade.invisionapp.com": {
-        "processor": "sso.samlidp.processors.ModelProcessor",
-        "attribute_mapping": {},
-    },
-    "https://elk.ci.uktrade.io:443/": {
-        "processor": "sso.samlidp.processors.EmailIdProcessor",
-        "attribute_mapping": {},
-    },
-    "https://elk.uktrade.digital:443/": {
-        "processor": "sso.samlidp.processors.EmailIdProcessor",
-        "attribute_mapping": {},
-    },
-    "trade.zoom.us": {
-        "processor": "sso.samlidp.processors.ContactEmailProcessor",
-        "attribute_mapping": {},
-    },
-    "https://federatedid-na1.services.adobe.com/federated/saml/metadata/alias/13fe47fc-6651-4d4f-8380-66d40192b1ac": {
-        "processor": "sso.samlidp.processors.ModelProcessor",
-        "attribute_mapping": {},
-    },
-    # prod
-    "https://federatedid-na1.services.adobe.com/federated/saml/metadata/alias/fe5a27cc-c28c-43e6-87f8-f1079e5eb3e4": {
-        "processor": "sso.samlidp.processors.ModelProcessor",
-        "attribute_mapping": {},
-    },
-    "talemetry-production-departmentforinternationaltradedigitaldataandtechnology": {
-        "processor": "sso.samlidp.processors.ModelProcessor",
-        "attribute_mapping": {},
-    },
-    "https://gitlab.ci.uktrade.digital": {
-        "processor": "sso.samlidp.processors.ModelProcessor",
-        "attribute_mapping": {
-            "email": "email",
-            "user_id": "user_id",
-            "email_user_id": "email_user_id",
-            "first_name": "first_name",
-            "last_name": "last_name",
-        },
-    },
-    'https://ui.comaea.com/simplesaml/www/module.php/saml/sp/metadata.php/dit-sp': {
-        'processor': 'sso.samlidp.processors.EmailIdProcessor',
-        'attribute_mapping': {
-            'email_user_id': 'email_user_id',
-            'email': 'email',
-            'first_name': 'first_name',
-            'last_name': 'last_name',
-        },
-    },
-}
-
 SAML_IDP_ERROR_VIEW_CLASS = "sso.samlidp.error_views.CustomSamlIDPErrorView"
 SAML_IDP_DJANGO_USERNAME_FIELD = "user_id"
+
 MI_GOOGLE_EMAIL_DOMAIN = env("MI_GOOGLE_EMAIL_DOMAIN")
 MI_GOOGLE_SERVICE_ACCOUNT_DATA = (
     env("MI_GOOGLE_SERVICE_ACCOUNT_DATA").encode("utf-8").decode("unicode_escape")
