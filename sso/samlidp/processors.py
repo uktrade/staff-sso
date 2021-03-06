@@ -13,19 +13,6 @@ from sso.core.logging import create_x_access_log
 logger = logging.getLogger(__name__)
 
 
-def build_google_user_id(user):
-    """
-    Construct a google email address from the user's primary email.
-    """
-
-    try:
-        return user.emails.get(email__endswith='@'+settings.MI_GOOGLE_EMAIL_DOMAIN).email
-    except EmailAddress.DoesNotExist:
-        return '{}@{}'.format(
-            user.email.split('@')[0],
-            settings.MI_GOOGLE_EMAIL_DOMAIN)
-
-
 class ModelProcessor(BaseProcessor):
     """
     Load an associated `sso.samlidp.models.SamlApplication` model
@@ -80,29 +67,3 @@ class AWSProcessor(ModelProcessor):
         identity['https://aws.amazon.com/SAML/Attributes/Role'] = role_arn
 
         return identity
-
-
-class GoogleProcessor(ModelProcessor):
-    def get_user_id(self, user):
-        return build_google_user_id(user)
-
-
-# class EmailIdProcessor(ModelProcessor):
-#     USER_ID_FIELD = 'email_user_id'
-#
-#     def create_identity(self, user, sp_mapping, **extra_config):
-#
-#         identity = super().create_identity(user, sp_mapping)
-#
-#         permissions = list(
-#             user.application_permissions
-#                 .filter(saml2_application=self._application)
-#                 .values_list('permission', flat=True))
-#
-#         identity['groups'] = permissions
-#
-#         return identity
-#
-#
-# class ContactEmailProcessor(ModelProcessor):
-#     USER_ID_FIELD = 'contact_email'
