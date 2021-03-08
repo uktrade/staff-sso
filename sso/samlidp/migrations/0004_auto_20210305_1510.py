@@ -7,7 +7,7 @@ import djangosaml2idp.models
 class Migration(migrations.Migration):
 
     run_before = [
-        ('djangosaml2idp', '0001_initial_squashed_0002_persistent_id_swappable_models'),
+        ('djangosaml2idp', '0001_initial_squashed_swappable'),
     ]
 
     dependencies = [
