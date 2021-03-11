@@ -33,17 +33,3 @@ def AdminIpRestrictionMiddleware(get_response):
         return get_response(request)
 
     return middleware
-
-
-class SessionCookieFixMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-
-        response = self.get_response(request)
-
-        if 'sessionid' in response.cookies:
-            response.cookies['sessionid']['SameSite'] = 'None'
-
-        return response
