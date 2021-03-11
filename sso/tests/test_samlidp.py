@@ -294,14 +294,12 @@ class TestAWSProcessor:
 
 class TestIdpInitiatedLogin:
     def test_alias_entry(self, client, settings):
-        breakpoint()
-        settings.SAML_IDP_CONFIG["metadata"]["local"] = [
-            os.path.join(settings.SAML_IDP_CONFIG_DIR, "sp_metadata.xml")
-        ]
 
-        settings.SAML_IDP_SPCONFIG = {"an-alias": {"entity_id": "http://test-idp"}}
+        from djangosaml2idp.idp import IDP
 
-        saml_application = SamlApplicationFactory(entity_id="http://test-idp")
+        saml_application = SamlApplicationFactory(entity_id="an-alias", real_entity_id="http://testsp/saml2/metadata/", active=True)
+
+        SamlApplicationFactory(entity_id="another-alias", real_entity_id="http://testsp/saml2/metadata/", active=True)
 
         access_profile = AccessProfileFactory(saml_apps_list=[saml_application])
 
@@ -316,15 +314,15 @@ class TestIdpInitiatedLogin:
 
         assert client.login(request=HttpRequest(), **credentials)
 
-        url = reverse("saml_idp_init") + "?sp=an-alias&RelayState=http://testing123.com"
+        url = reverse("saml_idp_init") + "?sp=an-alias&RelayState=https://testing.com"
 
         response = client.get(url)
-
+        breakpoint()
         assert (
-            b'<form action="http://localhost:7000/saml2/acs/" method="post">'
+            b'<form method="post" action="https://testing.com/saml2/acs/">'
             in response.content
         )
         assert (
-            b'<input type="hidden" name="RelayState" value="http://testing123.com"/>'
+            b'<input type="hidden" name="RelayState" value="https://testing.com" />'
             in response.content
         )

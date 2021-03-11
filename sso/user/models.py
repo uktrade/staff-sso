@@ -64,7 +64,7 @@ class ApplicationPermission(models.Model):
     )
 
     def application_name(self):
-        if self.saml2_application or self.oauth2_application:
+        if self.saml2_application:
             app_key = f'saml2: {self.saml2_application.slug}'
         elif self.oauth2_application:
             app_key = f'oauth2: {self.oauth2_application.application_key}'
@@ -267,7 +267,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             _remove_username(email): email for email in self.emails.all().values_list('email', flat=True)
         }
 
-    def can_access(self, application: Union[OAuthApplication, "SamlApplication"]):
+    def can_access(self, application: Union[OAuthApplication, "ServiceProvider"]):
         """ Can the user access this application?"""
 
         if not self.is_active:
@@ -295,7 +295,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return False
 
     @staticmethod
-    def can_access_all_settings(application: Union[OAuthApplication, "SamlApplication"]):
+    def can_access_all_settings(application: Union[OAuthApplication, "ServiceProvider"]):
         """is the user permitted to view all settings recorded against their profile?"""
 
         if isinstance(application, OAuthApplication):

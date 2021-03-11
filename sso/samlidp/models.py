@@ -16,6 +16,13 @@ class SamlApplication(AbstractServiceProvider):
         max_length=50,
         unique=True)
 
+    real_entity_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text=_('Takes precendence over the entity_id field and allows for the entity_id field to be an alias'),
+    )
+
     start_url = models.CharField(
         max_length=255,
         unique=True,
@@ -70,3 +77,6 @@ class SamlApplication(AbstractServiceProvider):
             return False
 
         return client_ip in self.allowed_ips
+
+    def get_entity_id(self):
+        return self.real_entity_id or self.entity_id
