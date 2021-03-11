@@ -294,7 +294,7 @@ class TestAWSProcessor:
 
 class TestIdpInitiatedLogin:
     def test_alias_entry(self, client, settings):
-
+        breakpoint()
         settings.SAML_IDP_CONFIG["metadata"]["local"] = [
             os.path.join(settings.SAML_IDP_CONFIG_DIR, "sp_metadata.xml")
         ]

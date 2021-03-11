@@ -35,6 +35,7 @@ SAML_LOGOUT_SERVICE = (
 )
 SAML_METADATA_URL = "http://localhost:8080/simplesaml/saml2/idp/metadata.php"
 
+SAML_LOGIN_START_URL = reverse_lazy("saml2_login_start")
 SAML_LOGIN_URL = reverse_lazy("saml2_login")
 SAML_LOGOUT_URL = reverse_lazy("saml2_logout")
 SAML_ACS_URL = reverse_lazy("saml2_acs")
@@ -802,30 +803,20 @@ class TestReAuth:
         assert user.emails.first().last_login == timezone.now()
 
     @freeze_time("2017-06-22 15:50:00.000000+00:00")
-    def test_used_email_is_saved_in_cookie(self, client, mocker):
-        application, authorize_params = create_oauth_application()
+    def test_used_email_is_saved_in_cookie(self, client, settings):
+
+        settings.AUTH_EMAIL_TO_IPD_MAP = {
+            'a-test': ['@test.com'],
+        }
 
         data = {
-            "SAMLResponse": [base64.b64encode(get_saml_response(action="login"))],
-            "RelayState": f"{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}",
+            'email': 'hello@test.com',
         }
 
-        MockOutstandingQueriesCache = mocker.patch(
-            "djangosaml2.views.OutstandingQueriesCache"
-        )
-        MockOutstandingQueriesCache().outstanding_queries.return_value = {
-            "id-WmZMklyFygoDg96gy": "test"
-        }
-
-        MockCryptoBackendXmlSec1 = mocker.patch(
-            "saml2.sigver.CryptoBackendXmlSec1", spec=True
-        )
-        MockCryptoBackendXmlSec1().validate_signature.return_value = True
-
-        response = client.post(SAML_ACS_URL, data)
+        response = client.post(SAML_LOGIN_START_URL, data)
 
         assert response.status_code == 302
-        assert client.cookies["sso_auth_email"].value == "user1@example.com"
+        assert client.cookies["sso_auth_email"].value == 'hello@test.com'
 
 
 class TestEmailBasedAuthFlow:

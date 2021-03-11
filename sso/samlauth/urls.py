@@ -1,5 +1,5 @@
 from django.urls import path
-from djangosaml2.views import LogoutInitView, LogoutView, LogoutView, MetadataView
+from djangosaml2.views import LogoutInitView, LoginView, LogoutView, LogoutView, MetadataView
 
 from . import views
 
@@ -9,9 +9,9 @@ urlpatterns = [
     path('logged-in/', views.logged_in, name='saml2_logged_in'),
     path('logged-out/', views.logged_out, name='saml2_logged_out'),
 
-    path('login/', views.CustomLoginView.as_view(), name='saml2_login'),
+    path('login/', LoginView.as_view(), name='saml2_login'),
     path('acs/', views.CustomAssertionConsumerServiceView.as_view(), name='saml2_acs'),
-    
+
     path('logout/', LogoutInitView.as_view(), name='saml2_logout'),
     path('ls/', LogoutView.as_view(), name='saml2_ls'),
     path('ls/post/', LogoutView.as_view(), name='saml2_ls_post'),

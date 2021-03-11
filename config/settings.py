@@ -66,7 +66,6 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    # "sso.core.middleware.SessionCookieFixMiddleware",
     "sso.healthcheck.middleware.HealthCheckMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -158,12 +157,6 @@ LOGIN_REDIRECT_URL = "/saml2/logged-in/"
 ACS_DEFAULT_REDIRECT_URL = LOGIN_REDIRECT_URL
 
 SAML_USER_MODEL = "user.user"
-
-# Allows us to use the NameID field for some IdPs
-# SAML_IDPS_USE_NAME_ID_AS_USERNAME = [
-#     "http://adfsmobile.azurecore.com/adfs/services/trust",
-#     "https://adfs.mobile.ukti.gov.uk/adfs/services/trust",
-# ]
 
 AUTHENTICATION_BACKENDS = (
     "axes.backends.AxesBackend",
