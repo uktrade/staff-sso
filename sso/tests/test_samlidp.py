@@ -317,7 +317,7 @@ class TestIdpInitiatedLogin:
         url = reverse("saml_idp_init") + "?sp=an-alias&RelayState=https://testing.com"
 
         response = client.get(url)
-        breakpoint()
+
         assert (
             b'<form method="post" action="https://testing.com/saml2/acs/">'
             in response.content
