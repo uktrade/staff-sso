@@ -4,9 +4,9 @@
 #
 #    pip-compile
 #
--e git+https://github.com/peppelinux/djangosaml2@master#egg=djangosaml2
+-e git+https://github.com/lgarvey/djangosaml2@dev#egg=djangosaml2
     # via -r requirements.in
--e git+https://github.com/lgarvey/djangosaml2idp.git@swappable-models#egg=djangosaml2idp
+-e git+https://github.com/lgarvey/djangosaml2idp.git@multiple-sp-same-entityid-solution#egg=djangosaml2idp
     # via -r requirements.in
 arrow==1.0.3
     # via djangosaml2idp
