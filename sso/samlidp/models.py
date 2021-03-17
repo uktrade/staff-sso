@@ -1,11 +1,37 @@
 import logging
 
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from sso.core.ip_filter import get_client_ip
 
 logger = logging.getLogger(__file__)
+
+### Temporary upgrade model
+
+DEFAULT_ATTRIBUTE_MAPPING = {
+    # DJANGO: SAML
+    'email': 'email',
+    'first_name': 'first_name',
+    'last_name': 'last_name',
+    'is_staff': 'is_staff',
+    'is_superuser': 'is_superuser',
+}
+
+DEFAULT_PROCESSOR = 'sso.samlidp.processors.ModelProcessor'
+
+
+def get_default_processor() -> str:
+    if hasattr(settings, 'SAML_IDP_SP_FIELD_DEFAULT_PROCESSOR'):
+        return getattr(settings, 'SAML_IDP_SP_FIELD_DEFAULT_PROCESSOR')
+    return DEFAULT_PROCESSOR
+
+
+def get_default_attribute_mapping() -> str:
+    if hasattr(settings, 'SAML_IDP_SP_FIELD_DEFAULT_ATTRIBUTE_MAPPING'):
+        return json.dumps(getattr(settings, 'SAML_IDP_SP_FIELD_DEFAULT_ATTRIBUTE_MAPPING'))
+    return json.dumps(DEFAULT_ATTRIBUTE_MAPPING)
 
 
 class SamlApplication(models.Model):
@@ -13,6 +39,18 @@ class SamlApplication(models.Model):
         _('slug'),
         help_text=_('WARNING: changing this may break things.')
     )
+
+    dt_created = models.DateTimeField(verbose_name='Created at', auto_now_add=True)
+    dt_updated = models.DateTimeField(verbose_name='Updated at', auto_now=True, null=True, blank=True)
+
+    pretty_name = models.CharField(verbose_name='Pretty Name', blank=True, max_length=255, help_text='For display purposes, can be empty')
+    description = models.TextField(verbose_name='Description', blank=True)
+    metadata_expiration_dt = models.DateTimeField(verbose_name='Metadata valid until')
+    local_metadata = models.TextField(verbose_name='Local Metadata XML', blank=True, help_text='XML containing the metadata')
+    active = models.BooleanField(verbose_name='Active', default=True)
+    _processor = models.CharField(verbose_name='Processor', max_length=256, help_text='Import string for the (access) Processor to use.', default='get_default_processor')
+    _attribute_mapping = models.TextField(verbose_name='Attribute mapping', default='get_default_attribute_mapping', help_text='dict with the mapping from django attributes to saml attributes in the identity.')
+    _nameid_field = models.CharField(verbose_name='NameID Field', blank=True, max_length=64, help_text='Attribute on the user to use as identifier during the NameID construction. Can be a callable. If not set, this will default to settings.SAML_IDP_DJANGO_USERNAME_FIELD; if that is not set, it will use the `USERNAME_FIELD` attribute on the active user model.')
 
     name = models.CharField(
         _('name'),
