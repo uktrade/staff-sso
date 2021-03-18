@@ -448,6 +448,7 @@ SAML_IDP_CONFIG = {
             os.path.join(SAML_IDP_CONFIG_DIR, 'adobe-metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'jobvite-metadata.xml'),
             os.path.join(SAML_IDP_CONFIG_DIR, 'gitlab-metadata.xml'),
+            os.path.join(SAML_IDP_CONFIG_DIR, 'comaea.xml'),
         ],
     },
     # Signing
@@ -524,7 +525,16 @@ SAML_IDP_SPCONFIG = {
             'first_name': 'first_name',
             'last_name': 'last_name',
         },
-    }
+    },
+    'https://ui.comaea.com/simplesaml/www/module.php/saml/sp/metadata.php/dit-sp': {
+        'processor': 'sso.samlidp.processors.EmailIdProcessor',
+        'attribute_mapping': {
+            'email_user_id': 'email_user_id',        
+            'email': 'email',
+            'first_name': 'first_name',
+            'last_name': 'last_name',
+        },
+    },
 }
 
 SAML_IDP_ERROR_VIEW_CLASS = 'sso.samlidp.error_views.CustomSamlIDPErrorView'
