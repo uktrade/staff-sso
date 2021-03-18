@@ -1,4 +1,4 @@
-django==2.2.13
+django==2.2.18
 django-environ
 psycopg2-binary
 djangosaml2==0.17.2
