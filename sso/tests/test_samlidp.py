@@ -4,7 +4,7 @@ import pytest
 from django.http import HttpRequest
 from django.urls import reverse
 
-from sso.samlidp.models import ServiceProvider
+from sso.samlidp.models import SamlApplication
 from sso.samlidp.processors import (
     AWSProcessor,
     ModelProcessor,
@@ -28,7 +28,7 @@ class TestModelProcessor:
         assert processor._application == app
 
     def test_model_does_not_exist(self):
-        with pytest.raises(ServiceProvider.DoesNotExist):
+        with pytest.raises(SamlApplication.DoesNotExist):
             ModelProcessor("a_non_existent_entity_id")
 
     def test_has_access_application_enabled(self, rf):

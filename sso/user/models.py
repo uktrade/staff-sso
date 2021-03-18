@@ -15,7 +15,7 @@ from sso.oauth2.models import Application as OAuthApplication
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from sso.samlidp.models import ServiceProvider
+    from sso.samlidp.models import SamlApplication
 
 from .managers import UserManager
 
@@ -39,7 +39,7 @@ class ApplicationPermission(models.Model):
     """
 
     saml2_application = models.ForeignKey(
-        'samlidp.ServiceProvider',
+        'samlidp.SamlApplication',
         related_name='application_permissions',
         blank=True,
         null=True,
@@ -101,7 +101,7 @@ class AccessProfile(models.Model):
     )
 
     saml2_applications = models.ManyToManyField(
-        'samlidp.ServiceProvider',
+        'samlidp.SamlApplication',
         _('access_profiles'),
         blank=True,
     )
@@ -109,7 +109,7 @@ class AccessProfile(models.Model):
     def __str__(self):
         return self.name
 
-    def is_allowed(self, application: Union[OAuthApplication, "ServiceProvider"]):
+    def is_allowed(self, application: Union[OAuthApplication, "SamlApplication"]):
         if isinstance(application, OAuthApplication):
             return application in self.oauth2_applications.all()
         else:
@@ -267,7 +267,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             _remove_username(email): email for email in self.emails.all().values_list('email', flat=True)
         }
 
-    def can_access(self, application: Union[OAuthApplication, "ServiceProvider"]):
+    def can_access(self, application: Union[OAuthApplication, "SamlApplication"]):
         """ Can the user access this application?"""
 
         if not self.is_active:
@@ -295,7 +295,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return False
 
     @staticmethod
-    def can_access_all_settings(application: Union[OAuthApplication, "ServiceProvider"]):
+    def can_access_all_settings(application: Union[OAuthApplication, "SamlApplication"]):
         """is the user permitted to view all settings recorded against their profile?"""
 
         if isinstance(application, OAuthApplication):
@@ -389,7 +389,7 @@ class EmailAddress(models.Model):
 
 class ServiceEmailAddress(models.Model):
     user = models.ForeignKey(User, related_name='service_emails', on_delete=models.CASCADE)
-    saml_application = models.ForeignKey('samlidp.ServiceProvider', on_delete=models.CASCADE)
+    saml_application = models.ForeignKey('samlidp.SamlApplication', on_delete=models.CASCADE)
     email = models.ForeignKey(EmailAddress, related_name='service_emails', on_delete=models.CASCADE)
 
     def __str__(self):

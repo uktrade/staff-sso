@@ -5,7 +5,7 @@ from django.conf import settings
 from djangosaml2idp.processors import BaseProcessor
 
 
-from .models import ServiceProvider
+from .models import SamlApplication
 from sso.user.models import EmailAddress, ServiceEmailAddress
 from sso.core.logging import create_x_access_log
 
@@ -21,7 +21,7 @@ class ModelProcessor(BaseProcessor):
     USER_ID_FIELD = 'email'
 
     def __init__(self, entity_id, *args, **kwargs):
-        self._application = ServiceProvider.objects.get(entity_id=entity_id)
+        self._application = SamlApplication.objects.get(entity_id=entity_id)
 
     def get_user_id(self, user):
         return str(self.get_service_email(user) or getattr(user, self.USER_ID_FIELD) or user.email)

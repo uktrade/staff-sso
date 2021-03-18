@@ -11,7 +11,7 @@ from django.views.generic import FormView
 from django.views.generic.base import View
 
 from sso.oauth2.models import Application
-from sso.samlidp.models import ServiceProvider
+from sso.samlidp.models import SamlApplication
 from .data_export import UserDataExport, EmailLastLoginExport
 from .models import User
 
@@ -104,7 +104,7 @@ class ShowUserPermissionsView(View):
         user = get_object_or_404(User, pk=kwargs['user_id'])
 
         oauth_apps = [{'name': app.name, 'access': user.can_access(app)} for app in Application.objects.all()]
-        saml_apps = [{'name': app.name, 'access': user.can_access(app)} for app in ServiceProvider.objects.all()]
+        saml_apps = [{'name': app.name, 'access': user.can_access(app)} for app in SamlApplication.objects.all()]
 
         context = {
             'user': user,

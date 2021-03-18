@@ -357,7 +357,7 @@ class TestApiUserIntrospect:
     def test_with_valid_token_and_permitted_applications(self, api_client):
         user, token = get_oauth_token(scope='introspection')
 
-        app = ApplicationFactory(users=[user])
+        app = ApplicationFactory(display_name='aaa', users=[user])
 
         user.emails.create(email='test@aaa.com')
         user.emails.create(email='test@bbb.com')
