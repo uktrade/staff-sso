@@ -50,6 +50,13 @@ class SamlApplication(AbstractServiceProvider):
         )
     )
 
+    extra_config = models.JSONField(
+        _('extra configuration'),
+        help_text=_('Additional configuration used by custom processors.'),
+        blank=True,
+        default=dict,
+    )
+
     objects = models.Manager()
 
     ### The following properties exist so that this model has the same fields as
@@ -60,12 +67,16 @@ class SamlApplication(AbstractServiceProvider):
         return self.slug
 
     @property
+    def display_name(self):
+        return self.pretty_name
+
+    @property
     def name(self):
         return self.pretty_name
 
     @property
-    def display_name(self):
-        return self.pretty_name
+    def public(self):
+        return False
 
     def is_valid_ip(self, request):
         if not self.allowed_ips or not self.allowed_ips.strip():

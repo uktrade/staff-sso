@@ -3,11 +3,9 @@ from django.urls import path, include
 from django.contrib import admin
 from django.views.generic.base import RedirectView, TemplateView
 
-
 from sso.healthcheck.views import HealthCheckView
 from . import api_urls
 from sso.admin.views import admin_login_view
-from sso.samlidp.views import LoginProcessView, SSOInitView
 
 app_name = 'staff_sso'
 
@@ -22,7 +20,7 @@ urlpatterns = [
     path('admin/', include('sso.user.admin_urls')),
 
     path('saml2/', include('sso.samlauth.urls')),
-    path('idp/', include('sso.samlidp.urls')),
+    path('idp/', include('sso.samlidp.urls', namespace='samlidp')),
 
     # override authorisation and token introspection DOT views
     path('o/', include('sso.oauth2.urls', namespace='oauth2')),

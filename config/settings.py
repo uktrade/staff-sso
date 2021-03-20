@@ -315,6 +315,11 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
+        "djangosaml2idp": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
     },
 }
 
@@ -414,14 +419,14 @@ SAML_IDP_CONFIG = {
             "name": "SSO Saml2 Identity Provider",
             "endpoints": {
                 "single_sign_on_service": [
-                    (os.path.join(BASE_URL, "idp/sso/post"), saml2.BINDING_HTTP_POST),
+                    (os.path.join(BASE_URL, "idp/sso/post/"), saml2.BINDING_HTTP_POST),
                     (
-                        os.path.join(BASE_URL, "idp/sso/redirect"),
+                        os.path.join(BASE_URL, "idp/sso/redirect/"),
                         saml2.BINDING_HTTP_REDIRECT,
                     ),
                 ],
             },
-            "name_id_format": [saml2.saml.NAMEID_FORMAT_EMAILADDRESS, saml2.saml.NAMEID_FORMAT_UNSPECIFIED],
+            "name_id_format": [saml2.saml.NAMEID_FORMAT_EMAILADDRESS, saml2.saml.NAMEID_FORMAT_UNSPECIFIED, saml2.saml.NAMEID_FORMAT_TRANSIENT, saml2.saml.NAMEID_FORMAT_PERSISTENT],
             "sign_response": True,
             "sign_assertion": True,
             "want_authn_requests_signed": False,
@@ -482,3 +487,4 @@ ACTIVITY_STREAM_HAWK_ID = env("ACTIVITY_STREAM_HAWK_ID")
 ACTIVITY_STREAM_HAWK_SECRET = env("ACTIVITY_STREAM_HAWK_SECRET")
 
 SAML_IDP_SERVICE_PROVIDER_MODEL = "samlidp.SamlApplication"
+SAML_IDP_SERVICE_PROVIDER_ADMIN_CLASS = "sso.samlidp.admin.SamlApplicationAdmin"

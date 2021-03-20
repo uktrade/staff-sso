@@ -1,6 +1,8 @@
 import logging
+from typing import Dict
 
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 
 from djangosaml2idp.processors import BaseProcessor
 
@@ -23,7 +25,7 @@ class ModelProcessor(BaseProcessor):
     def __init__(self, entity_id, *args, **kwargs):
         self._application = SamlApplication.objects.get(entity_id=entity_id)
 
-    def get_user_id(self, user):
+    def get_user_id(self, user, name_id_format: str, service_provider: SamlApplication, idp_config):
         return str(self.get_service_email(user) or getattr(user, self.USER_ID_FIELD) or user.email)
 
     def get_service_email(self, user):
@@ -52,18 +54,19 @@ class ModelProcessor(BaseProcessor):
 class AWSProcessor(ModelProcessor):
     USER_ID_FIELD = 'user_id'
 
-    def create_identity(self, user, sp_mapping, **extra_config):
-
-        role_arn = extra_config.pop('role', None)
-
-        assert role_arn, 'missing AWS role arn'
-
+    def create_identity(self, user, sp_attribute_mapping: Dict[str, str]) -> Dict[str, str]:
+        
         # See: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_saml_assertions.html
-        # The role and saml arns should be added to `settings.SAML_IDP_SPCONFIG['{saml2-entity-id}']['role']
+        # The role and saml arns should be added to the extra_config field of the saml application
 
-        identity = super().create_identity(user, sp_mapping)
+        identity = super().create_identity(user, sp_attribute_mapping)
 
-        identity['https://aws.amazon.com/SAML/Attributes/RoleSessionName'] = self.get_user_id(user)
-        identity['https://aws.amazon.com/SAML/Attributes/Role'] = role_arn
+        try:
+            role = self._application.extra_config['role']
+        except KeyError:
+            raise ImproperlyConfigured('AWS processor requires a role to be provided in extra_config')
+
+        identity['https://aws.amazon.com/SAML/Attributes/RoleSessionName'] = self.get_user_id(user, None, None, None)
+        identity['https://aws.amazon.com/SAML/Attributes/Role'] = role
 
         return identity

@@ -208,7 +208,7 @@ class TestModelProcessor:
         SamlApplicationFactory(entity_id="an_entity_id")
         processor = ModelProcessor(entity_id="an_entity_id")
 
-        assert processor.get_user_id(user) == user.email
+        assert processor.get_user_id(user, None, None, None) == user.email
 
     def test_get_user_id_with_service_override(self):
 
@@ -226,7 +226,7 @@ class TestModelProcessor:
             user=user, saml_application=ap, email=user.emails.get(email=service_email)
         )
 
-        assert processor.get_user_id(user) == service_email
+        assert processor.get_user_id(user, None, None, None) == service_email
 
     def test_user_id_field(self):
         user = UserFactory(email="email@testing.com", contact_email="testing@test.com")
@@ -236,7 +236,7 @@ class TestModelProcessor:
 
         processor.USER_ID_FIELD = "contact_email"
 
-        assert processor.get_user_id(user) == user.contact_email
+        assert processor.get_user_id(user, None, None, None) == user.contact_email
 
     def test_user_id_field_uses_email_if_contact_email_is_empty(self):
 
@@ -248,27 +248,35 @@ class TestModelProcessor:
         processor.USER_ID_FIELD = "contact_email"
 
         assert not user.contact_email
-        assert processor.get_user_id(user) == user.email
+        assert processor.get_user_id(user, None, None, None) == user.email
 
 
 class TestAWSProcessor:
     def test_create_identity_role_is_provided(self, settings):
         user = UserFactory()
 
-        SamlApplicationFactory(entity_id="an_entity_id")
+        extra_config = {
+            'role': 'test_role'
+        }
+
+        SamlApplicationFactory(entity_id="an_entity_id", extra_config=extra_config)
         processor = AWSProcessor(entity_id="an_entity_id")
 
-        identity = processor.create_identity(user, {}, role="test_role")
+        identity = processor.create_identity(user, {})
 
         assert identity["https://aws.amazon.com/SAML/Attributes/Role"] == "test_role"
 
     def test_create_identity_user_id_is_provided(self):
         user = UserFactory()
 
-        SamlApplicationFactory(entity_id="an_entity_id")
+        extra_config = {
+            'role': 'test_role'
+        }
+
+        SamlApplicationFactory(entity_id="an_entity_id", extra_config=extra_config)
         processor = AWSProcessor(entity_id="an_entity_id")
 
-        identity = processor.create_identity(user, {}, role="test_role")
+        identity = processor.create_identity(user, {})
 
         assert identity[
             "https://aws.amazon.com/SAML/Attributes/RoleSessionName"
@@ -277,14 +285,18 @@ class TestAWSProcessor:
     def test_role_session_name_can_be_overridden(self):
         user = UserFactory()
 
-        app = SamlApplicationFactory(entity_id="an_entity_id")
+        extra_config = {
+            'role': 'test_role'
+        }
+
+        app = SamlApplicationFactory(entity_id="an_entity_id", extra_config=extra_config)
         processor = AWSProcessor(entity_id="an_entity_id")
 
         email = user.emails.first()
 
         user.service_emails.create(email=user.emails.first(), saml_application=app)
 
-        identity = processor.create_identity(user, {}, role="test_role")
+        identity = processor.create_identity(user, {})
 
         assert (
             identity["https://aws.amazon.com/SAML/Attributes/RoleSessionName"]
@@ -314,7 +326,7 @@ class TestIdpInitiatedLogin:
 
         assert client.login(request=HttpRequest(), **credentials)
 
-        url = reverse("saml_idp_init") + "?sp=an-alias&RelayState=https://testing.com"
+        url = reverse("samlidp:saml_idp_init_legacy") + "?sp=an-alias&RelayState=https://testing.com"
 
         response = client.get(url)
 

@@ -1,10 +1,13 @@
 from django.urls import include, path
 from djangosaml2idp import views
 
-from . import views
+app_name = 'samlidp'
 
 urlpatterns = [
-    path('login/process/', views.LoginProcessView.as_view(), name='saml_login_process_overridden'),
-    path('sso/init', views.SSOInitView.as_view(), name="saml_idp_init"),
+    # The url patterns changed in the latest version of djangosamlidp to add trailing slashes.
+    # These paths are added to maintain backwards compatability and can be removed when each
+    # SP has been updated with the latest IdP metadata.
+    path('sso/init', views.SSOInitView.as_view(), name="saml_idp_init_legacy"),
+    path('sso/<str:binding>', views.sso_entry, name="saml_login_binding_legacy"),
     path('', include('djangosaml2idp.urls')),
 ]
