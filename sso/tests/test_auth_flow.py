@@ -200,8 +200,6 @@ class TestSAMLLogin:
         which generates the auth code.
         """
 
-        # settings.SAML_IDPS_USE_NAME_ID_AS_USERNAME = ['http://localhost:8080/simplesaml/saml2/idp/metadata.php']
-
         # we require an existing user with permissions to access the application
         user = UserFactory(email="user1@example.com")
 
@@ -324,55 +322,6 @@ class TestSAMLLogin:
             message="Remote IdP Auth",
             email="user1@example.com",
         )
-
-    @pytest.mark.skip()
-    @freeze_time("2017-06-22 15:50:00.000000+00:00")
-    def test_saml_login_using_name_id(self, client, mocker, settings):
-        """
-        Test that `settings.SAML_IDPS_USE_NAME_ID_AS_USERNAME` works correctly, and that the `User.email` field is not
-        overridden by the attribute mapping
-        """
-
-        assert User.objects.count() == 0
-
-        settings.SAML_IDPS_USE_NAME_ID_AS_USERNAME = [
-            "http://localhost:8080/simplesaml/saml2/idp/metadata.php"
-        ]
-
-        application, authorize_params = create_oauth_application()
-        response = client.get(OAUTH_AUTHORIZE_URL, data=authorize_params)
-
-        data = {
-            "SAMLResponse": [base64.b64encode(get_saml_response(action="login"))],
-            "RelayState": f"{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}",
-        }
-
-        MockOutstandingQueriesCache = mocker.patch(
-            "djangosaml2.views.OutstandingQueriesCache"
-        )
-        MockOutstandingQueriesCache().outstanding_queries.return_value = {
-            "id-WmZMklyFygoDg96gy": "test"
-        }
-
-        MockCryptoBackendXmlSec1 = mocker.patch(
-            "saml2.sigver.CryptoBackendXmlSec1", spec=True
-        )
-        MockCryptoBackendXmlSec1().validate_signature.return_value = True
-
-        response = client.post(SAML_ACS_URL, data)
-
-        # check saml login
-        assert response.status_code == 302
-        authorize_url = response["location"]
-        assert authorize_url == data["RelayState"]
-
-        # check user in db
-        assert User.objects.count() == 1
-        user = User.objects.first()
-        assert user.email == "user1(nameid)@example.com"
-        assert user.first_name == "John"
-        assert user.last_name == "Doe"
-        assert user.is_active == True
 
     @freeze_time("2017-06-22 15:50:00.000000+00:00")
     def test_saml_login_without_permissions_results_in_access_denied(
@@ -530,6 +479,46 @@ class TestSAMLLogin:
         MockCryptoBackendXmlSec1().validate_signature.return_value = False
 
         assert client.post(SAML_ACS_URL, data).status_code == 403
+
+    @freeze_time("2017-06-22 15:50:00.000000+00:00")
+    def test_saml_login_with_unspecifed_name_format_attributes(self, client, mocker, settings):
+
+        assert User.objects.count() == 0
+
+        application, authorize_params = create_oauth_application()
+        response = client.get(OAUTH_AUTHORIZE_URL, data=authorize_params)
+
+        data = {
+            "SAMLResponse": [base64.b64encode(get_saml_response(action="login_v2"))],
+            "RelayState": f"{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}",
+        }
+
+        MockOutstandingQueriesCache = mocker.patch(
+            "djangosaml2.views.OutstandingQueriesCache"
+        )
+        MockOutstandingQueriesCache().outstanding_queries.return_value = {
+            "id-WmZMklyFygoDg96gy": "test"
+        }
+
+        MockCryptoBackendXmlSec1 = mocker.patch(
+            "saml2.sigver.CryptoBackendXmlSec1", spec=True
+        )
+        MockCryptoBackendXmlSec1().validate_signature.return_value = True
+
+        response = client.post(SAML_ACS_URL, data)
+
+        # check saml login
+        assert response.status_code == 302
+        authorize_url = response["location"]
+        assert authorize_url == data["RelayState"]
+
+        # check user in db
+        assert User.objects.count() == 1
+        user = User.objects.first()
+        assert user.email == "john.smith@test.com"
+        assert user.first_name == "John"
+        assert user.last_name == "Smith"
+        assert user.is_active == True
 
 
 class TestOAuthToken:

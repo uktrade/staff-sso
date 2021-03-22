@@ -237,7 +237,6 @@ if ENV_NAME == "staging":
         os.path.join(SAML_CONFIG_DIR, "idp_metadata_okta.xml"),
         os.path.join(SAML_CONFIG_DIR, "idp_metadata_ukef.xml"),
         os.path.join(SAML_CONFIG_DIR, "idp_metadata_google.xml"),
-        os.path.join(SAML_CONFIG_DIR, "idp_metadata.xml"),
         os.path.join(SAML_CONFIG_DIR, "idp_metadata_core.xml"),
         os.path.join(SAML_CONFIG_DIR, "idp_metadata_okta_dit.xml"),
         os.path.join(SAML_CONFIG_DIR, "idp_metadata_fco.xml"),
@@ -250,7 +249,6 @@ elif ENV_NAME == "prod":
         os.path.join(SAML_CONFIG_DIR, "idp_metadata_cirrus.xml"),
         os.path.join(SAML_CONFIG_DIR, "idp_metadata_ukef.xml"),
         os.path.join(SAML_CONFIG_DIR, "idp_metadata_google.xml"),
-        os.path.join(SAML_CONFIG_DIR, "idp_metadata.xml"),
         os.path.join(SAML_CONFIG_DIR, "idp_metadata_core.xml"),
         os.path.join(SAML_CONFIG_DIR, "idp_metadata_okta_dit.xml"),
         os.path.join(SAML_CONFIG_DIR, "idp_metadata_fco.xml"),
@@ -312,7 +310,7 @@ LOGGING = {
         },
         "djangosaml2": {
             "handlers": ["console"],
-            "level": "INFO",
+            "level": "DEBUG",
             "propagate": False,
         },
         "djangosaml2idp": {
