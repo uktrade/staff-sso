@@ -9,5 +9,4 @@ urlpatterns = [
     # SP has been updated with the latest IdP metadata.
     path('sso/init', views.SSOInitView.as_view(), name="saml_idp_init_legacy"),
     path('sso/<str:binding>', views.sso_entry, name="saml_login_binding_legacy"),
-    path('', include('djangosaml2idp.urls')),
 ]

@@ -364,7 +364,7 @@ EMAIL_FROM = env("EMAIL_FROM", default="test@example.com")
 # session settings
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_AGE = env.int("SESSION_COOKIE_AGE_SECONDS")
-SESSION_COOKIE_SAMESITE = "Lax"  # this is currently overridden in middleware
+SESSION_COOKIE_SAMESITE = "None"
 SESSION_COOKIE_SECURE = True
 SESSION_SAVE_EVERY_REQUEST = True
 
@@ -419,6 +419,9 @@ SAML_IDP_CONFIG = {
             "name": "SSO Saml2 Identity Provider",
             "endpoints": {
                 "single_sign_on_service": [
+                    # legacy path - can be removed when SP has updated IdP metadata
+                    (os.path.join(BASE_URL, "idp/sso/post"), saml2.BINDING_HTTP_POST),
+                    # new post binding path
                     (os.path.join(BASE_URL, "idp/sso/post/"), saml2.BINDING_HTTP_POST),
                     (
                         os.path.join(BASE_URL, "idp/sso/redirect/"),

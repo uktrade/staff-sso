@@ -20,6 +20,7 @@ urlpatterns = [
     path('admin/', include('sso.user.admin_urls')),
 
     path('saml2/', include('sso.samlauth.urls')),
+    path('idp/', include('djangosaml2idp.urls', namespace='djangosaml2idp')),
     path('idp/', include('sso.samlidp.urls', namespace='samlidp')),
 
     # override authorisation and token introspection DOT views
