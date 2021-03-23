@@ -5,9 +5,9 @@ import pytest
 
 from googleapiclient.errors import HttpError
 
-from sso.samlidp.models import SamlApplication
 from sso.samlidp.management.commands.sync_with_google import Command, http_retry
 from sso.tests.factories.user import AccessProfileFactory, UserFactory
+from sso.tests.factories.saml import SamlApplicationFactory
 
 
 def build_google_http_error(status=403, reason='userRateLimitExceeded'):
@@ -129,7 +129,7 @@ class TestManagementCommand:
     @pytest.mark.django_db
     @patch('sso.samlidp.management.commands.sync_with_google.get_google_client')
     def test_user_without_access_and_not_in_google_is_not_syncd(self, mock_service, settings):
-        saml_app = SamlApplication.objects.create(name='test', slug='sync-me')
+        saml_app = SamlApplicationFactory(name='test', slug='sync-me')
         AccessProfileFactory(slug='an-mi-user', saml_apps_list=[saml_app])
 
         UserFactory(email='test.user@whatever.com')
@@ -147,7 +147,7 @@ class TestManagementCommand:
     @pytest.mark.django_db
     @patch('sso.samlidp.management.commands.sync_with_google.get_google_client')
     def test_user_without_access_and_in_google_is_disabled(self, mock_service, settings):
-        saml_app = SamlApplication.objects.create(name='test', slug='sync-me')
+        saml_app = SamlApplicationFactory(name='test', slug='sync-me')
         AccessProfileFactory(slug='an-mi-user', saml_apps_list=[saml_app])
 
         settings.MI_GOOGLE_USER_SYNC_SAML_APPLICATION_SLUG = 'sync-me'
@@ -167,7 +167,7 @@ class TestManagementCommand:
     @patch('sso.samlidp.management.commands.sync_with_google.get_google_client')
     def test_user_with_access_profile_not_in_google_is_created(self, mock_service, settings):
 
-        saml_app = SamlApplication.objects.create(name='test', slug='sync-me')
+        saml_app = SamlApplicationFactory(name='test', slug='sync-me')
         access_profile = AccessProfileFactory(slug='an-mi-user', saml_apps_list=[saml_app])
 
         user = UserFactory(email='test.user@whatever.com', add_access_profiles=[access_profile])
@@ -198,7 +198,7 @@ class TestManagementCommand:
     @patch('sso.samlidp.management.commands.sync_with_google.get_google_client')
     def test_user_with_missing_name_is_created(self, mock_service, settings):
 
-        saml_app = SamlApplication.objects.create(name='test', slug='sync-me')
+        saml_app = SamlApplicationFactory(name='test', slug='sync-me')
         access_profile = AccessProfileFactory(slug='an-mi-user', saml_apps_list=[saml_app])
         user = UserFactory(email='test.user@whatever.com', add_access_profiles=[access_profile],
                            first_name='', last_name='')
@@ -229,7 +229,7 @@ class TestManagementCommand:
     @patch('sso.samlidp.management.commands.sync_with_google.get_google_client')
     def test_user_with_access_profile_but_disabled_in_google_is_reenabled(self, mock_service, settings):
 
-        saml_app = SamlApplication.objects.create(name='test', slug='sync-me')
+        saml_app = SamlApplicationFactory(name='test', slug='sync-me')
         access_profile = AccessProfileFactory(slug='an-mi-user', saml_apps_list=[saml_app])
         UserFactory(email='test.user@whatever.com', add_access_profiles=[access_profile])
 
