@@ -4,6 +4,9 @@ MAP = {
         'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress': 'email',
         'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname': 'first_name',
         'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname': 'last_name',
+        'first_name': 'first_name',
+        'last_name': 'last_name',
+        'email': 'email',        
     },
     "to": {
         'email': 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress',
