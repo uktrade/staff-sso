@@ -1,9 +1,9 @@
 from axes.decorators import axes_dispatch
-from django.conf.urls import url
+from django.urls import path
 
 from sso.localauth import views
 
 urlpatterns = [
-    url(r'^login/$', axes_dispatch(views.LoginView.as_view()), name='login'),
-    url(r'^logout/$', views.LogoutView.as_view(), name='session-logout'),
+    path('login/', axes_dispatch(views.LoginView.as_view()), name='login'),
+    path('logout/', views.LogoutView.as_view(), name='session-logout'),
 ]

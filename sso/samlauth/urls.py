@@ -1,15 +1,19 @@
-from django.conf.urls import url
-from djangosaml2 import views as djangosaml2_views
+from django.urls import path
+from djangosaml2.views import LogoutInitView, LoginView, LogoutView, LogoutView, MetadataView
 
 from . import views
 
+
 urlpatterns = [
-    url(r'^login/$', views.login, name='saml2_login'),
-    url(r'^acs/$', views.assertion_consumer_service, name='saml2_acs'),
-    url(r'^logout/$', views.logout, name='saml2_logout'),
-    url(r'^ls/post/$', djangosaml2_views.logout_service_post, name='saml2_ls_post'),
-    url(r'^metadata/$', djangosaml2_views.metadata, name='saml2_metadata'),
-    url(r'^logged-in/$', views.logged_in, name='saml2_logged_in'),
-    url(r'^logged-out/$', views.logged_out, name='saml2_logged_out'),
-    url(r'^login-start/$', views.LoginStartView.as_view(), name='saml2_login_start'),
+    path('login-start/', views.LoginStartView.as_view(), name='saml2_login_start'),
+    path('logged-in/', views.logged_in, name='saml2_logged_in'),
+    path('logged-out/', views.logged_out, name='saml2_logged_out'),
+
+    path('login/', LoginView.as_view(), name='saml2_login'),
+    path('acs/', views.CustomAssertionConsumerServiceView.as_view(), name='saml2_acs'),
+
+    path('logout/', LogoutInitView.as_view(), name='saml2_logout'),
+    path('ls/', LogoutView.as_view(), name='saml2_ls'),
+    path('ls/post/', LogoutView.as_view(), name='saml2_ls_post'),
+    path('metadata/', MetadataView.as_view(), name='saml2_metadata'),
 ]

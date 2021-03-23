@@ -3,6 +3,7 @@ from unittest import mock
 
 import pytest
 from freezegun import freeze_time
+from django.http import HttpRequest
 from django.utils import timezone
 
 from sso.user.middleware import UpdatedLastAccessedMiddleware
@@ -13,11 +14,9 @@ from .factories.saml import SamlApplicationFactory
 from .factories.user import UserFactory
 
 
-pytestmark = [
-    pytest.mark.django_db
-]
+pytestmark = [pytest.mark.django_db]
 
-EMAIL = 'test@example.com'
+EMAIL = "test@example.com"
 
 
 class TestUserManager:
@@ -28,14 +27,14 @@ class TestUserManager:
         """
         assert User.objects.count() == 0
 
-        user = User.objects.create_superuser(EMAIL, 'password')
+        user = User.objects.create_superuser(EMAIL, "password")
 
         assert User.objects.count() == 1
         assert user.email == EMAIL
-        assert user.password != 'password'
+        assert user.password != "password"
         assert user.is_superuser
-        assert user.first_name == ''
-        assert user.last_name == ''
+        assert user.first_name == ""
+        assert user.last_name == ""
 
     def test_create_superuser_complete(self):
         """
@@ -45,18 +44,15 @@ class TestUserManager:
         assert User.objects.count() == 0
 
         user = User.objects.create_superuser(
-            EMAIL,
-            'password',
-            first_name='John',
-            last_name='Doe'
+            EMAIL, "password", first_name="John", last_name="Doe"
         )
 
         assert User.objects.count() == 1
         assert user.email == EMAIL
-        assert user.password != 'password'
+        assert user.password != "password"
         assert user.is_superuser
-        assert user.first_name == 'John'
-        assert user.last_name == 'Doe'
+        assert user.first_name == "John"
+        assert user.last_name == "Doe"
 
     def test_create_superuser_without_email(self):
         """
@@ -66,7 +62,7 @@ class TestUserManager:
         assert User.objects.count() == 0
 
         with pytest.raises(ValueError):
-            User.objects.create_superuser(email='', password='password')
+            User.objects.create_superuser(email="", password="password")
 
     def test_user_emails_are_lower_cased(self):
         """
@@ -74,13 +70,9 @@ class TestUserManager:
         """
         assert User.objects.count() == 0
 
-        email = 'ITATest1@example.com'
+        email = "ITATest1@example.com"
 
-        user = User.objects.create(
-            email=email,
-            first_name='',
-            last_name=''
-        )
+        user = User.objects.create(email=email, first_name="", last_name="")
 
         assert user.email == email.lower()
 
@@ -90,12 +82,10 @@ class TestUserManager:
         """
         assert User.objects.count() == 0
 
-        email = 'ITATest1@example.com'
+        email = "ITATest1@example.com"
 
         user, created = User.objects.get_or_create(
-            email=email,
-            first_name='',
-            last_name=''
+            email=email, first_name="", last_name=""
         )
 
         assert created
@@ -108,20 +98,16 @@ class TestUserManager:
         """
         assert User.objects.count() == 0
 
-        email = 'ITATest1@example.com'
+        email = "ITATest1@example.com"
 
         user, created = User.objects.get_or_create(
-            email=email,
-            first_name='',
-            last_name=''
+            email=email, first_name="", last_name=""
         )
 
         assert created
 
         user, created = User.objects.get_or_create(
-            email=email,
-            first_name='',
-            last_name=''
+            email=email, first_name="", last_name=""
         )
 
         assert not created
@@ -129,73 +115,72 @@ class TestUserManager:
         assert user.email == email.lower()
 
     def test_get_or_create_existing_user_queries_email_list(self):
-        user = UserFactory(email='test@test.com')
+        user = UserFactory(email="test@test.com")
 
         assert user.emails.count() == 1
-        assert user.emails.first().email == 'test@test.com'
+        assert user.emails.first().email == "test@test.com"
 
-        user, created = User.objects.get_or_create(email='test@test.com')
+        user, created = User.objects.get_or_create(email="test@test.com")
 
         assert not created
         assert user.emails.count() == 1
-        assert user.emails.first().email == 'test@test.com'
+        assert user.emails.first().email == "test@test.com"
 
     def test_get_or_create_new_user_adds_to_email_list(self):
 
-        user, created = User.objects.get_or_create(email='test@test.com')
+        user, created = User.objects.get_or_create(email="test@test.com")
 
         assert created
         assert user.emails.count() == 1
-        assert user.emails.first().email == 'test@test.com'
+        assert user.emails.first().email == "test@test.com"
 
     @pytest.mark.parametrize(
-        'email',
+        "email",
         (
-            'user@example.com',
-            'USER@EXAMPLE.COM',
+            "user@example.com",
+            "USER@EXAMPLE.COM",
         ),
     )
-    @freeze_time('2017-06-22 15:50:00.000000+00:00')
+    @freeze_time("2017-06-22 15:50:00.000000+00:00")
     def test_set_email_last_login_time(self, email):
-        user = UserFactory(email='user@example.com')
+        user = UserFactory(email="user@example.com")
         assert user.emails.count() == 1
         email_obj = user.emails.first()
         assert email_obj.last_login is None
-        assert email_obj.email == 'user@example.com'
+        assert email_obj.email == "user@example.com"
 
         User.objects.set_email_last_login_time(email)
 
         assert user.emails.count() == 1
         email_obj = user.emails.first()
         assert user.emails.first().last_login == timezone.now()
-        assert email_obj.email == 'user@example.com'
+        assert email_obj.email == "user@example.com"
 
 
 class TestUser:
-
     def test_get_full_name_with_first_last_name(self):
         """
         Test that `get_full_name()` == `first_name last_name`.
         """
-        user = User(email=EMAIL, first_name='John', last_name='Doe')
+        user = User(email=EMAIL, first_name="John", last_name="Doe")
 
-        assert user.get_full_name() == 'John Doe'
+        assert user.get_full_name() == "John Doe"
 
     def test_get_full_name_with_first_name_only(self):
         """
         Test that `get_full_name()` == `first_name` if last_name is empty.
         """
-        user = User(email=EMAIL, first_name='John')
+        user = User(email=EMAIL, first_name="John")
 
-        assert user.get_full_name() == 'John'
+        assert user.get_full_name() == "John"
 
     def test_get_full_name_with_last_name_only(self):
         """
         Test that `get_full_name()` == `last_name` if first_name is empty.
         """
-        user = User(email=EMAIL, last_name='Doe')
+        user = User(email=EMAIL, last_name="Doe")
 
-        assert user.get_full_name() == 'Doe'
+        assert user.get_full_name() == "Doe"
 
     def test_get_full_name_with_email_only(self):
         """
@@ -210,9 +195,9 @@ class TestUser:
         Test that `get_short_name()` follows `get_full_name()`.
         """
         user = User()
-        with mock.patch.object(user, 'get_full_name') as mock_get_full_name:
-            mock_get_full_name.return_value = 'John Doe'
-            assert user.get_short_name() == 'John Doe'
+        with mock.patch.object(user, "get_full_name") as mock_get_full_name:
+            mock_get_full_name.return_value = "John Doe"
+            assert user.get_short_name() == "John Doe"
 
             mock_get_full_name.return_value = EMAIL
             assert user.get_short_name() == EMAIL
@@ -240,7 +225,7 @@ class TestUser:
     def test_can_access_saml2_with_access_profile(self):
         app = SamlApplicationFactory()
         user = UserFactory()
-        ap = AccessProfile.objects.create(name='test profile')
+        ap = AccessProfile.objects.create(name="test profile")
         ap.saml2_applications.add(app)
         user.access_profiles.add(ap)
 
@@ -252,9 +237,9 @@ class TestUser:
         assert not user.can_access(app)
 
     def test_can_access_saml2_if_app_disabled(self):
-        app = SamlApplicationFactory(enabled=False)
+        app = SamlApplicationFactory(active=False)
         user = UserFactory()
-        ap = AccessProfile.objects.create(name='test profile')
+        ap = AccessProfile.objects.create(name="test profile")
         ap.saml2_applications.add(app)
         user.access_profiles.add(ap)
 
@@ -264,7 +249,7 @@ class TestUser:
 
         app = ApplicationFactory()
         user = UserFactory()
-        ap = AccessProfile.objects.create(name='test profile')
+        ap = AccessProfile.objects.create(name="test profile")
         ap.oauth2_applications.add(app)
         user.access_profiles.add(ap)
 
@@ -275,9 +260,9 @@ class TestUser:
 
         app = ApplicationFactory()
         user = UserFactory()
-        ap = AccessProfile.objects.create(name='test profile')
+        ap = AccessProfile.objects.create(name="test profile")
         ap.oauth2_applications.add(app)
-        ap2 = AccessProfile.objects.create(name='test profile 2')
+        ap2 = AccessProfile.objects.create(name="test profile 2")
         user.access_profiles.add(ap2)
 
         assert not user.can_access(app)
@@ -287,9 +272,9 @@ class TestUser:
 
         app = ApplicationFactory()
         user = UserFactory()
-        ap = AccessProfile.objects.create(name='test profile')
+        ap = AccessProfile.objects.create(name="test profile")
         ap.oauth2_applications.add(app)
-        ap2 = AccessProfile.objects.create(name='test profile 2')
+        ap2 = AccessProfile.objects.create(name="test profile 2")
         user.access_profiles.add(ap)
         user.access_profiles.add(ap2)
 
@@ -300,7 +285,7 @@ class TestUser:
 
         user = UserFactory()
         app = ApplicationFactory(users=[user])
-        ap = AccessProfile.objects.create(name='test profile')
+        ap = AccessProfile.objects.create(name="test profile")
         user.access_profiles.add(ap)
         assert user.can_access(app)
 
@@ -309,7 +294,7 @@ class TestUser:
 
         user = UserFactory()
         app = ApplicationFactory()
-        ap = AccessProfile.objects.create(name='test profile')
+        ap = AccessProfile.objects.create(name="test profile")
         ap.oauth2_applications.add(app)
         user.access_profiles.add(ap)
         assert user.can_access(app)
@@ -341,35 +326,44 @@ class TestUser:
 
         assert not user.can_access(app)
 
-    @pytest.mark.parametrize('application_func, email, expected',
+    @pytest.mark.parametrize(
+        "application_func, email, expected",
         [
             # OAuth2 application user has matching email
             (
-                lambda: ApplicationFactory(default_access_allowed=False,
-                                           allow_access_by_email_suffix='testing.com,testing123.com'),
-                'hello@testing.com',
-                True
+                lambda: ApplicationFactory(
+                    default_access_allowed=False,
+                    allow_access_by_email_suffix="testing.com,testing123.com",
+                ),
+                "hello@testing.com",
+                True,
             ),
             # OAuth2 application user does not have matching email
             (
-                lambda: ApplicationFactory(default_access_allowed=False,
-                                           allow_access_by_email_suffix='testing.com,testing123.com'),
-                'hello@notinlist.com',
-                False
+                lambda: ApplicationFactory(
+                    default_access_allowed=False,
+                    allow_access_by_email_suffix="testing.com,testing123.com",
+                ),
+                "hello@notinlist.com",
+                False,
             ),
             # Saml2 application user has matching email
             (
-                lambda: SamlApplicationFactory(allow_access_by_email_suffix='testing.com,testing123.com'),
-                'hello@testing.com',
-                True
+                lambda: SamlApplicationFactory(
+                    allow_access_by_email_suffix="testing.com,testing123.com"
+                ),
+                "hello@testing.com",
+                True,
             ),
             # Saml2 application user does not have matching email
             (
-                lambda: SamlApplicationFactory(allow_access_by_email_suffix='testing.com,testing123.com'),
-                'hello@notinlist.com',
-                False
+                lambda: SamlApplicationFactory(
+                    allow_access_by_email_suffix="testing.com,testing123.com"
+                ),
+                "hello@notinlist.com",
+                False,
             ),
-        ]
+        ],
     )
     def test_can_access_with_email(self, application_func, email, expected):
         """
@@ -383,36 +377,38 @@ class TestUser:
         assert user.can_access(app) == expected
 
     def test_get_emails_for_application_app_email_ordering(self):
-        app = ApplicationFactory(email_ordering='aaa.com, bbb.com, ccc.com, ddd.com, eee.com')
+        app = ApplicationFactory(
+            email_ordering="aaa.com, bbb.com, ccc.com, ddd.com, eee.com"
+        )
 
-        emails = ['test@zzz.com', 'test@aaa.com', 'test@bbb.com', 'test@ccc.com']
+        emails = ["test@zzz.com", "test@aaa.com", "test@bbb.com", "test@ccc.com"]
 
         user = UserFactory(email=emails[0], email_list=emails[1:])
 
         primary_email, related_emails = user.get_emails_for_application(app)
 
-        assert primary_email == 'test@aaa.com'
+        assert primary_email == "test@aaa.com"
         emails.pop(emails.index(primary_email))
         assert set(related_emails) == set(emails)
 
     def test_get_emails_for_application_settings_email_ordering(self, settings):
-        emails = ['test@zzz.com', 'test@aaa.com', 'test@bbb.com', 'test@ccc.com']
+        emails = ["test@zzz.com", "test@aaa.com", "test@bbb.com", "test@ccc.com"]
 
         app = ApplicationFactory()
 
-        settings.DEFAULT_EMAIL_ORDER = 'bbb.com, zzz.com'
+        settings.DEFAULT_EMAIL_ORDER = "bbb.com, zzz.com"
 
         user = UserFactory(email=emails[0], email_list=emails[1:])
 
         primary_email, related_emails = user.get_emails_for_application(app)
 
-        assert primary_email == 'test@bbb.com'
-        emails.pop(emails.index('test@bbb.com'))
+        assert primary_email == "test@bbb.com"
+        emails.pop(emails.index("test@bbb.com"))
         assert set(related_emails) == set(emails)
 
     def test_get_emails_for_application_settings_no_ordering(self):
         """Sanity check to confirm that something is returned with no specific ordering applied"""
-        emails = ['test@zzz.com', 'test@aaa.com', 'test@bbb.com', 'test@ccc.com']
+        emails = ["test@zzz.com", "test@aaa.com", "test@bbb.com", "test@ccc.com"]
 
         user = UserFactory(email=emails[0], email_list=emails[1:])
 
@@ -425,11 +421,11 @@ class TestUser:
         assert set(emails) == set(related_emails)
 
     def test_get_emails_for_application_emails_not_in_priority_list(self):
-        emails = ['test@google.com', 'test@microsoft.com', 'test@yahoo.com']
+        emails = ["test@google.com", "test@microsoft.com", "test@yahoo.com"]
 
         user = UserFactory(email=emails[0], email_list=emails[1:])
 
-        app = ApplicationFactory(email_ordering='bbb.com, ccc.com, ddd.com')
+        app = ApplicationFactory(email_ordering="bbb.com, ccc.com, ddd.com")
 
         primary_email, related_emails = user.get_emails_for_application(app)
 
@@ -438,42 +434,46 @@ class TestUser:
         assert set(emails) == set(related_emails)
 
     def test_get_emails_for_application_emails_no_application(self):
-        ApplicationFactory(email_ordering='bbb.com, ccc.com, ddd.com', provide_immutable_email=False)
+        ApplicationFactory(
+            email_ordering="bbb.com, ccc.com, ddd.com", provide_immutable_email=False
+        )
 
-        emails = ['test@google.com', 'test@microsoft.com', 'test@yahoo.com']
+        emails = ["test@google.com", "test@microsoft.com", "test@yahoo.com"]
 
         user = UserFactory(email=emails[0], email_list=emails[1:])
 
         primary_email, related_emails = user.get_emails_for_application(None)
 
-        assert primary_email == 'test@google.com'
+        assert primary_email == "test@google.com"
         assert set(related_emails) == set(emails[1:])
 
     def test_get_emails_for_application_emails_immutable_email(self):
-        app = ApplicationFactory(email_ordering='bbb.com, ccc.com, ddd.com', provide_immutable_email=True)
+        app = ApplicationFactory(
+            email_ordering="bbb.com, ccc.com, ddd.com", provide_immutable_email=True
+        )
 
-        emails = ['test@google.com', 'test@microsoft.com', 'test@yahoo.com']
+        emails = ["test@google.com", "test@microsoft.com", "test@yahoo.com"]
 
         user = UserFactory(email=emails[0], email_list=emails[1:])
 
         primary_email, related_emails = user.get_emails_for_application(app)
 
-        assert primary_email == 'test@google.com'
+        assert primary_email == "test@google.com"
         assert set(related_emails) == set(emails[1:])
 
     def test_save_adds_to_email_list(self):
         user = User()
 
-        user.email = 'test@test.com'
+        user.email = "test@test.com"
 
         user.save()
 
         assert user.emails.count() == 1
-        assert user.emails.first().email == 'test@test.com'
+        assert user.emails.first().email == "test@test.com"
 
     def test_save_email_already_in_email_list(self):
         """Sanity check to confirm `save()` won't try add additional user.emails related objects"""
-        user = UserFactory(email='test@test.com')
+        user = UserFactory(email="test@test.com")
 
         assert user.emails.count() == 1
 
@@ -483,60 +483,68 @@ class TestUser:
 
     def test_emails_create(self):
 
-        user = UserFactory(email='test@test.com')
+        user = UserFactory(email="test@test.com")
 
         assert user.emails.count() == 1
-        assert user.emails.first().email == 'test@test.com'
+        assert user.emails.first().email == "test@test.com"
 
-        user.emails.create(email='test222@test.com')
+        user.emails.create(email="test222@test.com")
 
         assert user.emails.count() == 2
-        assert user.emails.last().email == 'test222@test.com'
+        assert user.emails.last().email == "test222@test.com"
 
     def test_emails_added_on_save_are_lowercase(self):
 
-        user = User.objects.create(email='TEST@TEST.COM')
+        user = User.objects.create(email="TEST@TEST.COM")
 
         assert user.emails.count() == 1
-        assert user.emails.last().email == 'test@test.com'
+        assert user.emails.last().email == "test@test.com"
 
     def test_emails_added_directly_to_list_are_lower_cased(self):
-        user = UserFactory(email='test@test.com')
+        user = UserFactory(email="test@test.com")
 
-        user.emails.create(email='UPPER@CASE.COM')
+        user.emails.create(email="UPPER@CASE.COM")
 
         assert user.emails.count() == 2
-        assert user.emails.last().email == 'upper@case.com'
+        assert user.emails.last().email == "upper@case.com"
 
-    @freeze_time('2017-06-22 15:50:00.000000+00:00')
+    @freeze_time("2017-06-22 15:50:00.000000+00:00")
     def test_user_last_accessed_field_updates(self, rf, mocker):
 
-        user = UserFactory(email='goblin@example.com')
+        user = UserFactory(email="goblin@example.com")
         middleware = UpdatedLastAccessedMiddleware(get_response=mocker.MagicMock())
 
-        request = rf.get('/')
+        request = rf.get("/")
         request.user = user
 
         assert user.last_accessed is None
         middleware(request)
 
-        assert request.user.last_accessed == datetime.datetime.now(tz=datetime.timezone.utc)
-        assert User.objects.get(pk=user.pk).last_accessed == datetime.datetime.now(tz=datetime.timezone.utc)
+        assert request.user.last_accessed == datetime.datetime.now(
+            tz=datetime.timezone.utc
+        )
+        assert User.objects.get(pk=user.pk).last_accessed == datetime.datetime.now(
+            tz=datetime.timezone.utc
+        )
 
-    @freeze_time('2017-06-22 15:50:00.000000+00:00')
+    @freeze_time("2017-06-22 15:50:00.000000+00:00")
     def test_user_last_accessed_field_updates_integration_test(self, client):
-        user = UserFactory(email='goblin@example.com')
-        user.set_password('12345')
+        user = UserFactory(email="goblin@example.com")
+        user.set_password("12345")
         user.save()
 
-        client.login(email='goblin@example.com', password='12345')
-        response = client.get('/')
+        client.login(
+            request=HttpRequest(), email="goblin@example.com", password="12345"
+        )
+        response = client.get("/")
 
-        assert User.objects.get(pk=user.pk).last_accessed == datetime.datetime.now(tz=datetime.timezone.utc)
+        assert User.objects.get(pk=user.pk).last_accessed == datetime.datetime.now(
+            tz=datetime.timezone.utc
+        )
 
     def test_email_user_id_is_created_on_save(self, settings):
         user = User()
-        user.email = 'test@test.com'
+        user.email = "test@test.com"
 
         assert not user.email_user_id
 
@@ -546,10 +554,10 @@ class TestUser:
 
         hash = str(user.user_id)[:8]
 
-        assert user.email_user_id == f'test-{hash}{settings.EMAIL_ID_DOMAIN}'
+        assert user.email_user_id == f"test-{hash}{settings.EMAIL_ID_DOMAIN}"
 
     def test_email_user_id_is_not_overwritten(self):
-        user = UserFactory(email='goblin@example.com')
+        user = UserFactory(email="goblin@example.com")
 
         current_id = user.email_user_id
 
@@ -563,9 +571,13 @@ class TestUser:
 
     def test_get_extra_emails(self):
 
-        user = UserFactory(email='primar@test.com', email_list=['email1@test.com', 'email2@test.com'])
+        user = UserFactory(
+            email="primar@test.com", email_list=["email1@test.com", "email2@test.com"]
+        )
 
-        assert set(user.get_extra_emails()) == set(['email1@test.com', 'email2@test.com'])
+        assert set(user.get_extra_emails()) == set(
+            ["email1@test.com", "email2@test.com"]
+        )
 
 
 class TestAccessProfile:
@@ -602,7 +614,7 @@ class TestAccessProfile:
 
     def test_saml2_is_access_allowed_if_app_is_disabled(self):
 
-        app = SamlApplicationFactory(enabled=False)
+        app = SamlApplicationFactory(active=False)
 
         ap = AccessProfile.objects.create()
         ap.saml2_applications.add(app)
@@ -611,113 +623,123 @@ class TestAccessProfile:
 
     def test_user_get_permitted_applications(self):
         ap = AccessProfile.objects.create()
-        user = UserFactory(email='goblin@example.com', add_access_profiles=[ap])
+        user = UserFactory(email="goblin@example.com", add_access_profiles=[ap])
 
         app1 = ApplicationFactory(
-            application_key='app-1',
-            display_name='Appplication 1',
-            start_url='https://application1.com',
-            users=[user])
+            application_key="app-1",
+            display_name="Appplication 1",
+            start_url="https://application1.com",
+            users=[user],
+        )
         app2 = ApplicationFactory(
-            application_key='app-2',
-            display_name='Appplication 2',
-            start_url='https://application2.com',
-            users=[user])
+            application_key="app-2",
+            display_name="Appplication 2",
+            start_url="https://application2.com",
+            users=[user],
+        )
         app3 = ApplicationFactory(
-            application_key='app-3',
-            display_name='Appplication 3',
-            start_url='https://application3.com',
-            users=[user])
+            application_key="app-3",
+            display_name="Appplication 3",
+            start_url="https://application3.com",
+            users=[user],
+        )
 
         ap.oauth2_applications.add(app1)
         ap.oauth2_applications.add(app3)
 
-        permitted_applications = user.get_permitted_applications(include_non_public=True)
+        permitted_applications = user.get_permitted_applications(
+            include_non_public=True
+        )
 
         assert len(permitted_applications) == 3
-        assert sorted(permitted_applications, key=lambda x: x['key']) == [
+        assert sorted(permitted_applications, key=lambda x: x["key"]) == [
             {
-                'key': app1.application_key,
-                'url': app1.start_url,
-                'name': app1.display_name
+                "key": app1.application_key,
+                "url": app1.start_url,
+                "name": app1.display_name,
             },
             {
-                'key': app2.application_key,
-                'url': app2.start_url,
-                'name': app2.display_name
+                "key": app2.application_key,
+                "url": app2.start_url,
+                "name": app2.display_name,
             },
             {
-                'key': app3.application_key,
-                'url': app3.start_url,
-                'name': app3.display_name
-            }
+                "key": app3.application_key,
+                "url": app3.start_url,
+                "name": app3.display_name,
+            },
         ]
 
     def test_user_get_permitted_applications_public_only(self):
         ap = AccessProfile.objects.create()
-        user = UserFactory(email='goblin@example.com', add_access_profiles=[ap])
+        user = UserFactory(email="goblin@example.com", add_access_profiles=[ap])
 
         app1 = ApplicationFactory(
-            application_key='app-1',
-            display_name='Application 1',
-            start_url='https://application1.com',
+            application_key="app-1",
+            display_name="Application 1",
+            start_url="https://application1.com",
             public=True,
-            users=[user])
+            users=[user],
+        )
         ApplicationFactory(
-            application_key='app-2',
-            display_name='Application 2',
-            start_url='https://application2.com',
+            application_key="app-2",
+            display_name="Application 2",
+            start_url="https://application2.com",
             public=False,
-            users=[user])
+            users=[user],
+        )
 
         permitted_applications = user.get_permitted_applications()
 
         assert len(permitted_applications) == 1
         assert permitted_applications == [
             {
-                'key': app1.application_key,
-                'url': app1.start_url,
-                'name': app1.display_name
+                "key": app1.application_key,
+                "url": app1.start_url,
+                "name": app1.display_name,
             }
         ]
 
     def test_get_permitted_applications_ordering(self):
         ap = AccessProfile.objects.create()
-        user = UserFactory(email='goblin@example.com', add_access_profiles=[ap])
+        user = UserFactory(email="goblin@example.com", add_access_profiles=[ap])
 
         ApplicationFactory(
-            application_key='app-5',
-            display_name='E',
-            start_url='https://application2.com',
+            application_key="app-5",
+            display_name="E",
+            start_url="https://application2.com",
             public=True,
-            users=[user])
+            users=[user],
+        )
         ApplicationFactory(
-            application_key='app-1',
-            display_name='A',
-            start_url='https://application1.com',
+            application_key="app-1",
+            display_name="A",
+            start_url="https://application1.com",
             public=True,
-            users=[user])
+            users=[user],
+        )
         ApplicationFactory(
-            application_key='app-4',
-            display_name='D',
-            start_url='https://application2.com',
+            application_key="app-4",
+            display_name="D",
+            start_url="https://application2.com",
             public=True,
-            users=[user])
+            users=[user],
+        )
         ApplicationFactory(
-            application_key='app-3',
-            display_name='C',
-            start_url='https://application2.com',
+            application_key="app-3",
+            display_name="C",
+            start_url="https://application2.com",
             public=True,
-            users=[user])
+            users=[user],
+        )
         ApplicationFactory(
-            application_key='app-2',
-            display_name='B',
-            start_url='https://application2.com',
+            application_key="app-2",
+            display_name="B",
+            start_url="https://application2.com",
             public=True,
-            users=[user])
+            users=[user],
+        )
 
         permitted_apps = user.get_permitted_applications()
 
-        assert ['A', 'B', 'C', 'D', 'E'] == [
-            app['name'] for app in permitted_apps
-        ]
+        assert ["A", "B", "C", "D", "E"] == [app["name"] for app in permitted_apps]

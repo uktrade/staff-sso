@@ -7,6 +7,7 @@ from urllib.parse import parse_qs, quote, urlencode, urlsplit
 
 import pytest
 from django.http.cookie import SimpleCookie
+from django.http import HttpRequest
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from freezegun import freeze_time
@@ -18,35 +19,36 @@ from .factories.user import UserFactory
 
 
 @lru_cache()
-def get_saml_response(action='login'):
+def get_saml_response(action="login"):
     file_path = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
-        'data',
-        f'saml_{action}_response.xml'
+        "data",
+        f"saml_{action}_response.xml",
     )
-    with open(file_path, 'rb') as f:
+    with open(file_path, "rb") as f:
         return f.read()
 
 
-SAML_SSO_SERVICE = 'http://localhost:8080/simplesaml/saml2/idp/SSOService.php'
-SAML_LOGOUT_SERVICE = 'http://localhost:8080/simplesaml/saml2/idp/SingleLogoutService.php'
-SAML_METADATA_URL = 'http://localhost:8080/simplesaml/saml2/idp/metadata.php'
+SAML_SSO_SERVICE = "http://localhost:8080/simplesaml/saml2/idp/SSOService.php"
+SAML_LOGOUT_SERVICE = (
+    "http://localhost:8080/simplesaml/saml2/idp/SingleLogoutService.php"
+)
+SAML_METADATA_URL = "http://localhost:8080/simplesaml/saml2/idp/metadata.php"
 
-SAML_LOGIN_URL = reverse_lazy('saml2_login')
-SAML_LOGOUT_URL = reverse_lazy('saml2_logout')
-SAML_ACS_URL = reverse_lazy('saml2_acs')
-SAML_LS_POST_URL = reverse_lazy('saml2_ls_post')  # for logout
+SAML_LOGIN_START_URL = reverse_lazy("saml2_login_start")
+SAML_LOGIN_URL = reverse_lazy("saml2_login")
+SAML_LOGOUT_URL = reverse_lazy("saml2_logout")
+SAML_ACS_URL = reverse_lazy("saml2_acs")
+SAML_LS_POST_URL = reverse_lazy("saml2_ls_post")  # for logout
 
-OAUTH_AUTHORIZE_URL = reverse_lazy('oauth2_provider:authorize')
-OAUTH_REDIRECT_URL = 'http://localhost/authorized'
-OAUTH_TOKEN_URL = reverse_lazy('oauth2_provider:token')
+OAUTH_AUTHORIZE_URL = reverse_lazy("oauth2_provider:authorize")
+OAUTH_REDIRECT_URL = "http://localhost/authorized"
+OAUTH_TOKEN_URL = reverse_lazy("oauth2_provider:token")
 
-SAML_LOGIN_START_URL = reverse_lazy('saml2_login_start')
+SAML_LOGIN_START_URL = reverse_lazy("saml2_login_start")
 
 
-pytestmark = [
-    pytest.mark.django_db
-]
+pytestmark = [pytest.mark.django_db]
 
 
 def create_oauth_application(users=None):
@@ -57,32 +59,28 @@ def create_oauth_application(users=None):
         oauth params as dict for the authorize request
     )
     """
-    application = ApplicationFactory(
-        redirect_uris=OAUTH_REDIRECT_URL,
-        users=users
-    )
+    application = ApplicationFactory(redirect_uris=OAUTH_REDIRECT_URL, users=users)
 
     oauth_params = {
-        'scope': 'read write',
-        'response_type': 'code',
-        'client_id': application.client_id
+        "scope": "read write",
+        "response_type": "code",
+        "client_id": application.client_id,
     }
     return application, oauth_params
 
 
 def log_user_in(client):
-    user = UserFactory(email='user1@example.com')
+    user = UserFactory(email="user1@example.com")
     session_info = {
-        'ava': {
-            'email': ['user1@example.com']
-        },
-        'name_id': Mock(text='user1@example.com'),
-        'came_from': '/accounts/profile/',
-        'issuer': SAML_SSO_SERVICE,
+        "ava": {"email": ["user1@example.com"]},
+        "name_id": Mock(text="user1@example.com"),
+        "came_from": "/accounts/profile/",
+        "issuer": SAML_SSO_SERVICE,
     }
     logged_in = client.login(
+        request=HttpRequest(),
         session_info=session_info,
-        attribute_mapping={'email': ('email',)}
+        attribute_mapping={"email": ("email",)},
     )
     assert logged_in
     return user
@@ -99,14 +97,14 @@ class TestOAuthAuthorize:
 
         assert response.status_code == 302
         assert response.url.startswith(
-            f'{SAML_LOGIN_START_URL}?next={OAUTH_AUTHORIZE_URL}'
+            f"{SAML_LOGIN_START_URL}?next={OAUTH_AUTHORIZE_URL}"
         )
 
     def test_x_application_log_is_created(self, client, mocker):
         user = UserFactory()
         application, authorize_params = create_oauth_application(users=[user])
 
-        mock_create_x_access_log = mocker.patch('sso.oauth2.views.create_x_access_log')
+        mock_create_x_access_log = mocker.patch("sso.oauth2.views.create_x_access_log")
 
         client.force_login(user)
 
@@ -115,14 +113,14 @@ class TestOAuthAuthorize:
         assert mock_create_x_access_log.called
         request = mock_create_x_access_log.mock_calls[0][1][0]
         mock_create_x_access_log.assert_called_once_with(
-            request, 200,
-            oauth2_application=application.name)
+            request, 200, oauth2_application=application.name
+        )
 
     def test_x_application_log_is_created_on_access_denied(self, client, mocker):
         user = UserFactory()
         application, authorize_params = create_oauth_application()
 
-        mock_create_x_access_log = mocker.patch('sso.oauth2.views.create_x_access_log')
+        mock_create_x_access_log = mocker.patch("sso.oauth2.views.create_x_access_log")
 
         client.force_login(user)
 
@@ -131,8 +129,8 @@ class TestOAuthAuthorize:
         assert mock_create_x_access_log.called
         request = mock_create_x_access_log.mock_calls[0][1][0]
         mock_create_x_access_log.assert_called_once_with(
-            request, 403,
-            oauth2_application=application.name)
+            request, 403, oauth2_application=application.name
+        )
 
 
 class TestSAMLLogin:
@@ -142,22 +140,35 @@ class TestSAMLLogin:
         """
         application, authorize_params = create_oauth_application()
 
-        login_url = f'{SAML_LOGIN_URL}?next={OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}'
+        login_url = (
+            f"{SAML_LOGIN_URL}?next={OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}"
+        )
         response = client.get(login_url)
 
         # check form
-        content = response.content.decode('utf-8')
+        content = response.content.decode("utf-8")
         assert response.status_code == 200
-        assert f'<form method="post" action="{SAML_SSO_SERVICE}" name="SSO_Login">' in content
+        assert (
+            f'<form method="post" action="{SAML_SSO_SERVICE}" name="SSO_Login">'
+            in content
+        )
         assert '<input type="hidden" name="SAMLRequest"' in content
-        assert f'<input type="hidden" name="RelayState" value="{OAUTH_AUTHORIZE_URL}?scope=read write" />' in content
+        assert (
+            f'<input type="hidden" name="RelayState" value="{OAUTH_AUTHORIZE_URL}?scope=read write" />'
+            in content
+        )
         assert '<input type="submit" value="Log in" />' in content
 
         # check saml request
-        saml_request_search = re.search('<input type="hidden" name="SAMLRequest" value="(.*)" />', content)
-        saml_request = base64.b64decode(saml_request_search.group(1)).decode('utf-8')
+        saml_request_search = re.search(
+            '<input type="hidden" name="SAMLRequest" value="(.*)" />', content
+        )
+        saml_request = base64.b64decode(saml_request_search.group(1)).decode("utf-8")
 
-        assert '<ns2:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>' in saml_request
+        assert (
+            '<ns2:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>'
+            in saml_request
+        )
         assert f'Destination="{SAML_SSO_SERVICE}"' in saml_request
         assert f'AssertionConsumerServiceURL="{settings.SAML_ACS_URL}"' in saml_request
 
@@ -167,166 +178,155 @@ class TestSAMLLogin:
         """
         application, authorize_params = create_oauth_application()
 
-        malicious_code = '%22%3E%3Cscript%3Ealert%28%27NCC%2BXSS%27%29%3C%2Fscript%3E'
+        malicious_code = "%22%3E%3Cscript%3Ealert%28%27NCC%2BXSS%27%29%3C%2Fscript%3E"
 
-        login_url = f'{SAML_LOGIN_URL}?next={OAUTH_AUTHORIZE_URL}{malicious_code}?{urlencode(authorize_params)}'
+        login_url = f"{SAML_LOGIN_URL}?next={OAUTH_AUTHORIZE_URL}{malicious_code}?{urlencode(authorize_params)}"
         response = client.get(login_url)
 
         # check form
-        content = response.content.decode('utf-8')
+        content = response.content.decode("utf-8")
         assert response.status_code == 200
-        assert '<input type="hidden" name="RelayState" value="/o/authorize/&quot;&gt;&lt;script&gt;alert(&#39;NCC+XSS&#39;)&lt;/script&gt;?scope=read write" />' in content  # noqa
-        assert '<script>alert(\'NCC+XSS\')</script>' not in content
 
-    @freeze_time('2017-06-22 15:50:00.000000+00:00')
-    def test_saml_login_generates_oauth_code(self, client, mocker):
+        assert (
+            '<input type="hidden" name="RelayState" value="/o/authorize/&quot;&gt;&lt;script&gt;alert(&#x27;NCC+XSS&#x27;)&lt;/script&gt;?scope=read write" />'
+            in content
+        )  # noqa
+        assert "<script>alert('NCC+XSS')</script>" not in content
+
+    @freeze_time("2017-06-22 15:50:00.000000+00:00")
+    def test_saml_login_generates_oauth_code(self, client, mocker, settings):
         """
         Test that after successfully logging into the IdP, the app redirects to the oauth authorize url
         which generates the auth code.
         """
 
         # we require an existing user with permissions to access the application
-        user = UserFactory(email='user1@example.com')
+        user = UserFactory(email="user1@example.com")
 
         application, authorize_params = create_oauth_application(users=[user])
         response = client.get(OAUTH_AUTHORIZE_URL, data=authorize_params)
 
         data = {
-            'SAMLResponse': [base64.b64encode(get_saml_response(action='login'))],
-            'RelayState': f'{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}'
+            "SAMLResponse": [base64.b64encode(get_saml_response(action="login"))],
+            "RelayState": f"{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}",
         }
 
         assert User.objects.count() == 1
 
-        MockOutstandingQueriesCache = mocker.patch('sso.samlauth.views.OutstandingQueriesCache')
-        MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
+        MockOutstandingQueriesCache = mocker.patch(
+            "djangosaml2.views.OutstandingQueriesCache"
+        )
+        MockOutstandingQueriesCache().outstanding_queries.return_value = {
+            "id-WmZMklyFygoDg96gy": "test"
+        }
 
-        MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
+        MockCryptoBackendXmlSec1 = mocker.patch(
+            "saml2.sigver.CryptoBackendXmlSec1", spec=True
+        )
         MockCryptoBackendXmlSec1().validate_signature.return_value = True
 
         response = client.post(SAML_ACS_URL, data)
 
         # check saml login
         assert response.status_code == 302
-        authorize_url = response['location']
-        assert authorize_url == data['RelayState']
+        authorize_url = response["location"]
+        assert authorize_url == data["RelayState"]
 
         # check user in db
+
         assert User.objects.count() == 1
         user = User.objects.first()
-        assert user.email == 'user1@example.com'
-        assert user.first_name == 'John'
-        assert user.last_name == 'Doe'
+        assert user.email == "user1@example.com"
+        assert user.first_name == "John"
+        assert user.last_name == "Doe"
 
         # check token
         response = client.get(authorize_url)
         assert response.status_code == 302
 
-        authorize_qs = parse_qs(response['location'].split('?')[1])
-        assert 'code' in authorize_qs
+        authorize_qs = parse_qs(response["location"].split("?")[1])
+        assert "code" in authorize_qs
 
-    @freeze_time('2017-06-22 15:50:00.000000+00:00')
+    @freeze_time("2017-06-22 15:50:00.000000+00:00")
     def test_saml_login_with_inactive_user_fails(self, client, mocker):
         """
         If `user.is_active` is False, the user should not be able to authenticate.
         """
 
-        UserFactory(email='user1@example.com', is_active=False)
+        UserFactory(email="user1@example.com", is_active=False)
 
         data = {
-            'SAMLResponse': [base64.b64encode(get_saml_response(action='login'))],
-            'RelayState': ''
+            "SAMLResponse": [base64.b64encode(get_saml_response(action="login"))],
+            "RelayState": "",
         }
 
         assert User.objects.count() == 1
 
-        MockOutstandingQueriesCache = mocker.patch('sso.samlauth.views.OutstandingQueriesCache')
-        MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
+        MockOutstandingQueriesCache = mocker.patch(
+            "djangosaml2.views.OutstandingQueriesCache"
+        )
+        MockOutstandingQueriesCache().outstanding_queries.return_value = {
+            "id-WmZMklyFygoDg96gy": "test"
+        }
 
-        MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
+        MockCryptoBackendXmlSec1 = mocker.patch(
+            "saml2.sigver.CryptoBackendXmlSec1", spec=True
+        )
         MockCryptoBackendXmlSec1().validate_signature.return_value = True
 
         response = client.post(SAML_ACS_URL, data)
 
         assert response.status_code == 403
 
-    @freeze_time('2017-06-22 15:50:00.000000+00:00')
+    @freeze_time("2017-06-22 15:50:00.000000+00:00")
     def test_x_application_saml_log_message(self, client, mocker):
         """
         Test that an x-application log message is created
         """
 
         # we require an existing user with permissions to access the application
-        user = UserFactory(email='user1@example.com')
+        user = UserFactory(email="user1@example.com")
 
         application, authorize_params = create_oauth_application(users=[user])
         client.get(OAUTH_AUTHORIZE_URL, data=authorize_params)
 
         data = {
-            'SAMLResponse': [base64.b64encode(get_saml_response(action='login'))],
-            'RelayState': f'{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}'
+            "SAMLResponse": [base64.b64encode(get_saml_response(action="login"))],
+            "RelayState": f"{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}",
         }
 
-        MockOutstandingQueriesCache = mocker.patch('sso.samlauth.views.OutstandingQueriesCache')
-        MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
+        MockOutstandingQueriesCache = mocker.patch(
+            "djangosaml2.views.OutstandingQueriesCache"
+        )
+        MockOutstandingQueriesCache().outstanding_queries.return_value = {
+            "id-WmZMklyFygoDg96gy": "test"
+        }
 
-        MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
+        MockCryptoBackendXmlSec1 = mocker.patch(
+            "saml2.sigver.CryptoBackendXmlSec1", spec=True
+        )
         MockCryptoBackendXmlSec1().validate_signature.return_value = True
 
-        mock_create_x_access_log = mocker.patch('sso.samlauth.views.create_x_access_log')
+        mock_create_x_access_log = mocker.patch(
+            "sso.samlauth.views.create_x_access_log"
+        )
 
         client.post(SAML_ACS_URL, data)
 
         assert mock_create_x_access_log.called
         request = mock_create_x_access_log.mock_calls[0][1][0]
         mock_create_x_access_log.assert_called_once_with(
-            request, 200,
-            entity_id='http://localhost:8080/simplesaml/saml2/idp/metadata.php',
-            message='Remote IdP Auth',
-            email='user1@example.com')
+            request,
+            200,
+            entity_id="http://localhost:8080/simplesaml/saml2/idp/metadata.php",
+            message="Remote IdP Auth",
+            email="user1@example.com",
+        )
 
-    @freeze_time('2017-06-22 15:50:00.000000+00:00')
-    def test_saml_login_using_name_id(self, client, mocker, settings):
-        """
-        Test that `settings.SAML_IDPS_USE_NAME_ID_AS_USERNAME` works correctly, and that the `User.email` field is not
-        overridden by the attribute mapping
-        """
-
-        assert User.objects.count() == 0
-
-        settings.SAML_IDPS_USE_NAME_ID_AS_USERNAME = ['http://localhost:8080/simplesaml/saml2/idp/metadata.php']
-
-        application, authorize_params = create_oauth_application()
-        response = client.get(OAUTH_AUTHORIZE_URL, data=authorize_params)
-
-        data = {
-            'SAMLResponse': [base64.b64encode(get_saml_response(action='login'))],
-            'RelayState': f'{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}'
-        }
-
-        MockOutstandingQueriesCache = mocker.patch('sso.samlauth.views.OutstandingQueriesCache')
-        MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
-
-        MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
-        MockCryptoBackendXmlSec1().validate_signature.return_value = True
-
-        response = client.post(SAML_ACS_URL, data)
-
-        # check saml login
-        assert response.status_code == 302
-        authorize_url = response['location']
-        assert authorize_url == data['RelayState']
-
-        # check user in db
-        assert User.objects.count() == 1
-        user = User.objects.first()
-        assert user.email == 'user1(nameid)@example.com'
-        assert user.first_name == 'John'
-        assert user.last_name == 'Doe'
-        assert user.is_active == True
-
-    @freeze_time('2017-06-22 15:50:00.000000+00:00')
-    def test_saml_login_without_permissions_results_in_access_denied(self, client, mocker):
+    @freeze_time("2017-06-22 15:50:00.000000+00:00")
+    def test_saml_login_without_permissions_results_in_access_denied(
+        self, client, mocker
+    ):
         """
         Test that after successfully logging into the IdP, the app redirects to the oauth authorize url
         which generates the auth code.
@@ -335,104 +335,125 @@ class TestSAMLLogin:
         response = client.get(OAUTH_AUTHORIZE_URL, data=authorize_params)
 
         data = {
-            'SAMLResponse': [base64.b64encode(get_saml_response(action='login'))],
-            'RelayState': f'{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}'
+            "SAMLResponse": [base64.b64encode(get_saml_response(action="login"))],
+            "RelayState": f"{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}",
         }
 
         assert User.objects.count() == 0
 
-        MockOutstandingQueriesCache = mocker.patch('sso.samlauth.views.OutstandingQueriesCache')
-        MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
+        MockOutstandingQueriesCache = mocker.patch(
+            "djangosaml2.views.OutstandingQueriesCache"
+        )
+        MockOutstandingQueriesCache().outstanding_queries.return_value = {
+            "id-WmZMklyFygoDg96gy": "test"
+        }
 
-        MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
+        MockCryptoBackendXmlSec1 = mocker.patch(
+            "saml2.sigver.CryptoBackendXmlSec1", spec=True
+        )
         MockCryptoBackendXmlSec1().validate_signature.return_value = True
 
         response = client.post(SAML_ACS_URL, data)
 
         # check saml login
         assert response.status_code == 302
-        authorize_url = response['location']
-        assert authorize_url == data['RelayState']
+        authorize_url = response["location"]
+        assert authorize_url == data["RelayState"]
 
         # check user in db
         assert User.objects.count() == 1
         user = User.objects.first()
-        assert user.email == 'user1@example.com'
-        assert user.first_name == 'John'
-        assert user.last_name == 'Doe'
+        assert user.email == "user1@example.com"
+        assert user.first_name == "John"
+        assert user.last_name == "Doe"
 
         # check token
         response = client.get(authorize_url)
         assert response.status_code == 302
 
-        assert response['location'] == '/access-denied/'
+        assert response["location"] == "/access-denied/"
 
         # The application the user tried to access is recorded in session under the _last_failed_access_app
         # and is used by the request access form.
-        assert client.session['_last_failed_access_app'] == application.name
+        assert client.session["_last_failed_access_app"] == application.name
 
-    @freeze_time('2017-06-22 15:50:00.000000+00:00')
+    @freeze_time("2017-06-22 15:50:00.000000+00:00")
     def test_saml_login_with_alternative_email(self, client, mocker):
         """
-         Test that after successfully logging into the IdP, the app redirects to the oauth authorize url
-         which generates the auth code.
-         """
+        Test that after successfully logging into the IdP, the app redirects to the oauth authorize url
+        which generates the auth code.
+        """
 
-        user = UserFactory(email='hello@testing.com', email_list=['user1@example.com', 'test@bbb.com', 'test@ccc.com'])
+        user = UserFactory(
+            email="hello@testing.com",
+            email_list=["user1@example.com", "test@bbb.com", "test@ccc.com"],
+        )
 
         application, authorize_params = create_oauth_application(users=[user])
         response = client.get(OAUTH_AUTHORIZE_URL, data=authorize_params)
 
         data = {
-            'SAMLResponse': [base64.b64encode(get_saml_response(action='login'))],
-            'RelayState': f'{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}'
+            "SAMLResponse": [base64.b64encode(get_saml_response(action="login"))],
+            "RelayState": f"{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}",
         }
 
         assert User.objects.count() == 1
 
-        MockOutstandingQueriesCache = mocker.patch('sso.samlauth.views.OutstandingQueriesCache')
-        MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
+        MockOutstandingQueriesCache = mocker.patch(
+            "djangosaml2.views.OutstandingQueriesCache"
+        )
+        MockOutstandingQueriesCache().outstanding_queries.return_value = {
+            "id-WmZMklyFygoDg96gy": "test"
+        }
 
-        MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
+        MockCryptoBackendXmlSec1 = mocker.patch(
+            "saml2.sigver.CryptoBackendXmlSec1", spec=True
+        )
         MockCryptoBackendXmlSec1().validate_signature.return_value = True
 
         response = client.post(SAML_ACS_URL, data)
 
         # check saml login
         assert response.status_code == 302
-        authorize_url = response['location']
-        assert authorize_url == data['RelayState']
+        authorize_url = response["location"]
+        assert authorize_url == data["RelayState"]
 
         # check user in db
         assert User.objects.count() == 1
         user = User.objects.first()
-        assert user.emails.filter(email='user1@example.com').exists()
+        assert user.emails.filter(email="user1@example.com").exists()
 
         # check token
         response = client.get(authorize_url)
         assert response.status_code == 302
 
-    @freeze_time('2017-06-22 15:50:00.000000+00:00')
+    @freeze_time("2017-06-22 15:50:00.000000+00:00")
     def test_saml_login_with_default_redirect_url(self, client, mocker):
         """
         Test that if no redirect url is specified, it redirects to the default
         saml2_logged_in view.
         """
         data = {
-            'SAMLResponse': [base64.b64encode(get_saml_response(action='login'))],
+            "SAMLResponse": [base64.b64encode(get_saml_response(action="login"))],
         }
 
-        MockOutstandingQueriesCache = mocker.patch('sso.samlauth.views.OutstandingQueriesCache')
-        MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
+        MockOutstandingQueriesCache = mocker.patch(
+            "djangosaml2.views.OutstandingQueriesCache"
+        )
+        MockOutstandingQueriesCache().outstanding_queries.return_value = {
+            "id-WmZMklyFygoDg96gy": "test"
+        }
 
-        MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
+        MockCryptoBackendXmlSec1 = mocker.patch(
+            "saml2.sigver.CryptoBackendXmlSec1", spec=True
+        )
         MockCryptoBackendXmlSec1().validate_signature.return_value = True
 
         response = client.post(SAML_ACS_URL, data)
         assert response.status_code == 302
-        assert response['location'] == reverse('saml2_logged_in')
+        assert response["location"] == reverse("saml2_logged_in")
 
-    @freeze_time('2017-06-22 15:50:00.000000+00:00')
+    @freeze_time("2017-06-22 15:50:00.000000+00:00")
     def test_saml_login_fails_if_signature_invalid(self, client, mocker):
         """
         Test that if the saml signature is invalid, the login fails.
@@ -441,52 +462,75 @@ class TestSAMLLogin:
         application, authorize_params = create_oauth_application()
 
         data = {
-            'SAMLResponse': [base64.b64encode(get_saml_response(action='login'))],
-            'RelayState': f'{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}'
+            "SAMLResponse": [base64.b64encode(get_saml_response(action="login"))],
+            "RelayState": f"{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}",
         }
 
-        MockOutstandingQueriesCache = mocker.patch('djangosaml2.views.OutstandingQueriesCache')
-        MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
+        MockOutstandingQueriesCache = mocker.patch(
+            "djangosaml2.views.OutstandingQueriesCache"
+        )
+        MockOutstandingQueriesCache().outstanding_queries.return_value = {
+            "id-WmZMklyFygoDg96gy": "test"
+        }
 
-        MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
+        MockCryptoBackendXmlSec1 = mocker.patch(
+            "saml2.sigver.CryptoBackendXmlSec1", spec=True
+        )
         MockCryptoBackendXmlSec1().validate_signature.return_value = False
 
         assert client.post(SAML_ACS_URL, data).status_code == 403
 
-    def test_invalid_idp_is_ignored(self, client, mocker):
-        """
-        if an incorrect idp is supplied in query string it should be ignored
+    @freeze_time("2017-06-22 15:50:00.000000+00:00")
+    def test_saml_login_with_unspecifed_name_format_attributes(self, client, mocker, settings):
 
-        e.g.
+        assert User.objects.count() == 0
 
-        /saml2/login/?idp=does-not-exist
-        """
+        application, authorize_params = create_oauth_application()
+        response = client.get(OAUTH_AUTHORIZE_URL, data=authorize_params)
 
-        available_idps = mocker.patch('sso.samlauth.views.available_idps')
-
-        available_idps.return_value = {
-            'http://an-idp.com': 'idp1',
-            'https://another-idp.com': 'idp2'
+        data = {
+            "SAMLResponse": [base64.b64encode(get_saml_response(action="login_v2"))],
+            "RelayState": f"{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}",
         }
 
-        response = client.get(SAML_LOGIN_URL + '?idp=WRONG')
+        MockOutstandingQueriesCache = mocker.patch(
+            "djangosaml2.views.OutstandingQueriesCache"
+        )
+        MockOutstandingQueriesCache().outstanding_queries.return_value = {
+            "id-WmZMklyFygoDg96gy": "test"
+        }
 
-        assert response.status_code == 200
-        # this is the idp selection page which would have been bypassed if the idp was preselected with ?idp=
-        # previously a wrong idp would result in a 500
-        assert response.templates[0].name == 'djangosaml2/wayf.html'
+        MockCryptoBackendXmlSec1 = mocker.patch(
+            "saml2.sigver.CryptoBackendXmlSec1", spec=True
+        )
+        MockCryptoBackendXmlSec1().validate_signature.return_value = True
+
+        response = client.post(SAML_ACS_URL, data)
+
+        # check saml login
+        assert response.status_code == 302
+        authorize_url = response["location"]
+        assert authorize_url == data["RelayState"]
+
+        # check user in db
+        assert User.objects.count() == 1
+        user = User.objects.first()
+        assert user.email == "john.smith@test.com"
+        assert user.first_name == "John"
+        assert user.last_name == "Smith"
+        assert user.is_active == True
 
 
 class TestOAuthToken:
     def _obtain_auth_code(self, client, authorize_params):
-        authorize_url = f'{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}'
+        authorize_url = f"{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}"
 
         response = client.get(authorize_url)
         assert response.status_code == 302
 
-        authorize_qs = parse_qs(response['location'].split('?')[1])
-        assert 'code' in authorize_qs
-        return authorize_qs['code']
+        authorize_qs = parse_qs(response["location"].split("?")[1])
+        assert "code" in authorize_qs
+        return authorize_qs["code"]
 
     def test_obtain_oauth_token(self, client):
         """
@@ -501,18 +545,18 @@ class TestOAuthToken:
         response = client.post(
             OAUTH_TOKEN_URL,
             data={
-                'grant_type': 'authorization_code',
-                'code': auth_code,
-                'client_id': application.client_id,
-                'client_secret': application.client_secret,
-                'redirect_uri': OAUTH_REDIRECT_URL,
-            }
+                "grant_type": "authorization_code",
+                "code": auth_code,
+                "client_id": application.client_id,
+                "client_secret": application.client_secret,
+                "redirect_uri": OAUTH_REDIRECT_URL,
+            },
         )
 
         assert response.status_code == 200
         content = response.json()
-        assert 'access_token' in content
-        assert 'refresh_token' in content
+        assert "access_token" in content
+        assert "refresh_token" in content
 
     def test_obtain_oauth_token_fails_if_auth_code_invalid(self, client):
         """
@@ -527,18 +571,16 @@ class TestOAuthToken:
         response = client.post(
             OAUTH_TOKEN_URL,
             data={
-                'grant_type': 'authorization_code',
-                'code': 'invalid',
-                'client_id': application.client_id,
-                'client_secret': application.client_secret,
-                'redirect_uri': OAUTH_REDIRECT_URL,
-            }
+                "grant_type": "authorization_code",
+                "code": "invalid",
+                "client_id": application.client_id,
+                "client_secret": application.client_secret,
+                "redirect_uri": OAUTH_REDIRECT_URL,
+            },
         )
 
-        assert response.status_code == 401
-        assert response.json() == {
-            'error': 'invalid_grant'
-        }
+        assert response.status_code == 400
+        assert response.json() == {"error": "invalid_grant"}
 
     def test_obtain_oauth_token_fails_if_client_id_invalid(self, client):
         """
@@ -553,18 +595,16 @@ class TestOAuthToken:
         response = client.post(
             OAUTH_TOKEN_URL,
             data={
-                'grant_type': 'authorization_code',
-                'code': auth_code,
-                'client_id': 'invalid',
-                'client_secret': application.client_secret,
-                'redirect_uri': OAUTH_REDIRECT_URL,
-            }
+                "grant_type": "authorization_code",
+                "code": auth_code,
+                "client_id": "invalid",
+                "client_secret": application.client_secret,
+                "redirect_uri": OAUTH_REDIRECT_URL,
+            },
         )
 
         assert response.status_code == 401
-        assert response.json() == {
-            'error': 'invalid_client'
-        }
+        assert response.json() == {"error": "invalid_client"}
 
     def test_obtain_oauth_token_fails_if_client_secret_invalid(self, client):
         """
@@ -579,52 +619,46 @@ class TestOAuthToken:
         response = client.post(
             OAUTH_TOKEN_URL,
             data={
-                'grant_type': 'authorization_code',
-                'code': auth_code,
-                'client_id': application.client_id,
-                'client_secret': 'invalid',
-                'redirect_uri': OAUTH_REDIRECT_URL,
-            }
+                "grant_type": "authorization_code",
+                "code": auth_code,
+                "client_id": application.client_id,
+                "client_secret": "invalid",
+                "redirect_uri": OAUTH_REDIRECT_URL,
+            },
         )
 
         assert response.status_code == 401
-        assert response.json() == {
-            'error': 'invalid_client'
-        }
+        assert response.json() == {"error": "invalid_client"}
 
 
 class TestSAMLLogout:
+    @pytest.mark.skip
     def test_valid_saml_logout_form(self, client, settings):
         """
         Test that the saml logout form includes the appropriate hidden values.
         """
         log_user_in(client)
 
-        session_id = '_e257887eff90fde0f9ebda09c2d0825683969096d5'
-        subject_id = '1={entity_id},2={name_id_format},4={ref}'.format(
-            entity_id=quote(settings.SAML_CONFIG['entityid']),
-            name_id_format=quote(settings.SAML_CONFIG['service']['sp']['name_id_format']),
-            ref='c1e915bbc0586c0483a8f5654ed25d7afcdc315f'
+        session_id = "_e257887eff90fde0f9ebda09c2d0825683969096d5"
+        subject_id = "1={entity_id},2={name_id_format},4={ref}".format(
+            entity_id=quote(settings.SAML_CONFIG["entityid"]),
+            name_id_format=quote(
+                settings.SAML_CONFIG["service"]["sp"]["name_id_format"]
+            ),
+            ref="c1e915bbc0586c0483a8f5654ed25d7afcdc315f",
         )
 
         s = client.session
-        s['_saml2_identities'] = {
-            subject_id: {
-                SAML_METADATA_URL: [
-                    None,
-                    {
-                        'session_index': session_id
-                    }
-                ]
-            }
+        s["_saml2_identities"] = {
+            subject_id: {SAML_METADATA_URL: [None, {"session_index": session_id}]}
         }
-        s['_saml2_subject_id'] = subject_id
+        s["_saml2_subject_id"] = subject_id
         s.save()
 
         response = client.get(SAML_LOGOUT_URL)
 
         # check form
-        content = response.content.decode('utf-8')
+        content = response.content.decode("utf-8")
         assert response.status_code == 200
         assert f'<form action="{SAML_LOGOUT_SERVICE}" method="post">' in content
         assert '<input type="hidden" name="SAMLRequest"' in content
@@ -632,14 +666,19 @@ class TestSAMLLogout:
         assert '<input type="submit" value="Continue"/>' in content
 
         # check saml request
-        saml_request_search = re.search('<input type="hidden" name="SAMLRequest" value="(.*)"/>', content)
-        saml_request = base64.b64decode(saml_request_search.group(1)).decode('utf-8')
+        saml_request_search = re.search(
+            '<input type="hidden" name="SAMLRequest" value="(.*)"/>', content
+        )
+        saml_request = base64.b64decode(saml_request_search.group(1)).decode("utf-8")
 
-        assert '<ns2:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>' in saml_request
+        assert (
+            '<ns2:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>'
+            in saml_request
+        )
         assert f'Destination="{SAML_LOGOUT_SERVICE}"' in saml_request
-        assert f'<ns0:SessionIndex>{session_id}</ns0:SessionIndex>' in saml_request
+        assert f"<ns0:SessionIndex>{session_id}</ns0:SessionIndex>" in saml_request
 
-    @freeze_time('2017-06-30 16:24:00.000000+00:00')
+    @freeze_time("2017-06-30 16:24:00.000000+00:00")
     def test_saml_logout_with_default_redirect_url(self, client, mocker):
         """
         Test that if no redirect url is specified, it redirects to the default
@@ -648,7 +687,7 @@ class TestSAMLLogout:
         log_user_in(client)
 
         data = {
-            'SAMLResponse': [base64.b64encode(get_saml_response(action='logout'))],
+            "SAMLResponse": [base64.b64encode(get_saml_response(action="logout"))],
         }
 
         assert dict(client.session) != {}
@@ -656,7 +695,7 @@ class TestSAMLLogout:
         response = client.post(SAML_LS_POST_URL, data)
 
         assert response.status_code == 302
-        assert response['location'] == reverse('saml2_logged_out')
+        assert response["location"] == reverse("saml2_logged_out")
         assert dict(client.session) == {}
 
     def test_logged_out_result_view_redirects_if_user_logged_in(self, client):
@@ -666,9 +705,9 @@ class TestSAMLLogout:
         """
         log_user_in(client)
 
-        response = client.get(reverse('saml2_logged_out'))
+        response = client.get(reverse("saml2_logged_out"))
         assert response.status_code == 302
-        assert response['location'] == reverse('saml2_logged_in')
+        assert response["location"] == reverse("saml2_logged_in")
 
 
 class TestSessionLogout:
@@ -676,57 +715,70 @@ class TestSessionLogout:
     Whilst the saml2 logout is broken due to Core's logout url not killing the ADFS session we're
     using an alternative logout view that destroys the session
     """
+
     def test_logout_removes_all_keys(self, client):
 
         log_user_in(client)
 
-        assert '_auth_user_id' in client.session
-        client.session['_saml2_stuff'] = dict(saml='stuff')
+        assert "_auth_user_id" in client.session
+        client.session["_saml2_stuff"] = dict(saml="stuff")
 
-        client.get(reverse('localauth:session-logout'))
+        client.get(reverse("localauth:session-logout"))
 
         assert list(client.session.keys()) == []
 
     def test_logout_redirects_to_logged_out_url(self, client, settings):
         log_user_in(client)
 
-        response = client.get(reverse('localauth:session-logout'))
+        response = client.get(reverse("localauth:session-logout"))
         assert response.status_code == 302
         assert response.url == settings.LOGOUT_REDIRECT_URL
 
 
 class TestReAuth:
     def test_login_cookie_not_set_results_in_wayf_template(self, client, settings):
-        settings.SAML_CONFIG['metadata']['local'] += [os.path.join(settings.SAML_CONFIG_DIR, 'idp_metadata_2.xml')]
-        login_url = f'{SAML_LOGIN_URL}'
+        settings.SAML_CONFIG["metadata"]["local"] += [
+            os.path.join(settings.SAML_CONFIG_DIR, "idp_metadata_2.xml")
+        ]
+        login_url = f"{SAML_LOGIN_URL}"
         response = client.get(login_url)
 
         assert response.status_code == 200
-        assert response.templates[0].name == 'djangosaml2/wayf.html'
+        assert response.templates[0].name == "djangosaml2/wayf.html"
 
-    def test_login_cookie_set_to_incorrect_value_results_in_wayf_template(self, client, settings):
-        client.cookies.load({'last_login_idp': 'invalid-idp-entity-id'})
-        settings.SAML_CONFIG['metadata']['local'] += [os.path.join(settings.SAML_CONFIG_DIR, 'idp_metadata_2.xml')]
-        login_url = f'{SAML_LOGIN_URL}'
+    def test_login_cookie_set_to_incorrect_value_results_in_wayf_template(
+        self, client, settings
+    ):
+        client.cookies.load({"last_login_idp": "invalid-idp-entity-id"})
+        settings.SAML_CONFIG["metadata"]["local"] += [
+            os.path.join(settings.SAML_CONFIG_DIR, "idp_metadata_2.xml")
+        ]
+        login_url = f"{SAML_LOGIN_URL}"
         response = client.get(login_url)
 
         assert response.status_code == 200
-        assert response.templates[0].name == 'djangosaml2/wayf.html'
+        assert response.templates[0].name == "djangosaml2/wayf.html"
 
-    @freeze_time('2017-06-22 15:50:00.000000+00:00')
+    @freeze_time("2017-06-22 15:50:00.000000+00:00")
     def test_last_login_time_recorded_against_email(self, client, mocker):
 
         application, authorize_params = create_oauth_application()
 
         data = {
-            'SAMLResponse': [base64.b64encode(get_saml_response(action='login'))],
-            'RelayState': f'{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}'
+            "SAMLResponse": [base64.b64encode(get_saml_response(action="login"))],
+            "RelayState": f"{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}",
         }
 
-        MockOutstandingQueriesCache = mocker.patch('sso.samlauth.views.OutstandingQueriesCache')
-        MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
+        MockOutstandingQueriesCache = mocker.patch(
+            "djangosaml2.views.OutstandingQueriesCache"
+        )
+        MockOutstandingQueriesCache().outstanding_queries.return_value = {
+            "id-WmZMklyFygoDg96gy": "test"
+        }
 
-        MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
+        MockCryptoBackendXmlSec1 = mocker.patch(
+            "saml2.sigver.CryptoBackendXmlSec1", spec=True
+        )
         MockCryptoBackendXmlSec1().validate_signature.return_value = True
 
         response = client.post(SAML_ACS_URL, data)
@@ -739,103 +791,128 @@ class TestReAuth:
         assert user.emails.count() == 1
         assert user.emails.first().last_login == timezone.now()
 
-    @freeze_time('2017-06-22 15:50:00.000000+00:00')
-    def test_used_email_is_saved_in_cookie(self, client, mocker):
-        application, authorize_params = create_oauth_application()
+    @freeze_time("2017-06-22 15:50:00.000000+00:00")
+    def test_used_email_is_saved_in_cookie(self, client, settings):
 
-        data = {
-            'SAMLResponse': [base64.b64encode(get_saml_response(action='login'))],
-            'RelayState': f'{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}'
+        settings.AUTH_EMAIL_TO_IPD_MAP = {
+            'a-test': ['@test.com'],
         }
 
-        MockOutstandingQueriesCache = mocker.patch('sso.samlauth.views.OutstandingQueriesCache')
-        MockOutstandingQueriesCache().outstanding_queries.return_value = {'id-WmZMklyFygoDg96gy': 'test'}
+        data = {
+            'email': 'hello@test.com',
+        }
 
-        MockCryptoBackendXmlSec1 = mocker.patch('saml2.sigver.CryptoBackendXmlSec1', spec=True)
-        MockCryptoBackendXmlSec1().validate_signature.return_value = True
-
-        response = client.post(SAML_ACS_URL, data)
+        response = client.post(SAML_LOGIN_START_URL, data)
 
         assert response.status_code == 302
-        assert client.cookies['sso_auth_email'].value == 'user1@example.com'
+        assert client.cookies["sso_auth_email"].value == 'hello@test.com'
 
 
 class TestEmailBasedAuthFlow:
     def test_invalid_email_leads_to_form_error(self, client):
 
-        response = client.post(reverse('saml2_login_start'), {'email': 'test@invalid.com'})
+        response = client.post(
+            reverse("saml2_login_start"), {"email": "test@invalid.com"}
+        )
 
         assert response.status_code == 200
 
-        assert 'You can\'t use this email address to access DIT\'s internal services.'.encode('utf-8') in response.content
+        assert (
+            "You can't use this email address to access DIT's internal services.".encode(
+                "utf-8"
+            )
+            in response.content
+        )
 
     def test_previously_used_email_is_rendered_on_form(self, client):
-        client.cookies = SimpleCookie({'sso_auth_email': 'test@test.com'})
+        client.cookies = SimpleCookie({"sso_auth_email": "test@test.com"})
 
-        response = client.get(reverse('saml2_login_start'))
+        response = client.get(reverse("saml2_login_start"))
 
-        assert '<input type="text" name="email" value="test@test.com"'.encode('utf-8') in response.content
+        assert (
+            '<input type="text" name="email" value="test@test.com"'.encode("utf-8")
+            in response.content
+        )
 
     def test_email_token_based_email_redirects_to_email_flow(self, client, settings):
-        settings.EMAIL_TOKEN_DOMAIN_WHITELIST = ['@test.com']
+        settings.EMAIL_TOKEN_DOMAIN_WHITELIST = ["@test.com"]
 
-        response = client.post(reverse('saml2_login_start'), {'email': 'test@test.com'})
+        response = client.post(reverse("saml2_login_start"), {"email": "test@test.com"})
 
         assert response.status_code == 302
 
-        assert response.url == reverse('emailauth:email-auth-initiate-success')
+        assert response.url == reverse("emailauth:email-auth-initiate-success")
 
     def test_email_token_based_email_is_case_insensitive(self, client, settings):
-        settings.EMAIL_TOKEN_DOMAIN_WHITELIST = ['@test.com']
+        settings.EMAIL_TOKEN_DOMAIN_WHITELIST = ["@test.com"]
 
-        response = client.post(reverse('saml2_login_start'), {'email': 'test@TEST.com'})
+        response = client.post(reverse("saml2_login_start"), {"email": "test@TEST.com"})
 
         assert response.status_code == 302
 
-        assert response.url == reverse('emailauth:email-auth-initiate-success')
+        assert response.url == reverse("emailauth:email-auth-initiate-success")
 
     def test_redirect_to_idp(self, settings, client):
 
-        settings.AUTH_EMAIL_TO_IPD_MAP={'a-test': ['@test.com']}
-        response = client.post(reverse('saml2_login_start'), {'email': 'test@test.com'})
+        settings.AUTH_EMAIL_TO_IPD_MAP = {"a-test": ["@test.com"]}
+        response = client.post(reverse("saml2_login_start"), {"email": "test@test.com"})
 
         assert response.status_code == 302
-        assert response.url == '/saml2/login/?idp=http%3A//localhost%3A8080/simplesaml/saml2/idp/metadata.php'
+        assert (
+            response.url
+            == "/saml2/login/?idp=http%3A//localhost%3A8080/simplesaml/saml2/idp/metadata.php"
+        )
 
     def test_redirect_to_idp_is_case_insensitive(self, settings, client):
 
-        settings.AUTH_EMAIL_TO_IPD_MAP={'a-test': ['@test.com']}
-        response = client.post(reverse('saml2_login_start'), {'email': 'test@TEST.com'})
+        settings.AUTH_EMAIL_TO_IPD_MAP = {"a-test": ["@test.com"]}
+        response = client.post(reverse("saml2_login_start"), {"email": "test@TEST.com"})
 
         assert response.status_code == 302
-        assert response.url == '/saml2/login/?idp=http%3A//localhost%3A8080/simplesaml/saml2/idp/metadata.php'
+        assert (
+            response.url
+            == "/saml2/login/?idp=http%3A//localhost%3A8080/simplesaml/saml2/idp/metadata.php"
+        )
 
     def test_querystring_is_preserved_on_redirect(self, settings, client):
-        settings.AUTH_EMAIL_TO_IPD_MAP={'a-test': ['@test.com']}
-        response = client.post(reverse('saml2_login_start') + '?a=hello&b=world', {'email': 'test@test.com'})
+        settings.AUTH_EMAIL_TO_IPD_MAP = {"a-test": ["@test.com"]}
+        response = client.post(
+            reverse("saml2_login_start") + "?a=hello&b=world",
+            {"email": "test@test.com"},
+        )
 
         qs_items = dict(parse_qs(urlsplit(response.url).query))
 
         assert response.status_code == 302
         assert len(qs_items.items()) == 3
         assert qs_items == {
-            'idp': ['http://localhost:8080/simplesaml/saml2/idp/metadata.php'],
-            'a': ['hello'],
-            'b': ['world'],
+            "idp": ["http://localhost:8080/simplesaml/saml2/idp/metadata.php"],
+            "a": ["hello"],
+            "b": ["world"],
         }
 
     def test_next_querystring_is_retained(self, client):
 
-        response = client.post(reverse('saml2_login_start') + '?next=/some-local-url/', {'email': 'bad@invalid.com'})
+        response = client.post(
+            reverse("saml2_login_start") + "?next=/some-local-url/",
+            {"email": "bad@invalid.com"},
+        )
 
-        assert '<a href="/saml2/login/?next=/some-local-url/">Sign in using a different method</a>' in \
-               response.content.decode('utf-8')
+        assert (
+            '<a href="/saml2/login/?next=/some-local-url/">Sign in using a different method</a>'
+            in response.content.decode("utf-8")
+        )
 
     def test_unsafe_next_url_is_dropped(self, client):
-        response = client.post(reverse('saml2_login_start') + '?next=http://www.unsafe.com', {'email': 'bad@invalid.com'})
+        response = client.post(
+            reverse("saml2_login_start") + "?next=http://www.unsafe.com",
+            {"email": "bad@invalid.com"},
+        )
 
-        assert '<a href="/saml2/login/">Sign in using a different method</a>' in \
-               response.content.decode('utf-8')
+        assert (
+            '<a href="/saml2/login/">Sign in using a different method</a>'
+            in response.content.decode("utf-8")
+        )
 
 
 class TestLoggedInPage:
@@ -847,23 +924,28 @@ class TestLoggedInPage:
         user.access_profiles.add(ap)
 
         app1 = ApplicationFactory(
-            application_key='app-1',
-            display_name='Appplication 1',
-            start_url='https://application1.com',
+            application_key="app-1",
+            display_name="Appplication 1",
+            start_url="https://application1.com",
             public=True,
-            users=[user])
+            users=[user],
+        )
         ApplicationFactory(
-            application_key='app-2',
-            display_name='Appplication 2',
-            start_url='https://application2.com',
+            application_key="app-2",
+            display_name="Appplication 2",
+            start_url="https://application2.com",
             public=False,
-            users=[user])
+            users=[user],
+        )
 
         permitted_applications = user.get_permitted_applications()
 
         assert len(permitted_applications) == 1
 
-        response = client.get(reverse('saml2_logged_in'))
+        response = client.get(reverse("saml2_logged_in"))
 
         assert response.status_code == 200
-        assert f'<p>Go to <a href="{app1.start_url}">{app1.display_name}</a></p>' in response.content.decode('utf-8')
+        assert (
+            f'<p>Go to <a href="{app1.start_url}">{app1.display_name}</a></p>'
+            in response.content.decode("utf-8")
+        )

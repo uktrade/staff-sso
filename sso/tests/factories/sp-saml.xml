@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns0:EntityDescriptor xmlns:ns0="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ns1="urn:oasis:names:tc:SAML:metadata:algsupport" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" entityID="http://testsp/saml2/metadata/">
+  <ns0:Extensions>
+    <ns1:DigestMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#md5" />
+    <ns1:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#ripemd160" />
+    <ns1:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+    <ns1:DigestMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#sha224" />
+    <ns1:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+    <ns1:DigestMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#sha384" />
+    <ns1:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512" />
+    <ns1:SigningMethod Algorithm="http://www.w3.org/2000/09/xmldsig#dsa-sha1" />
+    <ns1:SigningMethod Algorithm="http://www.w3.org/2009/xmldsig11#dsa-sha256" />
+    <ns1:SigningMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha1" />
+    <ns1:SigningMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha224" />
+    <ns1:SigningMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256" />
+    <ns1:SigningMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha384" />
+    <ns1:SigningMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512" />
+    <ns1:SigningMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-md5" />
+    <ns1:SigningMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-ripemd160" />
+    <ns1:SigningMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+    <ns1:SigningMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha224" />
+    <ns1:SigningMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" />
+    <ns1:SigningMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha384" />
+    <ns1:SigningMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha512" />
+  </ns0:Extensions>
+  <ns0:SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol" AuthnRequestsSigned="false" WantAssertionsSigned="true">
+    <ns0:KeyDescriptor use="signing">
+      <ns2:KeyInfo>
+        <ns2:X509Data>
+          <ns2:X509Certificate>LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUVTVENDQXJHZ0F3SUJBZ0lRREptWllLMG5BdmlQNmVLM2RnelQ2VEFOQmdrcWhraUc5dzBCQVFzRkFEQ0IKaFRFZU1Cd0dBMVVFQ2hNVmJXdGpaWEowSUdSbGRtVnNiM0J0Wlc1MElFTkJNUzB3S3dZRFZRUUxEQ1JrYVhSMQpjMlZ5UUdScGRIVnpaWEp6TFUxaFkwSnZiMnN0VUhKdkxUUXViRzlqWVd3eE5EQXlCZ05WQkFNTUsyMXJZMlZ5CmRDQmthWFIxYzJWeVFHUnBkSFZ6WlhKekxVMWhZMEp2YjJzdFVISnZMVFF1Ykc5allXd3dIaGNOTWpFd016RXgKTVRZMU1USTVXaGNOTWpNd05qRXhNVFUxTVRJNVdqQlpNU2N3SlFZRFZRUUtFeDV0YTJObGNuUWdaR1YyWld4dgpjRzFsYm5RZ1kyVnlkR2xtYVdOaGRHVXhMakFzQmdOVkJBc01KV1JwZEhWelpYSkFiSGx1Wkc5dUxtZGhjblpsCmVTNWthWFF0WkdsbmFYUmhiQzUyY0c0d2dnRWlNQTBHQ1NxR1NJYjNEUUVCQVFVQUE0SUJEd0F3Z2dFS0FvSUIKQVFDc2Q0QWEvcW54R3VJR0s4Q1NIRk1iWnR6WWxKMnUvajdkeEhrSmxMYzJZZWtjUSt5bnR2dDRvNzhPdDV6ago4dUhOUnJmYTFwQ2oydTQ0eXY4RkNsYzN6MG9Ra3FBM3gyeWFaQmtJZVJpTnplakhhRFNOSTViNWVOa3JMaG5ECjhnbUdKVnQrci8yejZ0VnVYQURpSXRIcmtieDJORzA3VTNlNktxTERjcGlOc21ROEFDRTBSSmNDRFRZOWtpUUwKTU53VnMrblZKdk0vRjhFdHBPNmo5SEpzdTllOG5wQllSTVVZeTVGNjhGSDVtcjYvR241V1h2OVVZbXlsZkZkcApndjBsUzUveUdYUFExMVp6TERQQm9jdGE0N1VHZFhWeWZrcFVzY0xiTnRpRHA0TUNrUmllbWR5b2JKKyt2MHRlCjA2RUZTOVl6cFIrUEp4RUlFTHF6eVR5VkFnTUJBQUdqWURCZU1BNEdBMVVkRHdFQi93UUVBd0lGb0RBVEJnTlYKSFNVRUREQUtCZ2dyQmdFRkJRY0RBVEFmQmdOVkhTTUVHREFXZ0JTQXJGd3oyU0kxcTRPQ2hyWG1qQ2xqdHZScApjekFXQmdOVkhSRUVEekFOZ2d0bGVHRnRjR3hsTG05eVp6QU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FZRUFoTHRPCmNINEx2RTNNdUIwNXNPUHFLcXlvdVFtQlYwMFZDT21tTGZZQ3ovSDRxY2l3Y1hBK0tkVUVod0ZEdzE3dkVXR24KL2tUNHN1aDBHQnVXY3dCaFY1VFEvUDBuM282QjMzZ3pHTFBPbFNJRk9SSmdKaGEzTDhIcEt2QndOQzk2Z2ZQZAo4ckFKYnh0YWxrYkJwS3lrWUJBZ0t0U2szNGhTc0F6aXFqaFVSTTJTNTFtN1NLT2lyQWxuWHNqWEVVaHljellGCjFZOHRQdWdDWkVnazVGMEF6ZDlCemxDVm9HVHA2K3ZiTDJ5YjJpaDFHYnpIYnBqdlMrSGNvQUY5K3g3Q0FxY0MKcVNGZ3VnRjgxb0dDa0hZQ01iWDR0Nm1LSys0alB5QmdaMjdTWjRuMUJZT3FWbzJWZXo0VXdpM096cUdNc1o3MAoyNUxGUm1SWm1vU2JIZEMyanFWejRDREFvRGpoQVIwWmJ5aEFOdTZnZ1RKajIyRWV4bmN1aVdKWE9qbk1mTy9LCktwbFZDSWdUQnliR2QrSERHSVluVW9JOGI1eEdhNThpVmtOdWI5NjJ6SVpqL0lLQytDeDIxR1VWdXYyWnRIT2MKbmVKTVpqVk1yZURwRlRsWkFycnN1cldneTgyUWNEblQvb3owZVhYNWs1cHZzbU4xK05XUkpOV3B5WU5iCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K</ns2:X509Certificate>
+        </ns2:X509Data>
+      </ns2:KeyInfo>
+    </ns0:KeyDescriptor>
+    <ns0:KeyDescriptor use="encryption">
+      <ns2:KeyInfo>
+        <ns2:X509Data>
+          <ns2:X509Certificate>LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUVTVENDQXJHZ0F3SUJBZ0lRREptWllLMG5BdmlQNmVLM2RnelQ2VEFOQmdrcWhraUc5dzBCQVFzRkFEQ0IKaFRFZU1Cd0dBMVVFQ2hNVmJXdGpaWEowSUdSbGRtVnNiM0J0Wlc1MElFTkJNUzB3S3dZRFZRUUxEQ1JrYVhSMQpjMlZ5UUdScGRIVnpaWEp6TFUxaFkwSnZiMnN0VUhKdkxUUXViRzlqWVd3eE5EQXlCZ05WQkFNTUsyMXJZMlZ5CmRDQmthWFIxYzJWeVFHUnBkSFZ6WlhKekxVMWhZMEp2YjJzdFVISnZMVFF1Ykc5allXd3dIaGNOTWpFd016RXgKTVRZMU1USTVXaGNOTWpNd05qRXhNVFUxTVRJNVdqQlpNU2N3SlFZRFZRUUtFeDV0YTJObGNuUWdaR1YyWld4dgpjRzFsYm5RZ1kyVnlkR2xtYVdOaGRHVXhMakFzQmdOVkJBc01KV1JwZEhWelpYSkFiSGx1Wkc5dUxtZGhjblpsCmVTNWthWFF0WkdsbmFYUmhiQzUyY0c0d2dnRWlNQTBHQ1NxR1NJYjNEUUVCQVFVQUE0SUJEd0F3Z2dFS0FvSUIKQVFDc2Q0QWEvcW54R3VJR0s4Q1NIRk1iWnR6WWxKMnUvajdkeEhrSmxMYzJZZWtjUSt5bnR2dDRvNzhPdDV6ago4dUhOUnJmYTFwQ2oydTQ0eXY4RkNsYzN6MG9Ra3FBM3gyeWFaQmtJZVJpTnplakhhRFNOSTViNWVOa3JMaG5ECjhnbUdKVnQrci8yejZ0VnVYQURpSXRIcmtieDJORzA3VTNlNktxTERjcGlOc21ROEFDRTBSSmNDRFRZOWtpUUwKTU53VnMrblZKdk0vRjhFdHBPNmo5SEpzdTllOG5wQllSTVVZeTVGNjhGSDVtcjYvR241V1h2OVVZbXlsZkZkcApndjBsUzUveUdYUFExMVp6TERQQm9jdGE0N1VHZFhWeWZrcFVzY0xiTnRpRHA0TUNrUmllbWR5b2JKKyt2MHRlCjA2RUZTOVl6cFIrUEp4RUlFTHF6eVR5VkFnTUJBQUdqWURCZU1BNEdBMVVkRHdFQi93UUVBd0lGb0RBVEJnTlYKSFNVRUREQUtCZ2dyQmdFRkJRY0RBVEFmQmdOVkhTTUVHREFXZ0JTQXJGd3oyU0kxcTRPQ2hyWG1qQ2xqdHZScApjekFXQmdOVkhSRUVEekFOZ2d0bGVHRnRjR3hsTG05eVp6QU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FZRUFoTHRPCmNINEx2RTNNdUIwNXNPUHFLcXlvdVFtQlYwMFZDT21tTGZZQ3ovSDRxY2l3Y1hBK0tkVUVod0ZEdzE3dkVXR24KL2tUNHN1aDBHQnVXY3dCaFY1VFEvUDBuM282QjMzZ3pHTFBPbFNJRk9SSmdKaGEzTDhIcEt2QndOQzk2Z2ZQZAo4ckFKYnh0YWxrYkJwS3lrWUJBZ0t0U2szNGhTc0F6aXFqaFVSTTJTNTFtN1NLT2lyQWxuWHNqWEVVaHljellGCjFZOHRQdWdDWkVnazVGMEF6ZDlCemxDVm9HVHA2K3ZiTDJ5YjJpaDFHYnpIYnBqdlMrSGNvQUY5K3g3Q0FxY0MKcVNGZ3VnRjgxb0dDa0hZQ01iWDR0Nm1LSys0alB5QmdaMjdTWjRuMUJZT3FWbzJWZXo0VXdpM096cUdNc1o3MAoyNUxGUm1SWm1vU2JIZEMyanFWejRDREFvRGpoQVIwWmJ5aEFOdTZnZ1RKajIyRWV4bmN1aVdKWE9qbk1mTy9LCktwbFZDSWdUQnliR2QrSERHSVluVW9JOGI1eEdhNThpVmtOdWI5NjJ6SVpqL0lLQytDeDIxR1VWdXYyWnRIT2MKbmVKTVpqVk1yZURwRlRsWkFycnN1cldneTgyUWNEblQvb3owZVhYNWs1cHZzbU4xK05XUkpOV3B5WU5iCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K</ns2:X509Certificate>
+        </ns2:X509Data>
+      </ns2:KeyInfo>
+    </ns0:KeyDescriptor>
+    <ns0:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://testing.com/saml2/ls/" />
+    <ns0:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://testing.com/saml2/ls/post" />
+    <ns0:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</ns0:NameIDFormat>
+    <ns0:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://testing.com/saml2/acs/" index="1" />
+    <ns0:AttributeConsumingService index="1">
+      <ns0:ServiceName xml:lang="en" />
+      <ns0:RequestedAttribute Name="http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" FriendlyName="email" isRequired="true" />
+      <ns0:RequestedAttribute Name="eduPersonAffiliation" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" isRequired="false" />
+    </ns0:AttributeConsumingService>
+  </ns0:SPSSODescriptor>
+</ns0:EntityDescriptor>

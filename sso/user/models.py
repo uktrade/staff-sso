@@ -9,10 +9,14 @@ from django.contrib.auth.models import PermissionsMixin
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from sso.oauth2.models import Application as OAuthApplication
-from sso.samlidp.models import SamlApplication
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from sso.samlidp.models import SamlApplication
+
 from .managers import UserManager
 
 
@@ -97,7 +101,7 @@ class AccessProfile(models.Model):
     )
 
     saml2_applications = models.ManyToManyField(
-        SamlApplication,
+        'samlidp.SamlApplication',
         _('access_profiles'),
         blank=True,
     )
@@ -105,11 +109,11 @@ class AccessProfile(models.Model):
     def __str__(self):
         return self.name
 
-    def is_allowed(self, application: Union[OAuthApplication, SamlApplication]):
+    def is_allowed(self, application: Union[OAuthApplication, "SamlApplication"]):
         if isinstance(application, OAuthApplication):
             return application in self.oauth2_applications.all()
         else:
-            return application in self.saml2_applications.filter(enabled=True)
+            return application in self.saml2_applications.filter(active=True)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -263,7 +267,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             _remove_username(email): email for email in self.emails.all().values_list('email', flat=True)
         }
 
-    def can_access(self, application: Union[OAuthApplication, SamlApplication]):
+    def can_access(self, application: Union[OAuthApplication, "SamlApplication"]):
         """ Can the user access this application?"""
 
         if not self.is_active:
@@ -291,7 +295,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return False
 
     @staticmethod
-    def can_access_all_settings(application: Union[OAuthApplication, SamlApplication]):
+    def can_access_all_settings(application: Union[OAuthApplication, "SamlApplication"]):
         """is the user permitted to view all settings recorded against their profile?"""
 
         if isinstance(application, OAuthApplication):
