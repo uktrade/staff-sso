@@ -55,7 +55,7 @@ class AWSProcessor(ModelProcessor):
     USER_ID_FIELD = 'user_id'
 
     def create_identity(self, user, sp_attribute_mapping: Dict[str, str]) -> Dict[str, str]:
-        
+
         # See: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_saml_assertions.html
         # The role and saml arns should be added to the extra_config field of the saml application
 
@@ -68,5 +68,22 @@ class AWSProcessor(ModelProcessor):
 
         identity['https://aws.amazon.com/SAML/Attributes/RoleSessionName'] = self.get_user_id(user, None, None, None)
         identity['https://aws.amazon.com/SAML/Attributes/Role'] = role
+
+        return identity
+
+
+class ApplicationPermissionProcessor(ModelProcessor):
+    """Include application permissions as a list of groups"""
+    
+    def create_identity(self, user, sp_mapping, **extra_config):
+
+        identity = super().create_identity(user, sp_mapping)
+
+        permissions = list(
+            user.application_permissions
+                .filter(saml2_application=self._application)
+                .values_list('permission', flat=True))
+
+        identity['groups'] = permissions
 
         return identity

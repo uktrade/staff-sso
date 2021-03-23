@@ -8,6 +8,7 @@ from sso.samlidp.models import SamlApplication
 from sso.samlidp.processors import (
     AWSProcessor,
     ModelProcessor,
+    ApplicationPermissionProcessor,
 )
 from sso.tests.factories.saml import SamlApplicationFactory
 from sso.tests.factories.user import (
@@ -302,6 +303,30 @@ class TestAWSProcessor:
             identity["https://aws.amazon.com/SAML/Attributes/RoleSessionName"]
             == email.email
         )
+
+
+class TestApplicationPermissionProcessor:
+    def test_groups_are_supplied(self):
+        app1 = SamlApplicationFactory(entity_id='an_entity_id')
+        app2 = SamlApplicationFactory(entity_id='an_second_entity_id')
+
+        ap1 = ApplicationPermissionFactory(saml2_application=app1)
+        ap2 = ApplicationPermissionFactory(saml2_application=app1)
+        ap3 = ApplicationPermissionFactory()
+        ap4 = ApplicationPermissionFactory(saml2_application=app2)
+        ApplicationPermissionFactory(saml2_application=app1)
+        ApplicationPermissionFactory()
+        ap7 = ApplicationPermissionFactory(saml2_application=app2)
+        ap8 = ApplicationPermissionFactory(saml2_application=app1)
+
+        processor = ApplicationPermissionProcessor(entity_id='an_entity_id')
+
+        user = UserFactory(email='hello@world.com', application_permission_list=[ap1, ap3, ap4, ap8])
+        UserFactory(email='goodbye@world.com', application_permission_list=[ap2, ap3, ap7])
+
+        identity = processor.create_identity(user, {})
+
+        assert set(identity['groups']) == {ap1.permission, ap8.permission}
 
 
 class TestIdpInitiatedLogin:
