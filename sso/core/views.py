@@ -1,13 +1,13 @@
 import datetime
 import hmac
 import uuid
-from django.http import JsonResponse
+
 from django.conf import settings
-from django.contrib.auth import login, get_user_model
-from django.db.models.functions import Now
+from django.contrib.auth import get_user_model
+from django.http import JsonResponse
 from django.urls import reverse
-from django.views.decorators.http import require_GET
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET
 from hawkserver import authenticate_hawk_header
 
 from sso.oauth2.models import Application as OAuthApplication
@@ -41,11 +41,11 @@ def activity_stream(request):
 
     def seen_nonce(nonce, id):
         # No replay attack prevention since no shared cache between instances,
-        # but we're ok with that for now
+        # but we're ok with that for
         return False
 
     try:
-        auth_header = request.headers["authorization"]
+        request.headers["authorization"]
     except KeyError:
         return forbidden()
 

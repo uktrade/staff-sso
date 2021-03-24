@@ -1,15 +1,13 @@
 import logging
 from typing import Dict
 
-from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
 from djangosaml2idp.processors import BaseProcessor
 
-
-from .models import SamlApplication
-from sso.user.models import EmailAddress, ServiceEmailAddress
 from sso.core.logging import create_x_access_log
+from sso.user.models import ServiceEmailAddress
+from .models import SamlApplication
 
 
 logger = logging.getLogger(__name__)

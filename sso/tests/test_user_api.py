@@ -8,7 +8,7 @@ from sso.oauth2.models import Application
 
 from .factories.oauth import AccessTokenFactory, ApplicationFactory
 from .factories.saml import SamlApplicationFactory
-from .factories.user import GroupFactory, UserFactory, AccessProfileFactory
+from .factories.user import AccessProfileFactory, GroupFactory, UserFactory
 
 pytestmark = [pytest.mark.django_db]
 
@@ -357,7 +357,7 @@ class TestApiUserIntrospect:
     def test_with_valid_token_and_permitted_applications(self, api_client):
         user, token = get_oauth_token(scope="introspection")
 
-        app = ApplicationFactory(display_name="aaa", users=[user])
+        ApplicationFactory(display_name="aaa", users=[user])
 
         user.emails.create(email="test@aaa.com")
         user.emails.create(email="test@bbb.com")
@@ -387,7 +387,7 @@ class TestApiUserIntrospect:
     def test_with_user_id(self, api_client):
         user, token = get_oauth_token(scope="introspection")
 
-        app = ApplicationFactory(display_name="second app", users=[user])
+        ApplicationFactory(display_name="second app", users=[user])
         api_client.credentials(HTTP_AUTHORIZATION="Bearer " + token)
         response = api_client.get(
             self.GET_USER_INTROSPECT_URL + "?user_id={}".format(str(user.user_id))
@@ -415,7 +415,7 @@ class TestApiUserIntrospect:
     def test_with_email_user_id(self, api_client):
         user, token = get_oauth_token(scope="introspection")
 
-        app = ApplicationFactory(users=[user], display_name="a second test app")
+        ApplicationFactory(users=[user], display_name="a second test app")
         api_client.credentials(HTTP_AUTHORIZATION="Bearer " + token)
         response = api_client.get(
             self.GET_USER_INTROSPECT_URL + "?email_user_id={}".format(user.email_user_id)
@@ -836,7 +836,6 @@ class TestAPISearchUsers:
         response = api_client.get(self.GET_USER_SEARCH_URL)
 
         assert response.status_code == 200
-        print(response.json())
         assert response.data["count"] == 3
 
     def test_list_access_by_domain_and_permitted_app_and_access_profile_related_emails(
@@ -889,7 +888,7 @@ class TestAPISearchUsers:
         search_user, def_oauth_app, token = self.setup_search_user()
         saml_app = SamlApplicationFactory(entity_id="an_entity_id", active=True)
         ap = AccessProfileFactory(saml_apps_list=[saml_app])
-        saml_user = UserFactory(
+        UserFactory(
             email="saml.user@example.com",
             first_name="Saml",
             last_name="User",

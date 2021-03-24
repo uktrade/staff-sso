@@ -6,8 +6,8 @@ from unittest.mock import Mock
 from urllib.parse import parse_qs, quote, urlencode, urlsplit
 
 import pytest
-from django.http.cookie import SimpleCookie
 from django.http import HttpRequest
+from django.http.cookie import SimpleCookie
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from freezegun import freeze_time
@@ -179,7 +179,7 @@ class TestSAMLLogin:
         assert response.status_code == 200
 
         assert (
-            '<input type="hidden" name="RelayState" value="/o/authorize/&quot;&gt;&lt;script&gt;alert(&#x27;NCC+XSS&#x27;)&lt;/script&gt;?scope=read write" />'
+            '<input type="hidden" name="RelayState" value="/o/authorize/&quot;&gt;&lt;script&gt;alert(&#x27;NCC+XSS&#x27;)&lt;/script&gt;?scope=read write" />'  # noqa: E501
             in content
         )  # noqa
         assert "<script>alert('NCC+XSS')</script>" not in content
@@ -473,7 +473,7 @@ class TestSAMLLogin:
         assert user.email == "john.smith@test.com"
         assert user.first_name == "John"
         assert user.last_name == "Smith"
-        assert user.is_active == True
+        assert user.is_active
 
 
 class TestOAuthToken:

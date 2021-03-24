@@ -2,24 +2,23 @@ from functools import reduce
 from operator import or_
 
 from django.contrib.auth import get_user_model
-import django_filters
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet
-
 from oauth2_provider.contrib.rest_framework import TokenHasScope
+
 from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 
 from sso.oauth2.models import Application as OAuthApplication
+from .autocomplete import AutocompleteFilter
+from .models import User
 from .serializers import (
-    UserSerializer,
-    UserParamSerializer,
     UserDetailsSerializer,
     UserListSerializer,
+    UserParamSerializer,
+    UserSerializer,
 )
-from .models import User
-from .autocomplete import AutocompleteFilter
 
 
 class UserRetrieveViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):

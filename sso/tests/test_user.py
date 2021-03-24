@@ -2,9 +2,9 @@ import datetime
 from unittest import mock
 
 import pytest
-from freezegun import freeze_time
 from django.http import HttpRequest
 from django.utils import timezone
+from freezegun import freeze_time
 
 from sso.user.middleware import UpdatedLastAccessedMiddleware
 from sso.user.models import AccessProfile, User
@@ -522,7 +522,7 @@ class TestUser:
         user.save()
 
         client.login(request=HttpRequest(), email="goblin@example.com", password="12345")
-        response = client.get("/")
+        client.get("/")
 
         assert User.objects.get(pk=user.pk).last_accessed == datetime.datetime.now(
             tz=datetime.timezone.utc

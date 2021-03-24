@@ -1,15 +1,15 @@
-import urllib.parse
 import time
+import urllib.parse
 
-from freezegun import freeze_time
 import mohawk
-from django.urls import reverse
 import pytest
+from django.urls import reverse
+from freezegun import freeze_time
 
+from sso.user.middleware import UpdatedLastAccessedMiddleware
 from .factories.oauth import ApplicationFactory
 from .factories.saml import SamlApplicationFactory
-from .factories.user import UserFactory, AccessProfileFactory
-from sso.user.middleware import UpdatedLastAccessedMiddleware
+from .factories.user import AccessProfileFactory, UserFactory
 
 
 def test_via_public_internet_then_403(api_client):
@@ -29,8 +29,7 @@ def test_via_public_internet_then_403(api_client):
 
 def test_no_auth_header_then_403(api_client):
     path = reverse("api-v1:core:activity-stream")
-    host = "localhost:8080"
-    url = f"http://{host}{path}"
+
     response = api_client.get(
         path,
         content_type=None,
@@ -235,9 +234,7 @@ def test_no_n_plus_1_query(api_client, django_assert_num_queries):
     ap.oauth2_applications.add(ApplicationFactory())
     ap.saml2_applications.add(SamlApplicationFactory())
     app_direct = ApplicationFactory()
-    users = UserFactory.create_batch(
-        50, add_access_profiles=[ap], add_permitted_applications=[app_direct]
-    )
+    UserFactory.create_batch(50, add_access_profiles=[ap], add_permitted_applications=[app_direct])
 
     time.sleep(1)
 
@@ -245,7 +242,7 @@ def test_no_n_plus_1_query(api_client, django_assert_num_queries):
     path = reverse("api-v1:core:activity-stream")
 
     with django_assert_num_queries(7):
-        response_1 = hawk_request(api_client, host, path)
+        hawk_request(api_client, host, path)
 
 
 @pytest.mark.django_db
@@ -256,10 +253,12 @@ def test_with_permitted_apps(api_client, django_assert_num_queries):
         SamlApplicationFactory(pretty_name="App B", start_url="https://b.com/")
     )
     app_direct = ApplicationFactory(display_name="App A", start_url="https://a.com/")
-    app_no_access = ApplicationFactory(display_name="App D", start_url="https://d.com/")
-    users = UserFactory(add_access_profiles=[ap], add_permitted_applications=[app_direct])
+    app_no_access = ApplicationFactory(  # noqa: F841
+        display_name="App D", start_url="https://d.com/"
+    )
+    UserFactory(add_access_profiles=[ap], add_permitted_applications=[app_direct])
 
-    default_app = ApplicationFactory(
+    ApplicationFactory(
         display_name="App E", start_url="https://e.com/", default_access_allowed=True
     )
 

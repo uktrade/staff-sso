@@ -1,5 +1,5 @@
-from ipaddress import ip_network, ip_address
 import logging
+from ipaddress import ip_address, ip_network
 
 from django.conf import settings
 

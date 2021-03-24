@@ -6,7 +6,6 @@ except ImportError:
     from django.core.urlresolvers import reverse
 
 from .factories.oauth import AccessTokenFactory, ApplicationFactory, UserFactory
-from .factories.user import AccessProfileFactory
 
 pytestmark = [pytest.mark.django_db]
 

@@ -2,9 +2,9 @@ import pytest
 from django.conf import settings
 from django.urls import reverse
 
+from sso.localauth.models import DomainWhitelist
 from .factories.user import UserFactory
 
-from sso.localauth.models import DomainWhitelist
 
 pytestmark = pytest.mark.django_db
 

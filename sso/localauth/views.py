@@ -1,10 +1,8 @@
+from axes.decorators import axes_dispatch
 from django.conf import settings
 from django.contrib.auth import views
-from django.shortcuts import Http404, redirect
+from django.shortcuts import Http404
 from django.utils.decorators import method_decorator
-from django.utils.http import is_safe_url
-
-from axes.decorators import axes_dispatch
 
 from .models import DomainWhitelist
 

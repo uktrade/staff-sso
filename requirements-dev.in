@@ -15,7 +15,7 @@ flake8-blind-except
 flake8-debugger
 flake8-import-order
 flake8-print
-flake8-quotes
+flake8-double-quotes
 
 lxml
 mohawk==1.1.0

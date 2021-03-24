@@ -1,14 +1,12 @@
-import datetime
 import re
 
-from freezegun import freeze_time
 import pytest
-
 from django.contrib.admin.models import LogEntry
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser, Permission
 from django.shortcuts import reverse
 from django.utils import timezone
+from freezegun import freeze_time
 
 from sso.user.admin import UserAdmin, UserForm
 from sso.user.admin_views import ShowUserPermissionsView
@@ -322,4 +320,4 @@ class TestDisableUser:
         user.refresh_from_db()
 
         assert user.is_active
-        assert user.became_inactive_on == None
+        assert user.became_inactive_on is None

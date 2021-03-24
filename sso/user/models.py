@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import uuid
+from typing import TYPE_CHECKING
 from typing import Union
 
 from django.conf import settings
@@ -13,12 +14,10 @@ from django.utils.translation import gettext_lazy as _
 
 from sso.oauth2.models import Application as OAuthApplication
 
-from typing import TYPE_CHECKING
+from .managers import UserManager
 
 if TYPE_CHECKING:
-    from sso.samlidp.models import SamlApplication
-
-from .managers import UserManager
+    from sso.samlidp.models import SamlApplication  # noqa: F401
 
 
 def build_email_user_id(email, user_id):

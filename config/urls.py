@@ -1,11 +1,12 @@
 from django.conf import settings
-from django.urls import path, include
 from django.contrib import admin
+from django.urls import include, path
+
 from django.views.generic.base import RedirectView, TemplateView
 
+from sso.admin.views import admin_login_view
 from sso.healthcheck.views import HealthCheckView
 from . import api_urls
-from sso.admin.views import admin_login_view
 
 app_name = "staff_sso"
 

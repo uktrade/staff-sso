@@ -1,19 +1,17 @@
-import os
 import pytest
-
 from django.http import HttpRequest
 from django.urls import reverse
 
 from sso.samlidp.models import SamlApplication
 from sso.samlidp.processors import (
+    ApplicationPermissionProcessor,
     AWSProcessor,
     ModelProcessor,
-    ApplicationPermissionProcessor,
 )
 from sso.tests.factories.saml import SamlApplicationFactory
 from sso.tests.factories.user import (
-    ApplicationPermissionFactory,
     AccessProfileFactory,
+    ApplicationPermissionFactory,
     ServiceEmailAddressFactory,
     UserFactory,
 )
@@ -308,8 +306,6 @@ class TestApplicationPermissionProcessor:
 
 class TestIdpInitiatedLogin:
     def test_alias_entry(self, client, settings):
-
-        from djangosaml2idp.idp import IDP
 
         saml_application = SamlApplicationFactory(
             entity_id="an-alias", real_entity_id="http://testsp/saml2/metadata/", active=True

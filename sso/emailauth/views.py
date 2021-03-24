@@ -1,7 +1,7 @@
 import datetime as dt
 
 from django.conf import settings
-from django.contrib.auth import login, get_user_model
+from django.contrib.auth import get_user_model, login
 from django.shortcuts import redirect, render
 from django.views.generic import View
 from django.views.generic.edit import FormView

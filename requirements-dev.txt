@@ -95,18 +95,17 @@ flake8-blind-except==0.1.1
     # via -r requirements-dev.in
 flake8-debugger==3.1.0
     # via -r requirements-dev.in
+flake8-double-quotes==0.0.1
+    # via -r requirements-dev.in
 flake8-import-order==0.18
     # via -r requirements-dev.in
 flake8-print==3.1.0
-    # via -r requirements-dev.in
-flake8-quotes==1.0.0
     # via -r requirements-dev.in
 flake8==3.5.0
     # via
     #   -r requirements-dev.in
     #   flake8-debugger
     #   flake8-print
-    #   flake8-quotes
 freezegun==0.3.10
     # via -r requirements-dev.in
 google-api-core==1.25.1

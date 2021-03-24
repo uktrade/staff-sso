@@ -1,11 +1,11 @@
 import urllib.parse
 
-from sso.emailauth.models import EmailToken
-
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
-from django.conf import settings
 from django.urls import reverse
+
+from sso.emailauth.models import EmailToken
 
 
 class Command(BaseCommand):

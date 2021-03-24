@@ -12,10 +12,10 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.http import is_safe_url
 from django.views.generic.edit import FormView
-
 from djangosaml2.conf import get_config
 from djangosaml2.utils import available_idps
 from djangosaml2.views import AssertionConsumerServiceView
+
 from sso.core.logging import create_x_access_log
 from sso.emailauth.models import EmailToken
 

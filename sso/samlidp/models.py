@@ -2,12 +2,11 @@ import logging
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from djangosaml2idp.models import AbstractServiceProvider
 
 from sso.core.ip_filter import get_client_ip
 
 logger = logging.getLogger(__file__)
-
-from djangosaml2idp.models import AbstractServiceProvider
 
 
 class SamlApplication(AbstractServiceProvider):

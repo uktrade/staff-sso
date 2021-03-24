@@ -12,7 +12,7 @@ from django.views.generic.base import View
 
 from sso.oauth2.models import Application
 from sso.samlidp.models import SamlApplication
-from .data_export import UserDataExport, EmailLastLoginExport
+from .data_export import EmailLastLoginExport, UserDataExport
 from .models import User
 
 

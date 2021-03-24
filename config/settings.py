@@ -3,11 +3,10 @@ import os
 import shutil
 import sys
 
-from django.urls import reverse_lazy
-
 import dj_database_url
 import environ
 import saml2
+from django.urls import reverse_lazy
 from saml2 import saml
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)

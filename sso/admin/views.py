@@ -1,7 +1,7 @@
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect
 from django.urls import reverse
-from django.core.exceptions import PermissionDenied
 
 
 def admin_login_view(request):

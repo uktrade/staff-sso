@@ -1,5 +1,5 @@
 from django.urls import path
-from djangosaml2.views import LogoutInitView, LoginView, LogoutView, LogoutView, MetadataView
+from djangosaml2.views import LoginView, LogoutInitView, LogoutView, MetadataView
 
 from . import views
 
