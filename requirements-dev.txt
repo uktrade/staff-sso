@@ -46,11 +46,13 @@ click==7.1.2
     # via black
 coverage==4.5.1
     # via pytest-cov
-cryptography==3.3.1
+cryptography==3.3.2
     # via
     #   -r requirements.txt
     #   pyopenssl
     #   pysaml2
+dataclasses==0.8
+    # via black
 defusedxml==0.5.0
     # via
     #   -r requirements.txt
