@@ -119,6 +119,13 @@ If we have to add/change a dev library::
     pip-sync requirements-dev.txt
 
 
+Code quality
+------------
+
+python-black and flake8 are used to ensure consistency. Ensure that new code has been formatted by black and flake8 runs without raising any issues.
+
+
+
 =====================
 User Settings Storage
 =====================
