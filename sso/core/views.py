@@ -1,13 +1,13 @@
 import datetime
 import hmac
 import uuid
-from django.http import JsonResponse
+
 from django.conf import settings
-from django.contrib.auth import login, get_user_model
-from django.db.models.functions import Now
+from django.contrib.auth import get_user_model
+from django.http import JsonResponse
 from django.urls import reverse
-from django.views.decorators.http import require_GET
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET
 from hawkserver import authenticate_hawk_header
 
 from sso.oauth2.models import Application as OAuthApplication
@@ -22,58 +22,60 @@ def activity_stream(request):
             status=403,
         )
 
-
     ############################################
     ## Ensure not accessed via public networking
 
-    via_public_internet = 'x-forwarded-for' in request.headers
+    via_public_internet = "x-forwarded-for" in request.headers
     if via_public_internet:
         return forbidden()
-
 
     ###########################
     ## Ensure signed with Hawk
 
     def lookup_credentials(passed_id):
         user = {
-            'id': settings.ACTIVITY_STREAM_HAWK_ID,
-            'key':  settings.ACTIVITY_STREAM_HAWK_SECRET,
+            "id": settings.ACTIVITY_STREAM_HAWK_ID,
+            "key": settings.ACTIVITY_STREAM_HAWK_SECRET,
         }
-        return \
-            user if hmac.compare_digest(passed_id, user['id']) else \
-            None
+        return user if hmac.compare_digest(passed_id, user["id"]) else None
 
     def seen_nonce(nonce, id):
         # No replay attack prevention since no shared cache between instances,
-        # but we're ok with that for now
+        # but we're ok with that for
         return False
 
     try:
-        auth_header = request.headers['authorization']
+        request.headers["authorization"]
     except KeyError:
         return forbidden()
 
     # This is brittle to not running in PaaS or not via private networking
-    host, port = request.META['HTTP_HOST'].split(':')
+    host, port = request.META["HTTP_HOST"].split(":")
 
     max_skew_seconds = 15
     error_message, credentials = authenticate_hawk_header(
-        lookup_credentials, seen_nonce, max_skew_seconds,
-        request.headers['authorization'],
-        request.method, host, port, request.get_full_path(),
-        request.headers.get('content-type', ''), request.body,
+        lookup_credentials,
+        seen_nonce,
+        max_skew_seconds,
+        request.headers["authorization"],
+        request.method,
+        host,
+        port,
+        request.get_full_path(),
+        request.headers.get("content-type", ""),
+        request.body,
     )
     if error_message is not None:
         return forbidden()
 
-
     #############
     ## Get cursor
 
-    after_ts_str, after_user_id_str = request.GET.get('cursor', '0.0_00000000-0000-4000-0000-000000000000').split('_')
+    after_ts_str, after_user_id_str = request.GET.get(
+        "cursor", "0.0_00000000-0000-4000-0000-000000000000"
+    ).split("_")
     after_ts = datetime.datetime.fromtimestamp(float(after_ts_str))
     after_user_id = uuid.UUID(after_user_id_str)
-
 
     ##########################################################
     ## Fetch activities after cursor (i.e. user modifications)
@@ -91,24 +93,42 @@ def activity_stream(request):
 
     per_page = 50
     User = get_user_model()
-    users = list(User.objects.only(
-        'user_id', 'email_user_id', 'last_modified', 'last_accessed', 'is_active',
-        'first_name', 'last_name', 'email', 'contact_email', 'date_joined',
-    ).prefetch_related(
-        'emails', 'permitted_applications', 'access_profiles__oauth2_applications', 'access_profiles__saml2_applications')
-    .extra(
-        where=['(last_modified, user_id) > (%s, %s)', "last_modified < STATEMENT_TIMESTAMP() - INTERVAL '1 second'"],
-        params=(after_ts, after_user_id),
-    ).order_by('last_modified', 'user_id')[:per_page])
-
+    users = list(
+        User.objects.only(
+            "user_id",
+            "email_user_id",
+            "last_modified",
+            "last_accessed",
+            "is_active",
+            "first_name",
+            "last_name",
+            "email",
+            "contact_email",
+            "date_joined",
+        )
+        .prefetch_related(
+            "emails",
+            "permitted_applications",
+            "access_profiles__oauth2_applications",
+            "access_profiles__saml2_applications",
+        )
+        .extra(
+            where=[
+                "(last_modified, user_id) > (%s, %s)",
+                "last_modified < STATEMENT_TIMESTAMP() - INTERVAL '1 second'",
+            ],
+            params=(after_ts, after_user_id),
+        )
+        .order_by("last_modified", "user_id")[:per_page]
+    )
 
     ################################################################
     ## Convert to activities, with link to next page if at least one
 
     def next_url(after_ts, after_user_id):
-        return \
-            request.build_absolute_uri(reverse('api-v1:core:activity-stream')) + \
-            '?cursor={}_{}'.format(str(after_ts.timestamp()), str(after_user_id))
+        return request.build_absolute_uri(
+            reverse("api-v1:core:activity-stream")
+        ) + "?cursor={}_{}".format(str(after_ts.timestamp()), str(after_user_id))
 
     def without_duplicates(seq):
         seen = set()
@@ -117,51 +137,53 @@ def activity_stream(request):
     default_access_apps = OAuthApplication.get_default_access_applications()
 
     page = {
-        '@context': [
-            'https://www.w3.org/ns/activitystreams',
-            {'dit': 'https://www.trade.gov.uk/ns/activitystreams/v1'}
+        "@context": [
+            "https://www.w3.org/ns/activitystreams",
+            {"dit": "https://www.trade.gov.uk/ns/activitystreams/v1"},
         ],
-        'type': 'Collection',
-        'orderedItems': [
+        "type": "Collection",
+        "orderedItems": [
             {
-                'id': f'dit:StaffSSO:User:{user.user_id}:Update',
-                'published': user.last_modified,
-                'object': {
-                    'id': f'dit:StaffSSO:User:{user.user_id}',
-                    'type': 'dit:StaffSSO:User',
-                    'name': user.get_full_name(),
-                    'dit:StaffSSO:User:userId': user.user_id,
-                    'dit:StaffSSO:User:emailUserId': user.email_user_id,
-                    'dit:StaffSSO:User:contactEmailAddress': user.contact_email if user.contact_email else None,
-                    'dit:StaffSSO:User:joined': user.date_joined,
-                    'dit:StaffSSO:User:lastAccessed': user.last_accessed,
-                    'dit:StaffSSO:User:permittedApplications': [
+                "id": f"dit:StaffSSO:User:{user.user_id}:Update",
+                "published": user.last_modified,
+                "object": {
+                    "id": f"dit:StaffSSO:User:{user.user_id}",
+                    "type": "dit:StaffSSO:User",
+                    "name": user.get_full_name(),
+                    "dit:StaffSSO:User:userId": user.user_id,
+                    "dit:StaffSSO:User:emailUserId": user.email_user_id,
+                    "dit:StaffSSO:User:contactEmailAddress": user.contact_email
+                    if user.contact_email
+                    else None,
+                    "dit:StaffSSO:User:joined": user.date_joined,
+                    "dit:StaffSSO:User:lastAccessed": user.last_accessed,
+                    "dit:StaffSSO:User:permittedApplications": [
                         {
                             # name and url are both in the W3C Activity Streams 2.0 Vocab
-                            'name': app['name'],
-                            'url': app['url']
+                            "name": app["name"],
+                            "url": app["url"],
                         }
                         for app in user.get_permitted_applications(
                             include_non_public=True,
-                            get_default_access_allowed_apps=lambda: default_access_apps)
+                            get_default_access_allowed_apps=lambda: default_access_apps,
+                        )
                     ],
-                    'dit:StaffSSO:User:status': 'active' if user.is_active else 'inactive',
-                    'dit:StaffSSO:User:becameInactiveOn': None if user.is_active else user.became_inactive_on,
-                    'dit:firstName': user.first_name,
-                    'dit:lastName': user.last_name,
-                    'dit:emailAddress': without_duplicates(
-                        ([user.contact_email] if user.contact_email else []) +
-                        [user.email] +
-                        sorted([email.email for email in user.emails.all()])
-                    )
-                }
+                    "dit:StaffSSO:User:status": "active" if user.is_active else "inactive",
+                    "dit:StaffSSO:User:becameInactiveOn": None
+                    if user.is_active
+                    else user.became_inactive_on,
+                    "dit:firstName": user.first_name,
+                    "dit:lastName": user.last_name,
+                    "dit:emailAddress": without_duplicates(
+                        ([user.contact_email] if user.contact_email else [])
+                        + [user.email]
+                        + sorted([email.email for email in user.emails.all()])
+                    ),
+                },
             }
             for user in users
         ],
-        **(
-            {'next': next_url(users[-1].last_modified, users[-1].user_id)} if users \
-            else {}
-        )
+        **({"next": next_url(users[-1].last_modified, users[-1].user_id)} if users else {}),
     }
 
     return JsonResponse(

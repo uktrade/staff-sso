@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('oauth2', '0006_application_application_key'),
+        ("oauth2", "0006_application_application_key"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='application',
-            name='application_key',
-            field=models.SlugField(unique=True, verbose_name='unique text id'),
+            model_name="application",
+            name="application_key",
+            field=models.SlugField(unique=True, verbose_name="unique text id"),
         ),
     ]

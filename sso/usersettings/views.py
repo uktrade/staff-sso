@@ -1,6 +1,6 @@
 import json
-from django.http import HttpResponse
 
+from django.http import HttpResponse
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -25,27 +25,22 @@ class UserSettingsListView(APIView):
         user_id = request.user.user_id
 
         for data in settings_list:
-            clean_key, slug, key, prefix = user_settings.get_filter_params(data, request, user_settings)
+            clean_key, slug, key, prefix = user_settings.get_filter_params(
+                data, request, user_settings
+            )
 
-            settings = UserSettings.sanitize_settings(
-                user_settings,
-                data,
-                key,
-                prefix)
+            settings = UserSettings.sanitize_settings(user_settings, data, key, prefix)
 
             try:
                 """
                 Update existing record
                 """
                 UserSettings.objects.get(
-                    user_id=user_id,
-                    app_slug=slug,
-                    settings__startswith=clean_key)
+                    user_id=user_id, app_slug=slug, settings__startswith=clean_key
+                )
 
                 existing_record = UserSettings.objects.filter(
-                    user_id=user_id,
-                    app_slug=slug,
-                    settings__startswith=clean_key
+                    user_id=user_id, app_slug=slug, settings__startswith=clean_key
                 )
 
                 if len(existing_record) and len(existing_record) <= 1:
@@ -57,13 +52,13 @@ class UserSettingsListView(APIView):
 
             except UserSettings.DoesNotExist:
                 all_settings = user_settings.get_all_settings(request, user_id, slug)
-                new_settings = slug + '.' + settings
+                new_settings = slug + "." + settings
                 all_settings.append(new_settings)
 
                 try:
                     """
-                    Backtest if the new setting fits the existing data. 
-                    If it doesn't fit then it will raise a `conflict` exception in the 
+                    Backtest if the new setting fits the existing data.
+                    If it doesn't fit then it will raise a `conflict` exception in the
                     method which merges the atomic settings together in the json output
                     """
                     user_settings.get_json_data(all_settings)
@@ -74,10 +69,7 @@ class UserSettingsListView(APIView):
                 """
                 Then create the new record
                 """
-                UserSettings.set_settings(
-                                          user_id=user_id,
-                                          app_slug=slug,
-                                          settings=settings)
+                UserSettings.set_settings(user_id=user_id, app_slug=slug, settings=settings)
 
         return Response(status=status.HTTP_200_OK)
 
@@ -93,13 +85,13 @@ class UserSettingsListView(APIView):
         settings_list = user_settings.get_dot_notation(raw_data)
 
         for data in settings_list:
-            clean_key, slug, key, prefix = user_settings.get_filter_params(data, request, user_settings)
+            clean_key, slug, key, prefix = user_settings.get_filter_params(
+                data, request, user_settings
+            )
 
         try:
             recorded_settings = UserSettings.objects.filter(
-                user_id=user_id,
-                app_slug=slug,
-                settings__startswith=clean_key
+                user_id=user_id, app_slug=slug, settings__startswith=clean_key
             )
 
             if recorded_settings:
@@ -122,9 +114,9 @@ class UserSettingsListView(APIView):
         auth_app_slug = request.auth.application.name
         can_view_all_user_settings = request.auth.application.can_view_all_user_settings
 
-        all_settings = user_settings.get_all_settings(request, user_id, auth_app_slug, can_view_all_user_settings)
+        all_settings = user_settings.get_all_settings(
+            request, user_id, auth_app_slug, can_view_all_user_settings
+        )
         json_data = user_settings.get_json_data(all_settings)
 
         return HttpResponse(content=json.dumps(json_data, indent=4), status=status.HTTP_200_OK)
-
-

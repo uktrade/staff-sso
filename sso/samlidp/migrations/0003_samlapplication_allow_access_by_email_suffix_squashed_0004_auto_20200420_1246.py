@@ -5,16 +5,25 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    replaces = [('samlidp', '0003_samlapplication_allow_access_by_email_suffix'), ('samlidp', '0004_auto_20200420_1246')]
+    replaces = [
+        ("samlidp", "0003_samlapplication_allow_access_by_email_suffix"),
+        ("samlidp", "0004_auto_20200420_1246"),
+    ]
 
     dependencies = [
-        ('samlidp', '0002_samlapplication_slug'),
+        ("samlidp", "0002_samlapplication_slug"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='samlapplication',
-            name='allow_access_by_email_suffix',
-            field=models.CharField(blank=True, help_text='A comma separated list of email domains, e.g. "mobile.ukti.gov.uk, trade.gsi.gov.uk, fco.gov.uk" User\'s with an email in this list will be given access.  NOTE: all user emails are checked - including aliases.', max_length=255, null=True, verbose_name='allow access by email'),
+            model_name="samlapplication",
+            name="allow_access_by_email_suffix",
+            field=models.CharField(
+                blank=True,
+                help_text='A comma separated list of email domains, e.g. "mobile.ukti.gov.uk, trade.gsi.gov.uk, fco.gov.uk" User\'s with an email in this list will be given access.  NOTE: all user emails are checked - including aliases.',
+                max_length=255,
+                null=True,
+                verbose_name="allow access by email",
+            ),
         ),
     ]

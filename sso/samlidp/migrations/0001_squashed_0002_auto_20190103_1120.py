@@ -5,23 +5,51 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    replaces = [('samlidp', '0001_initial'), ('samlidp', '0002_auto_20190103_1120')]
+    replaces = [("samlidp", "0001_initial"), ("samlidp", "0002_auto_20190103_1120")]
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='SamlApplication',
+            name="SamlApplication",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100, verbose_name='name')),
-                ('start_url', models.CharField(blank=True, max_length=255, null=True, unique=True)),
-                ('entity_id', models.CharField(help_text='The entity ID of the service provider. WARNING: changing this may break the integration.', max_length=255, unique=True, verbose_name='Saml2 entity id')),
-                ('enabled', models.BooleanField(default=True, help_text='Is this integration enabled?', verbose_name='Enabled?')),
-                ('allowed_ips', models.CharField(blank=True, help_text='A comma separated list of allowed ips. Leave blank to disable ip restriction.', max_length=255, null=True, verbose_name='allowed ips')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("name", models.CharField(max_length=100, verbose_name="name")),
+                ("start_url", models.CharField(blank=True, max_length=255, null=True, unique=True)),
+                (
+                    "entity_id",
+                    models.CharField(
+                        help_text="The entity ID of the service provider. WARNING: changing this may break the integration.",
+                        max_length=255,
+                        unique=True,
+                        verbose_name="Saml2 entity id",
+                    ),
+                ),
+                (
+                    "enabled",
+                    models.BooleanField(
+                        default=True,
+                        help_text="Is this integration enabled?",
+                        verbose_name="Enabled?",
+                    ),
+                ),
+                (
+                    "allowed_ips",
+                    models.CharField(
+                        blank=True,
+                        help_text="A comma separated list of allowed ips. Leave blank to disable ip restriction.",
+                        max_length=255,
+                        null=True,
+                        verbose_name="allowed ips",
+                    ),
+                ),
             ],
         ),
     ]

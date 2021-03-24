@@ -6,9 +6,8 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('user', '0034_user_is_active'),
-        ('user', '0034_remove_user_use_new_journey'),
+        ("user", "0034_user_is_active"),
+        ("user", "0034_remove_user_use_new_journey"),
     ]
 
-    operations = [
-    ]
+    operations = []

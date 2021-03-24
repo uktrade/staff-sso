@@ -8,15 +8,29 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='DomainWhitelist',
+            name="DomainWhitelist",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('domain', models.CharField(max_length=255, validators=[django.core.validators.RegexValidator(message='Invalid domain', regex='[a-zA-Z-0-9\\.-]+')])),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "domain",
+                    models.CharField(
+                        max_length=255,
+                        validators=[
+                            django.core.validators.RegexValidator(
+                                message="Invalid domain", regex="[a-zA-Z-0-9\\.-]+"
+                            )
+                        ],
+                    ),
+                ),
             ],
         ),
     ]

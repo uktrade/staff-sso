@@ -14,4 +14,4 @@ class UpdatedLastAccessedMiddleware(object):
     def set_last_accessed_date(self, request):
         if request.user.is_authenticated:
             request.user.last_accessed = now()
-            request.user.save(update_fields=['last_accessed'])
+            request.user.save(update_fields=["last_accessed"])

@@ -2,10 +2,7 @@ import logging
 from typing import Any, Optional, Tuple
 
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 from djangosaml2.backends import Saml2Backend
-
-from djangosaml2.signals import pre_user_save
 
 try:
     from django.contrib.auth.models import SiteProfileNotAvailable
@@ -19,7 +16,6 @@ logger = logging.getLogger("djangosaml2")
 
 
 class MultiEmailSaml2Backend(Saml2Backend):
-
     def get_or_create_user(
         self,
         user_lookup_key: str,

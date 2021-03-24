@@ -2,7 +2,7 @@ from django.core.validators import RegexValidator
 from django.db import models
 
 
-domain_validator = RegexValidator(regex=r'[a-zA-Z0-9\.-]+', message='Invalid domain')
+domain_validator = RegexValidator(regex=r"[a-zA-Z0-9\.-]+", message="Invalid domain")
 
 
 class DomainWhitelist(models.Model):

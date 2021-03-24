@@ -9,13 +9,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('user', '0004_user_permitted_applications'),
+        ("user", "0004_user_permitted_applications"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='user',
-            name='permitted_applications',
-            field=models.ManyToManyField(blank=True, help_text='Applications that this user is permitted to access', related_name='users', to=settings.OAUTH2_PROVIDER_APPLICATION_MODEL),
+            model_name="user",
+            name="permitted_applications",
+            field=models.ManyToManyField(
+                blank=True,
+                help_text="Applications that this user is permitted to access",
+                related_name="users",
+                to=settings.OAUTH2_PROVIDER_APPLICATION_MODEL,
+            ),
         ),
     ]

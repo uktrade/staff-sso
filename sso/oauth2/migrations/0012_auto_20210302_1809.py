@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('oauth2', '0011_application_public'),
+        ("oauth2", "0011_application_public"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='application',
-            name='redirect_uris',
-            field=models.TextField(blank=True, help_text='Allowed URIs list, space separated'),
+            model_name="application",
+            name="redirect_uris",
+            field=models.TextField(blank=True, help_text="Allowed URIs list, space separated"),
         ),
     ]

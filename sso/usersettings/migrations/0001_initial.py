@@ -7,17 +7,21 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='UserSettings',
+            name="UserSettings",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('user_id', models.CharField(max_length=50, verbose_name='unique user id')),
-                ('app_slug', models.CharField(blank=True, max_length=50, verbose_name='app slug')),
-                ('settings', models.TextField(verbose_name='settings')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("user_id", models.CharField(max_length=50, verbose_name="unique user id")),
+                ("app_slug", models.CharField(blank=True, max_length=50, verbose_name="app slug")),
+                ("settings", models.TextField(verbose_name="settings")),
             ],
         ),
     ]

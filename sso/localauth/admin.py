@@ -5,4 +5,4 @@ from .models import DomainWhitelist
 
 @admin.register(DomainWhitelist)
 class DomainWhitelistAdmin(admin.ModelAdmin):
-    list_display = ('domain',)
+    list_display = ("domain",)

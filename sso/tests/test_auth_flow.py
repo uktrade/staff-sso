@@ -6,8 +6,8 @@ from unittest.mock import Mock
 from urllib.parse import parse_qs, quote, urlencode, urlsplit
 
 import pytest
-from django.http.cookie import SimpleCookie
 from django.http import HttpRequest
+from django.http.cookie import SimpleCookie
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from freezegun import freeze_time
@@ -30,9 +30,7 @@ def get_saml_response(action="login"):
 
 
 SAML_SSO_SERVICE = "http://localhost:8080/simplesaml/saml2/idp/SSOService.php"
-SAML_LOGOUT_SERVICE = (
-    "http://localhost:8080/simplesaml/saml2/idp/SingleLogoutService.php"
-)
+SAML_LOGOUT_SERVICE = "http://localhost:8080/simplesaml/saml2/idp/SingleLogoutService.php"
 SAML_METADATA_URL = "http://localhost:8080/simplesaml/saml2/idp/metadata.php"
 
 SAML_LOGIN_START_URL = reverse_lazy("saml2_login_start")
@@ -96,9 +94,7 @@ class TestOAuthAuthorize:
         response = client.get(OAUTH_AUTHORIZE_URL, data=authorize_params)
 
         assert response.status_code == 302
-        assert response.url.startswith(
-            f"{SAML_LOGIN_START_URL}?next={OAUTH_AUTHORIZE_URL}"
-        )
+        assert response.url.startswith(f"{SAML_LOGIN_START_URL}?next={OAUTH_AUTHORIZE_URL}")
 
     def test_x_application_log_is_created(self, client, mocker):
         user = UserFactory()
@@ -140,18 +136,13 @@ class TestSAMLLogin:
         """
         application, authorize_params = create_oauth_application()
 
-        login_url = (
-            f"{SAML_LOGIN_URL}?next={OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}"
-        )
+        login_url = f"{SAML_LOGIN_URL}?next={OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}"
         response = client.get(login_url)
 
         # check form
         content = response.content.decode("utf-8")
         assert response.status_code == 200
-        assert (
-            f'<form method="post" action="{SAML_SSO_SERVICE}" name="SSO_Login">'
-            in content
-        )
+        assert f'<form method="post" action="{SAML_SSO_SERVICE}" name="SSO_Login">' in content
         assert '<input type="hidden" name="SAMLRequest"' in content
         assert (
             f'<input type="hidden" name="RelayState" value="{OAUTH_AUTHORIZE_URL}?scope=read write" />'
@@ -188,7 +179,7 @@ class TestSAMLLogin:
         assert response.status_code == 200
 
         assert (
-            '<input type="hidden" name="RelayState" value="/o/authorize/&quot;&gt;&lt;script&gt;alert(&#x27;NCC+XSS&#x27;)&lt;/script&gt;?scope=read write" />'
+            '<input type="hidden" name="RelayState" value="/o/authorize/&quot;&gt;&lt;script&gt;alert(&#x27;NCC+XSS&#x27;)&lt;/script&gt;?scope=read write" />'  # noqa: E501
             in content
         )  # noqa
         assert "<script>alert('NCC+XSS')</script>" not in content
@@ -213,16 +204,12 @@ class TestSAMLLogin:
 
         assert User.objects.count() == 1
 
-        MockOutstandingQueriesCache = mocker.patch(
-            "djangosaml2.views.OutstandingQueriesCache"
-        )
+        MockOutstandingQueriesCache = mocker.patch("djangosaml2.views.OutstandingQueriesCache")
         MockOutstandingQueriesCache().outstanding_queries.return_value = {
             "id-WmZMklyFygoDg96gy": "test"
         }
 
-        MockCryptoBackendXmlSec1 = mocker.patch(
-            "saml2.sigver.CryptoBackendXmlSec1", spec=True
-        )
+        MockCryptoBackendXmlSec1 = mocker.patch("saml2.sigver.CryptoBackendXmlSec1", spec=True)
         MockCryptoBackendXmlSec1().validate_signature.return_value = True
 
         response = client.post(SAML_ACS_URL, data)
@@ -262,16 +249,12 @@ class TestSAMLLogin:
 
         assert User.objects.count() == 1
 
-        MockOutstandingQueriesCache = mocker.patch(
-            "djangosaml2.views.OutstandingQueriesCache"
-        )
+        MockOutstandingQueriesCache = mocker.patch("djangosaml2.views.OutstandingQueriesCache")
         MockOutstandingQueriesCache().outstanding_queries.return_value = {
             "id-WmZMklyFygoDg96gy": "test"
         }
 
-        MockCryptoBackendXmlSec1 = mocker.patch(
-            "saml2.sigver.CryptoBackendXmlSec1", spec=True
-        )
+        MockCryptoBackendXmlSec1 = mocker.patch("saml2.sigver.CryptoBackendXmlSec1", spec=True)
         MockCryptoBackendXmlSec1().validate_signature.return_value = True
 
         response = client.post(SAML_ACS_URL, data)
@@ -295,21 +278,15 @@ class TestSAMLLogin:
             "RelayState": f"{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}",
         }
 
-        MockOutstandingQueriesCache = mocker.patch(
-            "djangosaml2.views.OutstandingQueriesCache"
-        )
+        MockOutstandingQueriesCache = mocker.patch("djangosaml2.views.OutstandingQueriesCache")
         MockOutstandingQueriesCache().outstanding_queries.return_value = {
             "id-WmZMklyFygoDg96gy": "test"
         }
 
-        MockCryptoBackendXmlSec1 = mocker.patch(
-            "saml2.sigver.CryptoBackendXmlSec1", spec=True
-        )
+        MockCryptoBackendXmlSec1 = mocker.patch("saml2.sigver.CryptoBackendXmlSec1", spec=True)
         MockCryptoBackendXmlSec1().validate_signature.return_value = True
 
-        mock_create_x_access_log = mocker.patch(
-            "sso.samlauth.views.create_x_access_log"
-        )
+        mock_create_x_access_log = mocker.patch("sso.samlauth.views.create_x_access_log")
 
         client.post(SAML_ACS_URL, data)
 
@@ -324,9 +301,7 @@ class TestSAMLLogin:
         )
 
     @freeze_time("2017-06-22 15:50:00.000000+00:00")
-    def test_saml_login_without_permissions_results_in_access_denied(
-        self, client, mocker
-    ):
+    def test_saml_login_without_permissions_results_in_access_denied(self, client, mocker):
         """
         Test that after successfully logging into the IdP, the app redirects to the oauth authorize url
         which generates the auth code.
@@ -341,16 +316,12 @@ class TestSAMLLogin:
 
         assert User.objects.count() == 0
 
-        MockOutstandingQueriesCache = mocker.patch(
-            "djangosaml2.views.OutstandingQueriesCache"
-        )
+        MockOutstandingQueriesCache = mocker.patch("djangosaml2.views.OutstandingQueriesCache")
         MockOutstandingQueriesCache().outstanding_queries.return_value = {
             "id-WmZMklyFygoDg96gy": "test"
         }
 
-        MockCryptoBackendXmlSec1 = mocker.patch(
-            "saml2.sigver.CryptoBackendXmlSec1", spec=True
-        )
+        MockCryptoBackendXmlSec1 = mocker.patch("saml2.sigver.CryptoBackendXmlSec1", spec=True)
         MockCryptoBackendXmlSec1().validate_signature.return_value = True
 
         response = client.post(SAML_ACS_URL, data)
@@ -399,16 +370,12 @@ class TestSAMLLogin:
 
         assert User.objects.count() == 1
 
-        MockOutstandingQueriesCache = mocker.patch(
-            "djangosaml2.views.OutstandingQueriesCache"
-        )
+        MockOutstandingQueriesCache = mocker.patch("djangosaml2.views.OutstandingQueriesCache")
         MockOutstandingQueriesCache().outstanding_queries.return_value = {
             "id-WmZMklyFygoDg96gy": "test"
         }
 
-        MockCryptoBackendXmlSec1 = mocker.patch(
-            "saml2.sigver.CryptoBackendXmlSec1", spec=True
-        )
+        MockCryptoBackendXmlSec1 = mocker.patch("saml2.sigver.CryptoBackendXmlSec1", spec=True)
         MockCryptoBackendXmlSec1().validate_signature.return_value = True
 
         response = client.post(SAML_ACS_URL, data)
@@ -437,16 +404,12 @@ class TestSAMLLogin:
             "SAMLResponse": [base64.b64encode(get_saml_response(action="login"))],
         }
 
-        MockOutstandingQueriesCache = mocker.patch(
-            "djangosaml2.views.OutstandingQueriesCache"
-        )
+        MockOutstandingQueriesCache = mocker.patch("djangosaml2.views.OutstandingQueriesCache")
         MockOutstandingQueriesCache().outstanding_queries.return_value = {
             "id-WmZMklyFygoDg96gy": "test"
         }
 
-        MockCryptoBackendXmlSec1 = mocker.patch(
-            "saml2.sigver.CryptoBackendXmlSec1", spec=True
-        )
+        MockCryptoBackendXmlSec1 = mocker.patch("saml2.sigver.CryptoBackendXmlSec1", spec=True)
         MockCryptoBackendXmlSec1().validate_signature.return_value = True
 
         response = client.post(SAML_ACS_URL, data)
@@ -466,16 +429,12 @@ class TestSAMLLogin:
             "RelayState": f"{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}",
         }
 
-        MockOutstandingQueriesCache = mocker.patch(
-            "djangosaml2.views.OutstandingQueriesCache"
-        )
+        MockOutstandingQueriesCache = mocker.patch("djangosaml2.views.OutstandingQueriesCache")
         MockOutstandingQueriesCache().outstanding_queries.return_value = {
             "id-WmZMklyFygoDg96gy": "test"
         }
 
-        MockCryptoBackendXmlSec1 = mocker.patch(
-            "saml2.sigver.CryptoBackendXmlSec1", spec=True
-        )
+        MockCryptoBackendXmlSec1 = mocker.patch("saml2.sigver.CryptoBackendXmlSec1", spec=True)
         MockCryptoBackendXmlSec1().validate_signature.return_value = False
 
         assert client.post(SAML_ACS_URL, data).status_code == 403
@@ -493,16 +452,12 @@ class TestSAMLLogin:
             "RelayState": f"{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}",
         }
 
-        MockOutstandingQueriesCache = mocker.patch(
-            "djangosaml2.views.OutstandingQueriesCache"
-        )
+        MockOutstandingQueriesCache = mocker.patch("djangosaml2.views.OutstandingQueriesCache")
         MockOutstandingQueriesCache().outstanding_queries.return_value = {
             "id-WmZMklyFygoDg96gy": "test"
         }
 
-        MockCryptoBackendXmlSec1 = mocker.patch(
-            "saml2.sigver.CryptoBackendXmlSec1", spec=True
-        )
+        MockCryptoBackendXmlSec1 = mocker.patch("saml2.sigver.CryptoBackendXmlSec1", spec=True)
         MockCryptoBackendXmlSec1().validate_signature.return_value = True
 
         response = client.post(SAML_ACS_URL, data)
@@ -518,7 +473,7 @@ class TestSAMLLogin:
         assert user.email == "john.smith@test.com"
         assert user.first_name == "John"
         assert user.last_name == "Smith"
-        assert user.is_active == True
+        assert user.is_active
 
 
 class TestOAuthToken:
@@ -642,9 +597,7 @@ class TestSAMLLogout:
         session_id = "_e257887eff90fde0f9ebda09c2d0825683969096d5"
         subject_id = "1={entity_id},2={name_id_format},4={ref}".format(
             entity_id=quote(settings.SAML_CONFIG["entityid"]),
-            name_id_format=quote(
-                settings.SAML_CONFIG["service"]["sp"]["name_id_format"]
-            ),
+            name_id_format=quote(settings.SAML_CONFIG["service"]["sp"]["name_id_format"]),
             ref="c1e915bbc0586c0483a8f5654ed25d7afcdc315f",
         )
 
@@ -746,9 +699,7 @@ class TestReAuth:
         assert response.status_code == 200
         assert response.templates[0].name == "djangosaml2/wayf.html"
 
-    def test_login_cookie_set_to_incorrect_value_results_in_wayf_template(
-        self, client, settings
-    ):
+    def test_login_cookie_set_to_incorrect_value_results_in_wayf_template(self, client, settings):
         client.cookies.load({"last_login_idp": "invalid-idp-entity-id"})
         settings.SAML_CONFIG["metadata"]["local"] += [
             os.path.join(settings.SAML_CONFIG_DIR, "idp_metadata_2.xml")
@@ -769,16 +720,12 @@ class TestReAuth:
             "RelayState": f"{OAUTH_AUTHORIZE_URL}?{urlencode(authorize_params)}",
         }
 
-        MockOutstandingQueriesCache = mocker.patch(
-            "djangosaml2.views.OutstandingQueriesCache"
-        )
+        MockOutstandingQueriesCache = mocker.patch("djangosaml2.views.OutstandingQueriesCache")
         MockOutstandingQueriesCache().outstanding_queries.return_value = {
             "id-WmZMklyFygoDg96gy": "test"
         }
 
-        MockCryptoBackendXmlSec1 = mocker.patch(
-            "saml2.sigver.CryptoBackendXmlSec1", spec=True
-        )
+        MockCryptoBackendXmlSec1 = mocker.patch("saml2.sigver.CryptoBackendXmlSec1", spec=True)
         MockCryptoBackendXmlSec1().validate_signature.return_value = True
 
         response = client.post(SAML_ACS_URL, data)
@@ -795,32 +742,28 @@ class TestReAuth:
     def test_used_email_is_saved_in_cookie(self, client, settings):
 
         settings.AUTH_EMAIL_TO_IPD_MAP = {
-            'a-test': ['@test.com'],
+            "a-test": ["@test.com"],
         }
 
         data = {
-            'email': 'hello@test.com',
+            "email": "hello@test.com",
         }
 
         response = client.post(SAML_LOGIN_START_URL, data)
 
         assert response.status_code == 302
-        assert client.cookies["sso_auth_email"].value == 'hello@test.com'
+        assert client.cookies["sso_auth_email"].value == "hello@test.com"
 
 
 class TestEmailBasedAuthFlow:
     def test_invalid_email_leads_to_form_error(self, client):
 
-        response = client.post(
-            reverse("saml2_login_start"), {"email": "test@invalid.com"}
-        )
+        response = client.post(reverse("saml2_login_start"), {"email": "test@invalid.com"})
 
         assert response.status_code == 200
 
         assert (
-            "You can't use this email address to access DIT's internal services.".encode(
-                "utf-8"
-            )
+            "You can't use this email address to access DIT's internal services.".encode("utf-8")
             in response.content
         )
 

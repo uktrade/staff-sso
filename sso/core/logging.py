@@ -1,6 +1,6 @@
+import datetime as dt
 import json
 import logging
-import datetime as dt
 
 from django.conf import settings
 

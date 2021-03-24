@@ -2,19 +2,19 @@ import factory
 
 
 class GroupFactory(factory.django.DjangoModelFactory):
-    name = factory.Sequence(lambda n: f'Group {n+1}')
+    name = factory.Sequence(lambda n: f"Group {n+1}")
 
     class Meta:
-        model = 'auth.Group'
+        model = "auth.Group"
 
 
 class UserFactory(factory.django.DjangoModelFactory):
-    email = factory.Sequence(lambda n: f'user{n+1}@example.com')
-    first_name = factory.Sequence(lambda n: f'Name {n+1}')
-    last_name = factory.Sequence(lambda n: f'Surname {n+1}')
+    email = factory.Sequence(lambda n: f"user{n+1}@example.com")
+    first_name = factory.Sequence(lambda n: f"Name {n+1}")
+    last_name = factory.Sequence(lambda n: f"Surname {n+1}")
 
     class Meta:
-        model = 'user.User'
+        model = "user.User"
 
     @factory.post_generation
     def email_list(self, create, extracted, **kwargs):
@@ -56,8 +56,8 @@ class UserFactory(factory.django.DjangoModelFactory):
 
 
 class AccessProfileFactory(factory.django.DjangoModelFactory):
-    slug = factory.Sequence(lambda n: f'access-profile-{n+1}')
-    name = factory.Sequence(lambda n: f'access profile {n+1}')
+    slug = factory.Sequence(lambda n: f"access-profile-{n+1}")
+    name = factory.Sequence(lambda n: f"access profile {n+1}")
 
     @factory.post_generation
     def saml_apps_list(self, create, extracted, **kwargs):
@@ -78,17 +78,16 @@ class AccessProfileFactory(factory.django.DjangoModelFactory):
                 self.oauth2_applications.add(app)
 
     class Meta:
-        model = 'user.AccessProfile'
+        model = "user.AccessProfile"
 
 
 class ApplicationPermissionFactory(factory.django.DjangoModelFactory):
-    permission = factory.Sequence(lambda n: f'permission{n+1}')
+    permission = factory.Sequence(lambda n: f"permission{n+1}")
 
     class Meta:
-        model = 'user.ApplicationPermission'
+        model = "user.ApplicationPermission"
 
 
 class ServiceEmailAddressFactory(factory.django.DjangoModelFactory):
-
     class Meta:
-        model = 'user.ServiceEmailAddress'
+        model = "user.ServiceEmailAddress"

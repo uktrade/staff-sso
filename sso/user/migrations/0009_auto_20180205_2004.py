@@ -8,13 +8,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('user', '0008_auto_20171125_1456'),
+        ("user", "0008_auto_20171125_1456"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='user',
-            name='email',
-            field=models.EmailField(help_text='Warning: editing this field may cause user profiles to break in Digital Workspace', max_length=254, unique=True, verbose_name='email'),
+            model_name="user",
+            name="email",
+            field=models.EmailField(
+                help_text="Warning: editing this field may cause user profiles to break in Digital Workspace",
+                max_length=254,
+                unique=True,
+                verbose_name="email",
+            ),
         ),
     ]

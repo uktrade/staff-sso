@@ -2,25 +2,23 @@ import logging
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from djangosaml2idp.models import AbstractServiceProvider
 
 from sso.core.ip_filter import get_client_ip
 
 logger = logging.getLogger(__file__)
 
-from djangosaml2idp.models import AbstractServiceProvider
-
 
 class SamlApplication(AbstractServiceProvider):
-    slug = models.SlugField(
-        _('unique text id'),
-        max_length=50,
-        unique=True)
+    slug = models.SlugField(_("unique text id"), max_length=50, unique=True)
 
     real_entity_id = models.CharField(
         max_length=255,
         blank=True,
         null=True,
-        help_text=_('Takes precendence over the entity_id field and allows for the entity_id field to be an alias'),
+        help_text=_(
+            "Takes precendence over the entity_id field and allows for the entity_id field to be an alias"
+        ),
     )
 
     start_url = models.CharField(
@@ -31,28 +29,32 @@ class SamlApplication(AbstractServiceProvider):
     )
 
     allowed_ips = models.CharField(
-        _('allowed ips'),
-        help_text=_('A comma separated list of allowed ips. Leave blank to disable ip restriction.'),
+        _("allowed ips"),
+        help_text=_(
+            "A comma separated list of allowed ips. Leave blank to disable ip restriction."
+        ),
         max_length=255,
         null=True,
         blank=True,
     )
 
     allow_access_by_email_suffix = models.CharField(
-        _('allow access by email'),
+        _("allow access by email"),
         null=True,
         blank=True,
         max_length=255,
         help_text=_(
-            ('A comma separated list of email domains, e.g. "mobile.ukti.gov.uk, trade.gsi.gov.uk, fco.gov.uk" '
-             'User\'s with an email in this list will be given access.  NOTE: all user emails are checked - '
-             'including aliases.')
-        )
+            (
+                'A comma separated list of email domains, e.g. "mobile.ukti.gov.uk, trade.gsi.gov.uk, fco.gov.uk" '
+                "User's with an email in this list will be given access.  NOTE: all user emails are checked - "
+                "including aliases."
+            )
+        ),
     )
 
     extra_config = models.JSONField(
-        _('extra configuration'),
-        help_text=_('Additional configuration used by custom processors.'),
+        _("extra configuration"),
+        help_text=_("Additional configuration used by custom processors."),
         blank=True,
         default=dict,
     )

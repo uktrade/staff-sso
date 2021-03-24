@@ -6,20 +6,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('oauth2', '0007_auto_20181115_1836'),
+        ("oauth2", "0007_auto_20181115_1836"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='application',
-            name='display_name',
-            field=models.CharField(default='', max_length=100, verbose_name='the name of the application displayed to end users'),
+            model_name="application",
+            name="display_name",
+            field=models.CharField(
+                default="",
+                max_length=100,
+                verbose_name="the name of the application displayed to end users",
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='application',
-            name='start_url',
-            field=models.CharField(default='', max_length=255, verbose_name='the start url for the application'),
+            model_name="application",
+            name="start_url",
+            field=models.CharField(
+                default="", max_length=255, verbose_name="the start url for the application"
+            ),
             preserve_default=False,
         ),
     ]

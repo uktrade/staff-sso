@@ -6,14 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('samlidp', '0001_squashed_0002_auto_20190103_1120'),
+        ("samlidp", "0001_squashed_0002_auto_20190103_1120"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='samlapplication',
-            name='slug',
-            field=models.SlugField(default='default-value', help_text='WARNING: changing this may break things.', verbose_name='slug'),
+            model_name="samlapplication",
+            name="slug",
+            field=models.SlugField(
+                default="default-value",
+                help_text="WARNING: changing this may break things.",
+                verbose_name="slug",
+            ),
             preserve_default=False,
         ),
     ]

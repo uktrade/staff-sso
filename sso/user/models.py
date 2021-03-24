@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import uuid
+from typing import TYPE_CHECKING
 from typing import Union
 
 from django.conf import settings
@@ -13,19 +14,18 @@ from django.utils.translation import gettext_lazy as _
 
 from sso.oauth2.models import Application as OAuthApplication
 
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from sso.samlidp.models import SamlApplication
-
 from .managers import UserManager
+
+if TYPE_CHECKING:
+    from sso.samlidp.models import SamlApplication  # noqa: F401
 
 
 def build_email_user_id(email, user_id):
     """Generate a user's email id"""
-    username = email.split('@')[0]
+    username = email.split("@")[0]
     hash = str(user_id)[:8]
 
-    return f'{username}-{hash}{settings.EMAIL_ID_DOMAIN}'
+    return f"{username}-{hash}{settings.EMAIL_ID_DOMAIN}"
 
 
 class ApplicationPermission(models.Model):
@@ -39,42 +39,44 @@ class ApplicationPermission(models.Model):
     """
 
     saml2_application = models.ForeignKey(
-        'samlidp.SamlApplication',
-        related_name='application_permissions',
+        "samlidp.SamlApplication",
+        related_name="application_permissions",
         blank=True,
         null=True,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
     )
 
     oauth2_application = models.ForeignKey(
-        'oauth2.Application',
-        related_name='application_permissions',
+        "oauth2.Application",
+        related_name="application_permissions",
         blank=True,
         null=True,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
     )
 
     permission = models.CharField(
         max_length=255,
-        validators=[RegexValidator(
-            regex='^[a-zA-Z0-9\.\-\_]*$',
-            message=_('Permission must only contain letters, numbers and ._-'),
-            code='invalid_permission_format',
-        )]
+        validators=[
+            RegexValidator(
+                regex="^[a-zA-Z0-9\.\-\_]*$",
+                message=_("Permission must only contain letters, numbers and ._-"),
+                code="invalid_permission_format",
+            )
+        ],
     )
 
     def application_name(self):
         if self.saml2_application:
-            app_key = f'saml2: {self.saml2_application.slug}'
+            app_key = f"saml2: {self.saml2_application.slug}"
         elif self.oauth2_application:
-            app_key = f'oauth2: {self.oauth2_application.application_key}'
+            app_key = f"oauth2: {self.oauth2_application.application_key}"
         else:
-            app_key = 'None'
+            app_key = "None"
 
         return app_key
 
     def __str__(self):
-        return f'{self.application_name()} - {self.permission}'
+        return f"{self.application_name()} - {self.permission}"
 
 
 class AccessProfile(models.Model):
@@ -83,26 +85,23 @@ class AccessProfile(models.Model):
     slug = models.SlugField(help_text="Used internally. Do not edit.")
 
     name = models.CharField(
-        _('access profile name'),
+        _("access profile name"),
         max_length=50,
     )
 
     description = models.TextField(
-        _('description'),
-        null=True,
-        blank=True,
-        help_text=_('for internal use only')
+        _("description"), null=True, blank=True, help_text=_("for internal use only")
     )
 
     oauth2_applications = models.ManyToManyField(
         OAuthApplication,
-        _('access_profiles'),
+        _("access_profiles"),
         blank=True,
     )
 
     saml2_applications = models.ManyToManyField(
-        'samlidp.SamlApplication',
-        _('access_profiles'),
+        "samlidp.SamlApplication",
+        _("access_profiles"),
         blank=True,
     )
 
@@ -118,75 +117,66 @@ class AccessProfile(models.Model):
 
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(
-        _('email'), unique=True,
-        help_text=_('Warning: editing this field may cause user profiles to break in Digital Workspace')
+        _("email"),
+        unique=True,
+        help_text=_(
+            "Warning: editing this field may cause user profiles to break in Digital Workspace"
+        ),
     )
     email_user_id = models.EmailField(
         unique=True,
-        help_text=_('A unique user id in an email format'),
+        help_text=_("A unique user id in an email format"),
     )
-    user_id = models.UUIDField(
-        _('unique user id'), unique=True,
-        default=uuid.uuid4
-    )
-    first_name = models.CharField(
-        _('first name'), max_length=50, blank=True
-    )
-    last_name = models.CharField(
-        _('last name'), max_length=50, blank=True
-    )
+    user_id = models.UUIDField(_("unique user id"), unique=True, default=uuid.uuid4)
+    first_name = models.CharField(_("first name"), max_length=50, blank=True)
+    last_name = models.CharField(_("last name"), max_length=50, blank=True)
 
     date_joined = models.DateTimeField(
-        _('date joined'),
+        _("date joined"),
         default=timezone.now,
     )
     is_superuser = models.BooleanField(
-        _('superuser status'),
+        _("superuser status"),
         default=False,
         help_text=_(
-            'Designates that this user can log into the admin area and assign users to groups.'
+            "Designates that this user can log into the admin area and assign users to groups."
         ),
     )
     is_staff = models.BooleanField(
-        _('staff status'),
+        _("staff status"),
         default=False,
-        help_text=_('Designates whether the user can log into this admin site.'),
+        help_text=_("Designates whether the user can log into this admin site."),
     )
     is_active = models.BooleanField(
-        _('is active'),
+        _("is active"),
         default=True,
-        help_text=_('is the account active?'),
+        help_text=_("is the account active?"),
     )
     permitted_applications = models.ManyToManyField(
         settings.OAUTH2_PROVIDER_APPLICATION_MODEL,
-        related_name='users',
-        help_text=_(
-            'Applications that this user is permitted to access'
-        ),
+        related_name="users",
+        help_text=_("Applications that this user is permitted to access"),
         blank=True,
     )
     application_permissions = models.ManyToManyField(
         ApplicationPermission,
-        related_name='application_permissions',
-        help_text=_(
-            'Permissions that a user has on in an application'
-        ),
+        related_name="application_permissions",
+        help_text=_("Permissions that a user has on in an application"),
         blank=True,
     )
 
     access_profiles = models.ManyToManyField(
         AccessProfile,
-        related_name='users',
+        related_name="users",
         blank=True,
     )
 
-    contact_email = models.EmailField(
-        max_length=254, blank=True
-    )
+    contact_email = models.EmailField(max_length=254, blank=True)
 
     became_inactive_on = models.DateTimeField(
-        help_text=_('The date the user is account is deactivated'),
-        blank=True, null=True,
+        help_text=_("The date the user is account is deactivated"),
+        blank=True,
+        null=True,
     )
 
     last_accessed = models.DateTimeField(blank=True, null=True)
@@ -194,7 +184,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
     def __str__(self):
@@ -211,8 +201,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         self.email = self.email.lower()
         self.contact_email = self.contact_email.lower()
 
-        if 'email' in kwargs:
-            kwargs['email'] = kwargs['email'].lower()
+        if "email" in kwargs:
+            kwargs["email"] = kwargs["email"].lower()
 
         if self.email and not self.email_user_id:
             self.email_user_id = build_email_user_id(self.email, self.user_id)
@@ -232,7 +222,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
         names = [name for name in [self.first_name, self.last_name] if name]
         if names:
-            return ' '.join(names)
+            return " ".join(names)
         return self.email
 
     def get_short_name(self):
@@ -240,18 +230,20 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.get_full_name()
 
     def get_extra_emails(self):
-        return list(self.emails.exclude(email=self.email).values_list('email', flat=True))
+        return list(self.emails.exclude(email=self.email).values_list("email", flat=True))
 
     def _is_allowed_email(self, application):
         """Returns True if any of the user's emails are whitelisted in the OAuth2 app"""
 
         def _remove_username(email):
-            return email.split('@')[1]
+            return email.split("@")[1]
 
         if not application.allow_access_by_email_suffix:
             return False
 
-        allowed_emails = {email.strip() for email in application.allow_access_by_email_suffix.split(',')}
+        allowed_emails = {
+            email.strip() for email in application.allow_access_by_email_suffix.split(",")
+        }
 
         emails = self._get_domain_to_email_mapping().keys()
 
@@ -261,10 +253,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         """Return a dictionary of a user's emails and the domain, e.g. `{domain: email}` """
 
         def _remove_username(email):
-            return email.split('@')[1]
+            return email.split("@")[1]
 
         return {
-            _remove_username(email): email for email in self.emails.all().values_list('email', flat=True)
+            _remove_username(email): email
+            for email in self.emails.all().values_list("email", flat=True)
         }
 
     def can_access(self, application: Union[OAuthApplication, "SamlApplication"]):
@@ -310,8 +303,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
 
         if not application or application.provide_immutable_email:
-            return self.email, sorted(list(
-                self.emails.exclude(email=self.email).values_list('email', flat=True)))
+            return self.email, sorted(
+                list(self.emails.exclude(email=self.email).values_list("email", flat=True))
+            )
 
         emails = self._get_domain_to_email_mapping()
 
@@ -339,16 +333,15 @@ class User(AbstractBaseUser, PermissionsMixin):
         else:
             return self.get_emails_for_application(application)[0]
 
-    def get_permitted_applications(self, include_non_public=False,
-        get_default_access_allowed_apps=OAuthApplication.get_default_access_applications):
+    def get_permitted_applications(
+        self,
+        include_non_public=False,
+        get_default_access_allowed_apps=OAuthApplication.get_default_access_applications,
+    ):
         """Return a list of applications that this user has access to"""
 
         def _extract(app):
-            return {
-                'key': app.application_key,
-                'url': app.start_url,
-                'name': app.display_name
-            }
+            return {"key": app.application_key, "url": app.start_url, "name": app.display_name}
 
         apps = set(self.permitted_applications.all())
 
@@ -367,7 +360,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class EmailAddress(models.Model):
-    user = models.ForeignKey(User, related_name='emails', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name="emails", on_delete=models.CASCADE)
     email = models.EmailField(unique=True)
     last_login = models.DateTimeField(null=True)
 
@@ -384,16 +377,16 @@ class EmailAddress(models.Model):
         return self.email
 
     class Meta:
-        verbose_name_plural = 'email addresses'
+        verbose_name_plural = "email addresses"
 
 
 class ServiceEmailAddress(models.Model):
-    user = models.ForeignKey(User, related_name='service_emails', on_delete=models.CASCADE)
-    saml_application = models.ForeignKey('samlidp.SamlApplication', on_delete=models.CASCADE)
-    email = models.ForeignKey(EmailAddress, related_name='service_emails', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name="service_emails", on_delete=models.CASCADE)
+    saml_application = models.ForeignKey("samlidp.SamlApplication", on_delete=models.CASCADE)
+    email = models.ForeignKey(EmailAddress, related_name="service_emails", on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.user} - {self.saml_application.name} - {self.email}'
+        return f"{self.user} - {self.saml_application.name} - {self.email}"
 
     class Meta:
-        unique_together = ('user', 'saml_application', 'email')
+        unique_together = ("user", "saml_application", "email")

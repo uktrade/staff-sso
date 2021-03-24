@@ -6,17 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('samlidp', '0001_initial'),
+        ("samlidp", "0001_initial"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='samlapplication',
-            name='ip_restriction',
+            model_name="samlapplication",
+            name="ip_restriction",
         ),
         migrations.AddField(
-            model_name='samlapplication',
-            name='allowed_ips',
-            field=models.CharField(blank=True, help_text='A comma separated list of allowed ips. Leave blank to disable ip restriction.', max_length=255, null=True, verbose_name='allowed ips'),
+            model_name="samlapplication",
+            name="allowed_ips",
+            field=models.CharField(
+                blank=True,
+                help_text="A comma separated list of allowed ips. Leave blank to disable ip restriction.",
+                max_length=255,
+                null=True,
+                verbose_name="allowed ips",
+            ),
         ),
     ]

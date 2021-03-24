@@ -7,17 +7,19 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('user', '0020_auto_20190604_1437'),
+        ("user", "0020_auto_20190604_1437"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='user',
-            name='user_settings',
+            model_name="user",
+            name="user_settings",
         ),
         migrations.AddField(
-            model_name='user',
-            name='user_settings',
-            field=models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined'),
+            model_name="user",
+            name="user_settings",
+            field=models.DateTimeField(
+                default=django.utils.timezone.now, verbose_name="date joined"
+            ),
         ),
     ]

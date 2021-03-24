@@ -22,7 +22,7 @@ class AutocompleteFilter(CharFilter):
         The search_fields keyword argument specifies which fields to search and is required.
         """
         if search_fields is None:
-            raise ValueError('The search_fields keyword argument must be specified')
+            raise ValueError("The search_fields keyword argument must be specified")
 
         self.search_fields = search_fields
         super().__init__(*args, **kwargs)
@@ -58,7 +58,7 @@ def _apply_autocomplete_filter_to_queryset(queryset, autocomplete_fields, search
     if not escaped_tokens:
         return queryset.order_by(
             *autocomplete_fields,
-            'pk',
+            "pk",
         )
 
     filter_q_objects_for_tokens = (
@@ -66,12 +66,11 @@ def _apply_autocomplete_filter_to_queryset(queryset, autocomplete_fields, search
         for escaped_token in escaped_tokens
     )
 
-    return queryset.filter(
-        *filter_q_objects_for_tokens,
-    ).order_by(
+    return queryset.filter(*filter_q_objects_for_tokens,).order_by(
         *autocomplete_fields,
-        'pk',
+        "pk",
     )
+
 
 def _make_filter_q_for_token(fields, escaped_token):
     r"""
@@ -87,10 +86,7 @@ def _make_filter_q_for_token(fields, escaped_token):
     """
     return reduce(
         or_,
-        (
-            Q(_make_prefix_match_q(field, escaped_token))
-            for field in fields
-        ),
+        (Q(_make_prefix_match_q(field, escaped_token)) for field in fields),
     )
 
 
@@ -104,6 +100,6 @@ def _make_prefix_match_q(field, escaped_token):
     the token must match the beginning of any of the words in the specified field.
     """
     q_kwargs = {
-        f'{field}__iregex': rf'\m{escaped_token}',
+        f"{field}__iregex": rf"\m{escaped_token}",
     }
     return Q(**q_kwargs)

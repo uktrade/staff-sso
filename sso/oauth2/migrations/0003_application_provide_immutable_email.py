@@ -8,13 +8,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('oauth2', '0002_application_email_ordering'),
+        ("oauth2", "0002_application_email_ordering"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='application',
-            name='provide_immutable_email',
-            field=models.BooleanField(default=False, help_text="Always provide the same primary email to the application, instead of selecting the primary email user's list of emails", verbose_name='provide immutable primary email to the application'),
+            model_name="application",
+            name="provide_immutable_email",
+            field=models.BooleanField(
+                default=False,
+                help_text="Always provide the same primary email to the application, instead of selecting the primary email user's list of emails",
+                verbose_name="provide immutable primary email to the application",
+            ),
         ),
     ]

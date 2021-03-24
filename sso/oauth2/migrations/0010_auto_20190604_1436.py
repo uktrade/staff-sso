@@ -6,13 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('oauth2', '0009_application_can_view_all_user_settings'),
+        ("oauth2", "0009_application_can_view_all_user_settings"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='application',
-            name='can_view_all_user_settings',
-            field=models.BooleanField(default=False, help_text='Allow for this application authenticated users to access all their user-settings', verbose_name='allow access to all user settings'),
+            model_name="application",
+            name="can_view_all_user_settings",
+            field=models.BooleanField(
+                default=False,
+                help_text="Allow for this application authenticated users to access all their user-settings",
+                verbose_name="allow access to all user settings",
+            ),
         ),
     ]

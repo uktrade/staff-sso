@@ -1,17 +1,15 @@
+from axes.decorators import axes_dispatch
 from django.conf import settings
 from django.contrib.auth import views
-from django.shortcuts import Http404, redirect
+from django.shortcuts import Http404
 from django.utils.decorators import method_decorator
-from django.utils.http import is_safe_url
-
-from axes.decorators import axes_dispatch
 
 from .models import DomainWhitelist
 
 
 class FeatureFlaggedMixin:
     def dispatch(self, *args, **kwargs):
-        if not getattr(settings, 'LOCAL_AUTH_PAGE'):
+        if not getattr(settings, "LOCAL_AUTH_PAGE"):
             raise Http404()
         return super().dispatch(*args, **kwargs)
 
@@ -23,7 +21,7 @@ class LoginView(FeatureFlaggedMixin, views.LoginView):
 
 class LogoutView(views.LogoutView):
     def get_success_url_allowed_hosts(self):
-        domains = list(DomainWhitelist.objects.all().values_list('domain', flat=True))
+        domains = list(DomainWhitelist.objects.all().values_list("domain", flat=True))
         return {self.request.get_host(), *domains}
 
     def get_next_page(self):
