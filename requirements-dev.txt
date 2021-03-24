@@ -46,7 +46,7 @@ click==7.1.2
     # via black
 coverage==4.5.1
     # via pytest-cov
-cryptography==3.3.1
+cryptography==3.3.2
     # via
     #   -r requirements.txt
     #   pyopenssl
@@ -70,7 +70,7 @@ django-ipware==3.0.2
     #   django-axes
 django-oauth-toolkit==1.3.3
     # via -r requirements.txt
-django==3.1.5
+django==3.1.6
     # via
     #   -r requirements.txt
     #   django-axes
@@ -130,7 +130,7 @@ googleapis-common-protos==1.52.0
     #   google-api-core
 hawk-server==0.0.12
     # via -r requirements.txt
-httplib2==0.18.1
+httplib2==0.19.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
@@ -144,8 +144,10 @@ importlib-resources==5.1.0
     # via
     #   -r requirements.txt
     #   pysaml2
-lxml==4.2.4
-    # via -r requirements-dev.in
+lxml==4.6.3
+    # via
+    #   -r requirements-dev.in
+    #   -r requirements.txt
 mccabe==0.6.1
     # via flake8
 mohawk==1.1.0
@@ -200,6 +202,10 @@ pyopenssl==20.0.1
     # via
     #   -r requirements.txt
     #   pysaml2
+pyparsing==2.4.7
+    # via
+    #   -r requirements.txt
+    #   httplib2
 pysaml2==6.5.1
     # via
     #   -r requirements.txt
