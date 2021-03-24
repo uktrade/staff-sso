@@ -418,12 +418,13 @@ SAML_IDP_CONFIG = {
             "endpoints": {
                 "single_sign_on_service": [
                     # new post binding path
-                    (os.path.join(BASE_URL, "idp/sso/post/"), saml2.BINDING_HTTP_POST),
-                    (
-                        os.path.join(BASE_URL, "idp/sso/redirect/"),
-                        saml2.BINDING_HTTP_REDIRECT,
-                    ),
+                    # (os.path.join(BASE_URL, "idp/sso/post/"), saml2.BINDING_HTTP_POST),
+                    # (
+                    #     os.path.join(BASE_URL, "idp/sso/redirect/"),
+                    #     saml2.BINDING_HTTP_REDIRECT,
+                    # ),
                     # legacy paths - can be removed when all SPs have updated IdP metadata
+                    # with new paths
                     (os.path.join(BASE_URL, "idp/sso/post"), saml2.BINDING_HTTP_POST),
                     (
                         os.path.join(BASE_URL, "idp/sso/redirect"),
