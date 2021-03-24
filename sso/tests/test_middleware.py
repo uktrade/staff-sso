@@ -16,6 +16,5 @@ class TestNeverCacheMiddleware:
         middleware.process_response(request=mock.Mock(), response=response)
 
         assert (
-            response["cache-control"]
-            == "max-age=0, no-cache, no-store, must-revalidate, private"
+            response["cache-control"] == "max-age=0, no-cache, no-store, must-revalidate, private"
         )

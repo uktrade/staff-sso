@@ -63,9 +63,7 @@ class TestModelProcessor:
         assert processor.has_access(request)
 
     def test_has_access_ip_restriction_no_x_forwarded_header(self, rf):
-        saml_app = SamlApplicationFactory(
-            entity_id="an_entity_id", allowed_ips="1.1.1.1"
-        )
+        saml_app = SamlApplicationFactory(entity_id="an_entity_id", allowed_ips="1.1.1.1")
         ap = AccessProfileFactory(saml_apps_list=[saml_app])
         processor = ModelProcessor("an_entity_id")
 
@@ -75,9 +73,7 @@ class TestModelProcessor:
         assert not processor.has_access(request)
 
     def test_has_access_ip_restriction_valid_ip(self, rf):
-        saml_app = SamlApplicationFactory(
-            entity_id="an_entity_id", allowed_ips="1.1.1.1"
-        )
+        saml_app = SamlApplicationFactory(entity_id="an_entity_id", allowed_ips="1.1.1.1")
         ap = AccessProfileFactory(saml_apps_list=[saml_app])
         processor = ModelProcessor("an_entity_id")
 
@@ -87,9 +83,7 @@ class TestModelProcessor:
         assert processor.has_access(request)
 
     def test_has_access_ip_restriction_ip_not_whitelisted(self, rf):
-        saml_app = SamlApplicationFactory(
-            entity_id="an_entity_id", allowed_ips="8.8.8.8"
-        )
+        saml_app = SamlApplicationFactory(entity_id="an_entity_id", allowed_ips="8.8.8.8")
         ap = AccessProfileFactory(saml_apps_list=[saml_app])
         processor = ModelProcessor("an_entity_id")
 
@@ -127,15 +121,11 @@ class TestModelProcessor:
         request = rf.get("/whatever/")
         request.user = UserFactory(add_access_profiles=[ap])
 
-        mock_create_x_access_log = mocker.patch(
-            "sso.samlidp.processors.create_x_access_log"
-        )
+        mock_create_x_access_log = mocker.patch("sso.samlidp.processors.create_x_access_log")
 
         processor.has_access(request)
 
-        mock_create_x_access_log.assert_called_once_with(
-            request, 200, application=saml_app.name
-        )
+        mock_create_x_access_log.assert_called_once_with(request, 200, application=saml_app.name)
 
     def test_x_application_logging_without_access(self, rf, mocker):
         saml_app = SamlApplicationFactory(entity_id="an_entity_id")
@@ -145,15 +135,11 @@ class TestModelProcessor:
         request = rf.get("/whatever/")
         request.user = UserFactory()
 
-        mock_create_x_access_log = mocker.patch(
-            "sso.samlidp.processors.create_x_access_log"
-        )
+        mock_create_x_access_log = mocker.patch("sso.samlidp.processors.create_x_access_log")
 
         processor.has_access(request)
 
-        mock_create_x_access_log.assert_called_once_with(
-            request, 403, application=saml_app.name
-        )
+        mock_create_x_access_log.assert_called_once_with(request, 403, application=saml_app.name)
 
     @pytest.mark.parametrize(
         "email, allowed_emails, expected",
@@ -189,9 +175,7 @@ class TestModelProcessor:
         ap = SamlApplicationFactory(entity_id="an_entity_id")
         processor = ModelProcessor(entity_id="an_entity_id")
 
-        user = UserFactory(
-            email="email1@testing.com", email_list=["extra1@testing.com"]
-        )
+        user = UserFactory(email="email1@testing.com", email_list=["extra1@testing.com"])
         user2 = UserFactory(email="email2@testing.com")
 
         ServiceEmailAddressFactory(
@@ -256,9 +240,7 @@ class TestAWSProcessor:
     def test_create_identity_role_is_provided(self, settings):
         user = UserFactory()
 
-        extra_config = {
-            'role': 'test_role'
-        }
+        extra_config = {"role": "test_role"}
 
         SamlApplicationFactory(entity_id="an_entity_id", extra_config=extra_config)
         processor = AWSProcessor(entity_id="an_entity_id")
@@ -270,25 +252,21 @@ class TestAWSProcessor:
     def test_create_identity_user_id_is_provided(self):
         user = UserFactory()
 
-        extra_config = {
-            'role': 'test_role'
-        }
+        extra_config = {"role": "test_role"}
 
         SamlApplicationFactory(entity_id="an_entity_id", extra_config=extra_config)
         processor = AWSProcessor(entity_id="an_entity_id")
 
         identity = processor.create_identity(user, {})
 
-        assert identity[
-            "https://aws.amazon.com/SAML/Attributes/RoleSessionName"
-        ] == str(user.user_id)
+        assert identity["https://aws.amazon.com/SAML/Attributes/RoleSessionName"] == str(
+            user.user_id
+        )
 
     def test_role_session_name_can_be_overridden(self):
         user = UserFactory()
 
-        extra_config = {
-            'role': 'test_role'
-        }
+        extra_config = {"role": "test_role"}
 
         app = SamlApplicationFactory(entity_id="an_entity_id", extra_config=extra_config)
         processor = AWSProcessor(entity_id="an_entity_id")
@@ -299,16 +277,13 @@ class TestAWSProcessor:
 
         identity = processor.create_identity(user, {})
 
-        assert (
-            identity["https://aws.amazon.com/SAML/Attributes/RoleSessionName"]
-            == email.email
-        )
+        assert identity["https://aws.amazon.com/SAML/Attributes/RoleSessionName"] == email.email
 
 
 class TestApplicationPermissionProcessor:
     def test_groups_are_supplied(self):
-        app1 = SamlApplicationFactory(entity_id='an_entity_id')
-        app2 = SamlApplicationFactory(entity_id='an_second_entity_id')
+        app1 = SamlApplicationFactory(entity_id="an_entity_id")
+        app2 = SamlApplicationFactory(entity_id="an_second_entity_id")
 
         ap1 = ApplicationPermissionFactory(saml2_application=app1)
         ap2 = ApplicationPermissionFactory(saml2_application=app1)
@@ -319,14 +294,16 @@ class TestApplicationPermissionProcessor:
         ap7 = ApplicationPermissionFactory(saml2_application=app2)
         ap8 = ApplicationPermissionFactory(saml2_application=app1)
 
-        processor = ApplicationPermissionProcessor(entity_id='an_entity_id')
+        processor = ApplicationPermissionProcessor(entity_id="an_entity_id")
 
-        user = UserFactory(email='hello@world.com', application_permission_list=[ap1, ap3, ap4, ap8])
-        UserFactory(email='goodbye@world.com', application_permission_list=[ap2, ap3, ap7])
+        user = UserFactory(
+            email="hello@world.com", application_permission_list=[ap1, ap3, ap4, ap8]
+        )
+        UserFactory(email="goodbye@world.com", application_permission_list=[ap2, ap3, ap7])
 
         identity = processor.create_identity(user, {})
 
-        assert set(identity['groups']) == {ap1.permission, ap8.permission}
+        assert set(identity["groups"]) == {ap1.permission, ap8.permission}
 
 
 class TestIdpInitiatedLogin:
@@ -334,9 +311,13 @@ class TestIdpInitiatedLogin:
 
         from djangosaml2idp.idp import IDP
 
-        saml_application = SamlApplicationFactory(entity_id="an-alias", real_entity_id="http://testsp/saml2/metadata/", active=True)
+        saml_application = SamlApplicationFactory(
+            entity_id="an-alias", real_entity_id="http://testsp/saml2/metadata/", active=True
+        )
 
-        SamlApplicationFactory(entity_id="another-alias", real_entity_id="http://testsp/saml2/metadata/", active=True)
+        SamlApplicationFactory(
+            entity_id="another-alias", real_entity_id="http://testsp/saml2/metadata/", active=True
+        )
 
         access_profile = AccessProfileFactory(saml_apps_list=[saml_application])
 
@@ -351,14 +332,13 @@ class TestIdpInitiatedLogin:
 
         assert client.login(request=HttpRequest(), **credentials)
 
-        url = reverse("samlidp:saml_idp_init_legacy") + "?sp=an-alias&RelayState=https://testing.com"
+        url = (
+            reverse("samlidp:saml_idp_init_legacy") + "?sp=an-alias&RelayState=https://testing.com"
+        )
 
         response = client.get(url)
 
-        assert (
-            b'<form method="post" action="https://testing.com/saml2/acs/">'
-            in response.content
-        )
+        assert b'<form method="post" action="https://testing.com/saml2/acs/">' in response.content
         assert (
             b'<input type="hidden" name="RelayState" value="https://testing.com" />'
             in response.content

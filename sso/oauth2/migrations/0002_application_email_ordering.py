@@ -8,13 +8,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('oauth2', '0001_initial'),
+        ("oauth2", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='application',
-            name='email_ordering',
-            field=models.CharField(blank=True, help_text='A comma separated list of email domains, e.g "mobile.ukti.gov.uk, trade.gsi.gov.uk, fco.gov.uk" for users with multiple email addresses this list determines which email is sent to the application.', max_length=255, null=True, verbose_name='email ordering'),
+            model_name="application",
+            name="email_ordering",
+            field=models.CharField(
+                blank=True,
+                help_text='A comma separated list of email domains, e.g "mobile.ukti.gov.uk, trade.gsi.gov.uk, fco.gov.uk" for users with multiple email addresses this list determines which email is sent to the application.',
+                max_length=255,
+                null=True,
+                verbose_name="email ordering",
+            ),
         ),
     ]

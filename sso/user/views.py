@@ -16,7 +16,7 @@ from .serializers import (
     UserSerializer,
     UserParamSerializer,
     UserDetailsSerializer,
-    UserListSerializer
+    UserListSerializer,
 )
 from .models import User
 from .autocomplete import AutocompleteFilter
@@ -54,7 +54,7 @@ class UserRetrieveViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 
 class UserIntrospectViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     permission_classes = [permissions.IsAuthenticated, TokenHasScope]
-    required_scopes = ['introspection']
+    required_scopes = ["introspection"]
     serializer_class = UserSerializer
 
     def retrieve(self, request):
@@ -64,12 +64,14 @@ class UserIntrospectViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         serializer = UserParamSerializer(data=request.query_params)
         if serializer.is_valid(raise_exception=True):
             try:
-                if serializer.validated_data['email']:
-                    selected_user = User.objects.get_by_email(serializer.validated_data['email'])
-                elif serializer.validated_data['user_id']:
-                    selected_user = User.objects.get(user_id=serializer.validated_data['user_id'])
+                if serializer.validated_data["email"]:
+                    selected_user = User.objects.get_by_email(serializer.validated_data["email"])
+                elif serializer.validated_data["user_id"]:
+                    selected_user = User.objects.get(user_id=serializer.validated_data["user_id"])
                 else:
-                    selected_user = User.objects.get(email_user_id=serializer.validated_data['email_user_id'])
+                    selected_user = User.objects.get(
+                        email_user_id=serializer.validated_data["email_user_id"]
+                    )
             except User.DoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -84,20 +86,20 @@ class UserIntrospectViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 class UserAutoCompleteFilter(FilterSet):
 
     autocomplete = AutocompleteFilter(
-        search_fields=('first_name', 'last_name'),
+        search_fields=("first_name", "last_name"),
     )
 
     class Meta:
         model = get_user_model()
         fields = {
-            'first_name': ('exact', 'icontains'),
-            'last_name': ('exact', 'icontains'),
+            "first_name": ("exact", "icontains"),
+            "last_name": ("exact", "icontains"),
         }
 
 
 class UserListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     permission_classes = [permissions.IsAuthenticated, TokenHasScope]
-    required_scopes = ['search']
+    required_scopes = ["search"]
     serializer_class = UserListSerializer
 
     User = get_user_model()
@@ -107,17 +109,17 @@ class UserListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         OrderingFilter,
     )
     filterset_class = UserAutoCompleteFilter
-    ordering_fields = ('first_name', 'last_name')
-    _default_ordering = ('first_name', 'last_name')
+    ordering_fields = ("first_name", "last_name")
+    _default_ordering = ("first_name", "last_name")
 
     def _allowed_by_email_domain_qs(self, application):
         return reduce(
-                or_,
-                (
-                    Q(('emails__email__icontains', domain))
-                    for domain in application.allow_access_by_email_suffix.split(',')
-                ),
-            )
+            or_,
+            (
+                Q(("emails__email__icontains", domain))
+                for domain in application.allow_access_by_email_suffix.split(",")
+            ),
+        )
 
     def _oauth_filtered_qs(self, queryset, application):
         """
@@ -133,7 +135,7 @@ class UserListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             qs = email_qs | permitted_qs | access_qs
         else:
             qs = permitted_qs | access_qs
-        return qs.distinct()    # remove dups        
+        return qs.distinct()  # remove dups
 
     def get_queryset(self):
         queryset = super().get_queryset()

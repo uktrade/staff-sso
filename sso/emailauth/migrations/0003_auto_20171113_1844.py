@@ -8,20 +8,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('emailauth', '0002_auto_20171113_1812'),
+        ("emailauth", "0002_auto_20171113_1812"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='emailtoken',
-            name='first_name',
-            field=models.CharField(default='', max_length=255),
+            model_name="emailtoken",
+            name="first_name",
+            field=models.CharField(default="", max_length=255),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='emailtoken',
-            name='last_name',
-            field=models.CharField(default='', max_length=255),
+            model_name="emailtoken",
+            name="last_name",
+            field=models.CharField(default="", max_length=255),
             preserve_default=False,
         ),
     ]

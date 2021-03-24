@@ -8,6 +8,7 @@ pytest-env
 pytest-cov
 factory-boy
 freezegun
+black
 
 flake8
 flake8-blind-except

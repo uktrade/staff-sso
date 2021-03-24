@@ -5,7 +5,7 @@ import uuid
 
 
 def create_uuid(apps, schema_editor):
-    User = apps.get_model('user', 'User')
+    User = apps.get_model("user", "User")
     for user in User.objects.all():
         user.user_id = uuid.uuid4()
         user.save()
@@ -14,19 +14,17 @@ def create_uuid(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('user', '0010_user_last_accessed'),
+        ("user", "0010_user_last_accessed"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='user_id',
-            field=models.UUIDField(default=uuid.uuid4, unique=False, verbose_name='unique user id'),
+            model_name="user",
+            name="user_id",
+            field=models.UUIDField(default=uuid.uuid4, unique=False, verbose_name="unique user id"),
         ),
         migrations.RunPython(create_uuid),
         migrations.AlterField(
-            model_name='user',
-            name='user_id',
-            field=models.UUIDField(unique=True)
-        )
+            model_name="user", name="user_id", field=models.UUIDField(unique=True)
+        ),
     ]

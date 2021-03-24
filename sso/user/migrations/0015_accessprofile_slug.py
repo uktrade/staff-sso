@@ -6,14 +6,14 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('user', '0014_auto_20181204_1536'),
+        ("user", "0014_auto_20181204_1536"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='accessprofile',
-            name='slug',
-            field=models.SlugField(default='', help_text='Used internally. Do not edit.'),
+            model_name="accessprofile",
+            name="slug",
+            field=models.SlugField(default="", help_text="Used internally. Do not edit."),
             preserve_default=False,
         ),
     ]

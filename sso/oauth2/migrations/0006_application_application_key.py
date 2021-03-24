@@ -5,7 +5,7 @@ from django.utils.text import slugify
 
 
 def populate_application_key(apps, schema_editor):
-    Application = apps.get_model('oauth2', 'Application')
+    Application = apps.get_model("oauth2", "Application")
 
     for app in Application.objects.all():
         app.application_key = slugify(app.name)
@@ -15,14 +15,14 @@ def populate_application_key(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('oauth2', '0005_application_allow_tokens_from'),
+        ("oauth2", "0005_application_allow_tokens_from"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='application',
-            name='application_key',
-            field=models.SlugField(default='', unique=False, verbose_name='unique text id'),
+            model_name="application",
+            name="application_key",
+            field=models.SlugField(default="", unique=False, verbose_name="unique text id"),
             preserve_default=False,
         ),
         migrations.RunPython(populate_application_key),

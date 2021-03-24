@@ -43,9 +43,7 @@ class TestUserManager:
         """
         assert User.objects.count() == 0
 
-        user = User.objects.create_superuser(
-            EMAIL, "password", first_name="John", last_name="Doe"
-        )
+        user = User.objects.create_superuser(EMAIL, "password", first_name="John", last_name="Doe")
 
         assert User.objects.count() == 1
         assert user.email == EMAIL
@@ -84,9 +82,7 @@ class TestUserManager:
 
         email = "ITATest1@example.com"
 
-        user, created = User.objects.get_or_create(
-            email=email, first_name="", last_name=""
-        )
+        user, created = User.objects.get_or_create(email=email, first_name="", last_name="")
 
         assert created
 
@@ -100,15 +96,11 @@ class TestUserManager:
 
         email = "ITATest1@example.com"
 
-        user, created = User.objects.get_or_create(
-            email=email, first_name="", last_name=""
-        )
+        user, created = User.objects.get_or_create(email=email, first_name="", last_name="")
 
         assert created
 
-        user, created = User.objects.get_or_create(
-            email=email, first_name="", last_name=""
-        )
+        user, created = User.objects.get_or_create(email=email, first_name="", last_name="")
 
         assert not created
 
@@ -377,9 +369,7 @@ class TestUser:
         assert user.can_access(app) == expected
 
     def test_get_emails_for_application_app_email_ordering(self):
-        app = ApplicationFactory(
-            email_ordering="aaa.com, bbb.com, ccc.com, ddd.com, eee.com"
-        )
+        app = ApplicationFactory(email_ordering="aaa.com, bbb.com, ccc.com, ddd.com, eee.com")
 
         emails = ["test@zzz.com", "test@aaa.com", "test@bbb.com", "test@ccc.com"]
 
@@ -520,9 +510,7 @@ class TestUser:
         assert user.last_accessed is None
         middleware(request)
 
-        assert request.user.last_accessed == datetime.datetime.now(
-            tz=datetime.timezone.utc
-        )
+        assert request.user.last_accessed == datetime.datetime.now(tz=datetime.timezone.utc)
         assert User.objects.get(pk=user.pk).last_accessed == datetime.datetime.now(
             tz=datetime.timezone.utc
         )
@@ -533,9 +521,7 @@ class TestUser:
         user.set_password("12345")
         user.save()
 
-        client.login(
-            request=HttpRequest(), email="goblin@example.com", password="12345"
-        )
+        client.login(request=HttpRequest(), email="goblin@example.com", password="12345")
         response = client.get("/")
 
         assert User.objects.get(pk=user.pk).last_accessed == datetime.datetime.now(
@@ -575,9 +561,7 @@ class TestUser:
             email="primar@test.com", email_list=["email1@test.com", "email2@test.com"]
         )
 
-        assert set(user.get_extra_emails()) == set(
-            ["email1@test.com", "email2@test.com"]
-        )
+        assert set(user.get_extra_emails()) == set(["email1@test.com", "email2@test.com"])
 
 
 class TestAccessProfile:
@@ -647,9 +631,7 @@ class TestAccessProfile:
         ap.oauth2_applications.add(app1)
         ap.oauth2_applications.add(app3)
 
-        permitted_applications = user.get_permitted_applications(
-            include_non_public=True
-        )
+        permitted_applications = user.get_permitted_applications(include_non_public=True)
 
         assert len(permitted_applications) == 3
         assert sorted(permitted_applications, key=lambda x: x["key"]) == [

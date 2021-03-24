@@ -6,14 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('samlidp', '0001_initial'),
-        ('user', '0012_auto_20181127_1142'),
+        ("samlidp", "0001_initial"),
+        ("user", "0012_auto_20181127_1142"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='accessprofile',
-            name='saml2_applications',
-            field=models.ManyToManyField(related_name='access_profiles', to='samlidp.SamlApplication'),
+            model_name="accessprofile",
+            name="saml2_applications",
+            field=models.ManyToManyField(
+                related_name="access_profiles", to="samlidp.SamlApplication"
+            ),
         ),
     ]

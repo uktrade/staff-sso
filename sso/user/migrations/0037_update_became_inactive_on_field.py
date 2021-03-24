@@ -8,7 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 def update_disabled_users(apps, schema_editor):
     ACTION_TEXT = '[{"changed": {"fields": ["is_active"]}}]'
 
-    User = apps.get_model('user', 'User')
+    User = apps.get_model("user", "User")
 
     user_type = ContentType.objects.get_for_model(User())
 
@@ -18,7 +18,8 @@ def update_disabled_users(apps, schema_editor):
                 object_id=str(user.id),
                 content_type=user_type,
                 change_message=ACTION_TEXT,
-                action_flag=CHANGE).order_by('-id')
+                action_flag=CHANGE,
+            ).order_by("-id")
 
             if log_entry:
                 user.became_inactive_on = log_entry[0].action_time
@@ -28,7 +29,7 @@ def update_disabled_users(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('user', '0036_user_became_inactive_on'),
+        ("user", "0036_user_became_inactive_on"),
     ]
 
     operations = [

@@ -8,60 +8,93 @@ from django.utils.timezone import utc
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('samlidp', '0003_samlapplication_allow_access_by_email_suffix_squashed_0004_auto_20200420_1246'),
+        (
+            "samlidp",
+            "0003_samlapplication_allow_access_by_email_suffix_squashed_0004_auto_20200420_1246",
+        ),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='samlapplication',
-            name='_attribute_mapping',
-            field=models.TextField(default='get_default_attribute_mapping', help_text='dict with the mapping from django attributes to saml attributes in the identity.', verbose_name='Attribute mapping'),
+            model_name="samlapplication",
+            name="_attribute_mapping",
+            field=models.TextField(
+                default="get_default_attribute_mapping",
+                help_text="dict with the mapping from django attributes to saml attributes in the identity.",
+                verbose_name="Attribute mapping",
+            ),
         ),
         migrations.AddField(
-            model_name='samlapplication',
-            name='_nameid_field',
-            field=models.CharField(blank=True, help_text='Attribute on the user to use as identifier during the NameID construction. Can be a callable. If not set, this will default to settings.SAML_IDP_DJANGO_USERNAME_FIELD; if that is not set, it will use the `USERNAME_FIELD` attribute on the active user model.', max_length=64, verbose_name='NameID Field'),
+            model_name="samlapplication",
+            name="_nameid_field",
+            field=models.CharField(
+                blank=True,
+                help_text="Attribute on the user to use as identifier during the NameID construction. Can be a callable. If not set, this will default to settings.SAML_IDP_DJANGO_USERNAME_FIELD; if that is not set, it will use the `USERNAME_FIELD` attribute on the active user model.",
+                max_length=64,
+                verbose_name="NameID Field",
+            ),
         ),
         migrations.AddField(
-            model_name='samlapplication',
-            name='_processor',
-            field=models.CharField(default='get_default_processor', help_text='Import string for the (access) Processor to use.', max_length=256, verbose_name='Processor'),
+            model_name="samlapplication",
+            name="_processor",
+            field=models.CharField(
+                default="get_default_processor",
+                help_text="Import string for the (access) Processor to use.",
+                max_length=256,
+                verbose_name="Processor",
+            ),
         ),
         migrations.AddField(
-            model_name='samlapplication',
-            name='active',
-            field=models.BooleanField(default=True, verbose_name='Active'),
+            model_name="samlapplication",
+            name="active",
+            field=models.BooleanField(default=True, verbose_name="Active"),
         ),
         migrations.AddField(
-            model_name='samlapplication',
-            name='description',
-            field=models.TextField(blank=True, verbose_name='Description'),
+            model_name="samlapplication",
+            name="description",
+            field=models.TextField(blank=True, verbose_name="Description"),
         ),
         migrations.AddField(
-            model_name='samlapplication',
-            name='dt_created',
-            field=models.DateTimeField(auto_now_add=True, default=datetime.datetime(2021, 3, 17, 16, 23, 20, 670661, tzinfo=utc), verbose_name='Created at'),
+            model_name="samlapplication",
+            name="dt_created",
+            field=models.DateTimeField(
+                auto_now_add=True,
+                default=datetime.datetime(2021, 3, 17, 16, 23, 20, 670661, tzinfo=utc),
+                verbose_name="Created at",
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='samlapplication',
-            name='dt_updated',
-            field=models.DateTimeField(auto_now=True, null=True, verbose_name='Updated at'),
+            model_name="samlapplication",
+            name="dt_updated",
+            field=models.DateTimeField(auto_now=True, null=True, verbose_name="Updated at"),
         ),
         migrations.AddField(
-            model_name='samlapplication',
-            name='local_metadata',
-            field=models.TextField(blank=True, help_text='XML containing the metadata', verbose_name='Local Metadata XML'),
+            model_name="samlapplication",
+            name="local_metadata",
+            field=models.TextField(
+                blank=True,
+                help_text="XML containing the metadata",
+                verbose_name="Local Metadata XML",
+            ),
         ),
         migrations.AddField(
-            model_name='samlapplication',
-            name='metadata_expiration_dt',
-            field=models.DateTimeField(default=datetime.datetime(2021, 3, 17, 16, 23, 44, 6343, tzinfo=utc), verbose_name='Metadata valid until'),
+            model_name="samlapplication",
+            name="metadata_expiration_dt",
+            field=models.DateTimeField(
+                default=datetime.datetime(2021, 3, 17, 16, 23, 44, 6343, tzinfo=utc),
+                verbose_name="Metadata valid until",
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='samlapplication',
-            name='pretty_name',
-            field=models.CharField(blank=True, help_text='For display purposes, can be empty', max_length=255, verbose_name='Pretty Name'),
+            model_name="samlapplication",
+            name="pretty_name",
+            field=models.CharField(
+                blank=True,
+                help_text="For display purposes, can be empty",
+                max_length=255,
+                verbose_name="Pretty Name",
+            ),
         ),
     ]

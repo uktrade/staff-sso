@@ -41,17 +41,17 @@ class EmailToken(models.Model):
     def extract_name_from_email(self, email):
         """Attempt to populate the first and last name fields from the user's email"""
 
-        username = email.split('@')[0]
-        parts = username.split('.')
+        username = email.split("@")[0]
+        parts = username.split(".")
         self.first_name = parts[0].capitalize()
-        self.last_name = ' '.join(parts[1:]).capitalize()
+        self.last_name = " ".join(parts[1:]).capitalize()
 
     def get_user(self):
 
         defaults = {
-            'first_name': self.first_name,
-            'last_name': self.last_name,
-            'is_active': True,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "is_active": True,
         }
 
         user, _ = User.objects.get_or_create(email=self.email, defaults=defaults)

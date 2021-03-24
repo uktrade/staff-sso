@@ -8,21 +8,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('user', '0001_initial'),
+        ("user", "0001_initial"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='user',
-            name='is_active',
+            model_name="user",
+            name="is_active",
         ),
         migrations.RemoveField(
-            model_name='user',
-            name='is_staff',
+            model_name="user",
+            name="is_staff",
         ),
         migrations.AlterField(
-            model_name='user',
-            name='is_superuser',
-            field=models.BooleanField(default=False, help_text='Designates that this user can log into the admin area and assign users to groups.', verbose_name='superuser status'),
+            model_name="user",
+            name="is_superuser",
+            field=models.BooleanField(
+                default=False,
+                help_text="Designates that this user can log into the admin area and assign users to groups.",
+                verbose_name="superuser status",
+            ),
         ),
     ]

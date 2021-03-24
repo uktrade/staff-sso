@@ -8,12 +8,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('user', '0006_emailaddress'),
+        ("user", "0006_emailaddress"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='emailaddress',
-            options={'verbose_name_plural': 'email addresses'},
+            name="emailaddress",
+            options={"verbose_name_plural": "email addresses"},
         ),
     ]

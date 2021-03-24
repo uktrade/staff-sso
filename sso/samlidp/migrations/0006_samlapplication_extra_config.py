@@ -6,13 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('samlidp', '0005_auto_20210318_1222'),
+        ("samlidp", "0005_auto_20210318_1222"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='samlapplication',
-            name='extra_config',
-            field=models.JSONField(blank=True, default=dict, help_text='Additional configuration used by custom processors.', verbose_name='extra configuration'),
+            model_name="samlapplication",
+            name="extra_config",
+            field=models.JSONField(
+                blank=True,
+                default=dict,
+                help_text="Additional configuration used by custom processors.",
+                verbose_name="extra configuration",
+            ),
         ),
     ]

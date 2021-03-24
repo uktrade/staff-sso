@@ -5,5 +5,5 @@ from .views import AccessDeniedView
 
 
 urlpatterns = [
-    path('access-denied/', AccessDeniedView.as_view(), name='access-denied'),
+    path("access-denied/", AccessDeniedView.as_view(), name="access-denied"),
 ]

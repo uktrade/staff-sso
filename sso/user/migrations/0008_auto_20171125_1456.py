@@ -6,7 +6,7 @@ from django.db import migrations
 
 
 def add_email_to_emailaddress_model(apps, schema_editor):
-    User = apps.get_model('user', 'User')
+    User = apps.get_model("user", "User")
     for row in User.objects.all():
         if not row.emails.filter(email=row.email).exists():
             row.emails.create(email=row.email)
@@ -15,9 +15,11 @@ def add_email_to_emailaddress_model(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('user', '0007_auto_20171124_1626'),
+        ("user", "0007_auto_20171124_1626"),
     ]
 
     operations = [
-        migrations.RunPython(add_email_to_emailaddress_model, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(
+            add_email_to_emailaddress_model, reverse_code=migrations.RunPython.noop
+        ),
     ]

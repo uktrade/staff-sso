@@ -19,7 +19,6 @@ logger = logging.getLogger("djangosaml2")
 
 
 class MultiEmailSaml2Backend(Saml2Backend):
-
     def get_or_create_user(
         self,
         user_lookup_key: str,

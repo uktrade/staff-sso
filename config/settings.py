@@ -30,9 +30,7 @@ BASE_URL = env("SAML_REDIRECT_RETURN_HOST")
 
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG", default=False)
-ENV_NAME = env(
-    "ENV_NAME", default="test"
-)  # 'test', 'staging' or 'prod' (maches config/saml/x/)
+ENV_NAME = env("ENV_NAME", default="test")  # 'test', 'staging' or 'prod' (maches config/saml/x/)
 
 ALLOWED_HOSTS = env("ALLOWED_HOSTS", default="localhost").split(",")
 SAML_ALLOWED_HOSTS = ALLOWED_HOSTS
@@ -397,9 +395,7 @@ SAML_IDP_CONFIG_DIR = os.path.join(
 SAML_IDP_PRIVATE_KEY_PATH = os.path.join(SAML_IDP_CONFIG_DIR, "idp.private.key")
 SAML_IDP_PUBLIC_CERT_PATH = os.path.join(SAML_IDP_CONFIG_DIR, "idp.public.crt")
 
-if env("SAML_IDP_PRIVATE_KEY", default=None) and env(
-    "SAML_IDP_PUBLIC_CERT", default=None
-):
+if env("SAML_IDP_PRIVATE_KEY", default=None) and env("SAML_IDP_PUBLIC_CERT", default=None):
     # if the key/crt are passed in as env vars => save it to a file
     with open(SAML_IDP_PRIVATE_KEY_PATH, "wb") as f:
         f.write(base64.b64decode(env("SAML_IDP_PRIVATE_KEY")))
@@ -432,7 +428,12 @@ SAML_IDP_CONFIG = {
                     ),
                 ],
             },
-            "name_id_format": [saml2.saml.NAMEID_FORMAT_EMAILADDRESS, saml2.saml.NAMEID_FORMAT_UNSPECIFIED, saml2.saml.NAMEID_FORMAT_TRANSIENT, saml2.saml.NAMEID_FORMAT_PERSISTENT],
+            "name_id_format": [
+                saml2.saml.NAMEID_FORMAT_EMAILADDRESS,
+                saml2.saml.NAMEID_FORMAT_UNSPECIFIED,
+                saml2.saml.NAMEID_FORMAT_TRANSIENT,
+                saml2.saml.NAMEID_FORMAT_PERSISTENT,
+            ],
             "sign_response": True,
             "sign_assertion": True,
             "want_authn_requests_signed": False,
@@ -445,8 +446,7 @@ SAML_IDP_CONFIG = {
         },
     },
     "metadata": {
-        "local": [
-        ],
+        "local": [],
     },
     # Signing
     "key_file": SAML_IDP_PRIVATE_KEY_PATH,
@@ -471,12 +471,8 @@ MI_GOOGLE_EMAIL_DOMAIN = env("MI_GOOGLE_EMAIL_DOMAIN")
 MI_GOOGLE_SERVICE_ACCOUNT_DATA = (
     env("MI_GOOGLE_SERVICE_ACCOUNT_DATA").encode("utf-8").decode("unicode_escape")
 )
-MI_GOOGLE_SERVICE_ACCOUNT_DELEGATED_USER = env(
-    "MI_GOOGLE_SERVICE_ACCOUNT_DELEGATED_USER"
-)
-MI_GOOGLE_USER_SYNC_SAML_APPLICATION_SLUG = env(
-    "MI_GOOGLE_USER_SYNC_SAML_APPLICATION_SLUG"
-)
+MI_GOOGLE_SERVICE_ACCOUNT_DELEGATED_USER = env("MI_GOOGLE_SERVICE_ACCOUNT_DELEGATED_USER")
+MI_GOOGLE_USER_SYNC_SAML_APPLICATION_SLUG = env("MI_GOOGLE_USER_SYNC_SAML_APPLICATION_SLUG")
 AUTH_EMAIL_TO_IPD_MAP = env.json("AUTH_EMAIL_TO_IPD_MAP", default={})
 EMAIL_ID_DOMAIN = env("EMAIL_ID_DOMAIN")
 

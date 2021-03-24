@@ -7,16 +7,25 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    replaces = [('oauth2', '0004_application_allow_access_by_email_suffix'), ('oauth2', '0005_auto_20180205_2004')]
+    replaces = [
+        ("oauth2", "0004_application_allow_access_by_email_suffix"),
+        ("oauth2", "0005_auto_20180205_2004"),
+    ]
 
     dependencies = [
-        ('oauth2', '0003_application_provide_immutable_email'),
+        ("oauth2", "0003_application_provide_immutable_email"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='application',
-            name='allow_access_by_email_suffix',
-            field=models.CharField(blank=True, help_text='A comma separated list of email domains, e.g. "mobile.ukti.gov.uk, trade.gsi.gov.uk, fco.gov.uk" User\'s with an email in this list will be given access.  NOTE: all user emails are checked - including aliases.', max_length=255, null=True, verbose_name='allow access by email'),
+            model_name="application",
+            name="allow_access_by_email_suffix",
+            field=models.CharField(
+                blank=True,
+                help_text='A comma separated list of email domains, e.g. "mobile.ukti.gov.uk, trade.gsi.gov.uk, fco.gov.uk" User\'s with an email in this list will be given access.  NOTE: all user emails are checked - including aliases.',
+                max_length=255,
+                null=True,
+                verbose_name="allow access by email",
+            ),
         ),
     ]

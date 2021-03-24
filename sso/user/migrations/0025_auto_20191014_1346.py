@@ -6,18 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('user', '0024_emailaddress_last_login'),
+        ("user", "0024_emailaddress_last_login"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='use_new_journey',
-            field=models.BooleanField(default=False, help_text='Enable the new user journey', verbose_name='use new journey'),
+            model_name="user",
+            name="use_new_journey",
+            field=models.BooleanField(
+                default=False,
+                help_text="Enable the new user journey",
+                verbose_name="use new journey",
+            ),
         ),
         migrations.AlterField(
-            model_name='accessprofile',
-            name='name',
-            field=models.CharField(max_length=50, verbose_name='access profile name'),
+            model_name="accessprofile",
+            name="name",
+            field=models.CharField(max_length=50, verbose_name="access profile name"),
         ),
     ]

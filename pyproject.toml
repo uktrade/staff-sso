@@ -1,0 +1,15 @@
+[tool.black]
+line-length = 100
+target-version = ['py37']
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.mypy_cache
+  | \.venv
+  | \.env
+  | _build
+  | .venv
+  | tests-reports
+)/
+'''

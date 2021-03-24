@@ -10,13 +10,15 @@ import sso.emailauth.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('emailauth', '0001_initial'),
+        ("emailauth", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='emailtoken',
-            name='token',
-            field=models.CharField(default=sso.emailauth.models.generate_token, max_length=128, unique=True),
+            model_name="emailtoken",
+            name="token",
+            field=models.CharField(
+                default=sso.emailauth.models.generate_token, max_length=128, unique=True
+            ),
         ),
     ]

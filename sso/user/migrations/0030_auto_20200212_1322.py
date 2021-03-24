@@ -8,23 +8,40 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('user', '0029_applicationpermission'),
+        ("user", "0029_applicationpermission"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='application_permissions',
-            field=models.ManyToManyField(blank=True, help_text='Permissions that a user has on in an application', related_name='application_permissions', to='user.ApplicationPermission'),
+            model_name="user",
+            name="application_permissions",
+            field=models.ManyToManyField(
+                blank=True,
+                help_text="Permissions that a user has on in an application",
+                related_name="application_permissions",
+                to="user.ApplicationPermission",
+            ),
         ),
         migrations.AlterField(
-            model_name='applicationpermission',
-            name='oauth2_application',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='application_permissions', to='samlidp.SamlApplication'),
+            model_name="applicationpermission",
+            name="oauth2_application",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="application_permissions",
+                to="samlidp.SamlApplication",
+            ),
         ),
         migrations.AlterField(
-            model_name='applicationpermission',
-            name='saml2_application',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='application_permissions', to=settings.OAUTH2_PROVIDER_APPLICATION_MODEL),
+            model_name="applicationpermission",
+            name="saml2_application",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="application_permissions",
+                to=settings.OAUTH2_PROVIDER_APPLICATION_MODEL,
+            ),
         ),
     ]
