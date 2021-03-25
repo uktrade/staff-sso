@@ -34,7 +34,7 @@ class SamlApplicationAdmin(admin.ModelAdmin):
                 )
             },
         ),
-        ("Access control", {"fields": ("allowed_ips", "allow_access_by_email_suffix")}),
+        ("Access control", {"fields": ("allowed_ips", "allow_access_by_email_suffix", "public")}),
         (
             "Metadata",
             {"fields": ("metadata_expiration_dt", "remote_metadata_url", "local_metadata")},

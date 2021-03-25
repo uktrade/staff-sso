@@ -15,7 +15,8 @@ from freezegun import freeze_time
 from sso.user.models import AccessProfile, User
 
 from .factories.oauth import ApplicationFactory
-from .factories.user import UserFactory
+from .factories.saml import SamlApplicationFactory
+from .factories.user import AccessProfileFactory, UserFactory
 
 
 @lru_cache()
@@ -861,10 +862,7 @@ class TestEmailBasedAuthFlow:
 class TestLoggedInPage:
     def test_dynamic_links(self, client):
 
-        ap = AccessProfile.objects.create()
-
         user = log_user_in(client)
-        user.access_profiles.add(ap)
 
         app1 = ApplicationFactory(
             application_key="app-1",
@@ -873,7 +871,8 @@ class TestLoggedInPage:
             public=True,
             users=[user],
         )
-        ApplicationFactory(
+
+        app2 = ApplicationFactory(
             application_key="app-2",
             display_name="Appplication 2",
             start_url="https://application2.com",
@@ -881,14 +880,26 @@ class TestLoggedInPage:
             users=[user],
         )
 
+        saml_app = SamlApplicationFactory(
+            pretty_name="SamlTest",
+            start_url="https://samltest.com",
+            public=True,
+        )
+
+        ap = AccessProfileFactory(saml_apps_list=[saml_app])
+        user.access_profiles.add(ap)
+
         permitted_applications = user.get_permitted_applications()
 
-        assert len(permitted_applications) == 1
+        assert len(permitted_applications) == 2
 
         response = client.get(reverse("saml2_logged_in"))
 
+        content = response.content.decode("utf-8")
+
         assert response.status_code == 200
-        assert (
-            f'<p>Go to <a href="{app1.start_url}">{app1.display_name}</a></p>'
-            in response.content.decode("utf-8")
-        )
+        assert f'<p>Go to <a href="{app1.start_url}">{app1.display_name}</a></p>' in content
+
+        assert f'<p>Go to <a href="{saml_app.start_url}">{saml_app.display_name}</a></p>' in content
+
+        assert app2.display_name not in content

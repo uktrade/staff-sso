@@ -57,7 +57,7 @@ def logged_in(request):
         request,
         "sso/logged-in.html",
         {
-            "oauth2_applications": request.user.get_permitted_applications(),
+            "applications": request.user.get_permitted_applications(),
         },
     )
 
