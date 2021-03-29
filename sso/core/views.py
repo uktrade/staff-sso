@@ -130,10 +130,6 @@ def activity_stream(request):
             reverse("api-v1:core:activity-stream")
         ) + "?cursor={}_{}".format(str(after_ts.timestamp()), str(after_user_id))
 
-    def without_duplicates(seq):
-        seen = set()
-        return [x for x in seq if not (x in seen or seen.add(x))]
-
     default_access_apps = OAuthApplication.get_default_access_applications()
 
     page = {
