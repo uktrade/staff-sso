@@ -59,6 +59,12 @@ class SamlApplication(AbstractServiceProvider):
         default=dict,
     )
 
+    public = models.BooleanField(
+        _("display a link to this application on the logged in page"),
+        max_length=255,
+        default=False,
+    )
+
     objects = models.Manager()
 
     ### The following properties exist so that this model has the same fields as
@@ -75,10 +81,6 @@ class SamlApplication(AbstractServiceProvider):
     @property
     def name(self):
         return self.pretty_name
-
-    @property
-    def public(self):
-        return False
 
     def is_valid_ip(self, request):
         if not self.allowed_ips or not self.allowed_ips.strip():
