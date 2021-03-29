@@ -310,7 +310,6 @@ def test_with_contact_email(api_client):
 
     assert len(response_1_dict["orderedItems"]) == 1
     assert response_1_dict["orderedItems"][0]["object"]["dit:emailAddress"] == [
-        "test@b.com",
         "test@a.com",
         "test@c.com",
         "test@d.com",
