@@ -174,7 +174,9 @@ def activity_stream(request):
                     else user.became_inactive_on,
                     "dit:firstName": user.first_name,
                     "dit:lastName": user.last_name,
-                    "dit:emailAddress": sorted([email.email for email in user.emails.all()]),
+                    "dit:emailAddress": without_duplicates(
+                        [user.email] + sorted([email.email for email in user.emails.all()])
+                    ),
                 },
             }
             for user in users
