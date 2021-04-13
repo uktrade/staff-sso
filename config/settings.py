@@ -274,7 +274,7 @@ LOCAL_AUTH_PAGE = env("LOCAL_AUTH_PAGE", default=False)
 
 OAUTH2_PROVIDER = {
     "OIDC_ENABLED": True,
-    "OIDC_RSA_PRIVATE_KEY": base64.b64decode(env("OIDC_RSA_PRIVATE_KEY")),
+    "OIDC_RSA_PRIVATE_KEY": base64.b64decode(env("OIDC_RSA_PRIVATE_KEY")).decode("utf8"),
     "SCOPES": {
         "openid": "OpenID Connect scope",
         "read": "Read scope",
@@ -284,6 +284,7 @@ OAUTH2_PROVIDER = {
     },
     "DEFAULT_SCOPES": ["read", "write"],
     "REFRESH_TOKEN_EXPIRE_SECONDS": env.int("REFRESH_TOKEN_EXPIRE_SECONDS", default=172800),
+    "OAUTH2_VALIDATOR_CLASS": "sso.oauth2.oauth2_validators.CustomOAuth2Validator",
 }
 
 OAUTH2_PROVIDER_APPLICATION_MODEL = "oauth2.Application"

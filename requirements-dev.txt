@@ -203,6 +203,8 @@ pycparser==2.20
     #   cffi
 pyflakes==1.6.0
     # via flake8
+pyjwt==2.0.1
+    # via -r requirements-dev.in
 pyopenssl==20.0.1
     # via
     #   -r requirements.txt
