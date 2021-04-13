@@ -273,15 +273,18 @@ REST_FRAMEWORK = {
 LOCAL_AUTH_PAGE = env("LOCAL_AUTH_PAGE", default=False)
 
 OAUTH2_PROVIDER = {
+    "OIDC_ENABLED": True,
+    "OIDC_RSA_PRIVATE_KEY": base64.b64decode(env("OIDC_RSA_PRIVATE_KEY")).decode("utf8"),
     "SCOPES": {
+        "openid": "OpenID Connect scope",
         "read": "Read scope",
         "write": "Write scope",
         "introspection": "introspect scope",
-        "data-hub:internal-front-end": "A datahub specific scope",
         "search": "Search Scope",
     },
-    "DEFAULT_SCOPES": ["read", "write", "data-hub:internal-front-end"],
-    "REFRESH_TOKEN_EXPIRE_SECONDS": 24 * 60 * 60 * 2,
+    "DEFAULT_SCOPES": ["read", "write"],
+    "REFRESH_TOKEN_EXPIRE_SECONDS": env.int("REFRESH_TOKEN_EXPIRE_SECONDS", default=172800),
+    "OAUTH2_VALIDATOR_CLASS": "sso.oauth2.oauth2_validators.CustomOAuth2Validator",
 }
 
 OAUTH2_PROVIDER_APPLICATION_MODEL = "oauth2.Application"

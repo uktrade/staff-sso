@@ -6,6 +6,7 @@ from django.views.generic.edit import FormView
 from zenpy import Zenpy
 from zenpy.lib.api_objects import CustomField, Ticket, User as ZendeskUser
 
+from sso.oauth2.views import LAST_FAILED_APPLICATION_SESSION_KEY
 from .forms import RequestAccessForm
 
 
@@ -29,7 +30,7 @@ class AccessDeniedView(FormView):
     def create_zendesk_ticket(self, cleaned_data):
 
         email = self.request.user.email
-        application = self.request.session.get("_last_failed_access_app", "Unspecified")
+        application = self.request.session.get(LAST_FAILED_APPLICATION_SESSION_KEY, "Unspecified")
 
         zendesk_user = ZendeskUser(name=cleaned_data["full_name"], email=email)
 

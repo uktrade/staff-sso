@@ -6,13 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('samlidp', '0006_samlapplication_extra_config'),
+        ("samlidp", "0006_samlapplication_extra_config"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='samlapplication',
-            name='public',
-            field=models.BooleanField(default=False, max_length=255, verbose_name='display a link to this application on the logged in page'),
+            model_name="samlapplication",
+            name="public",
+            field=models.BooleanField(
+                default=False,
+                max_length=255,
+                verbose_name="display a link to this application on the logged in page",
+            ),
         ),
     ]

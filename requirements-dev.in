@@ -19,3 +19,4 @@ flake8-double-quotes
 
 lxml
 mohawk==1.1.0
+pyjwt

@@ -10,7 +10,10 @@ from django.http import HttpRequest
 from django.http.cookie import SimpleCookie
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
+from django.conf import settings
 from freezegun import freeze_time
+
+import jwt
 
 from sso.user.models import AccessProfile, User
 
@@ -50,7 +53,7 @@ SAML_LOGIN_START_URL = reverse_lazy("saml2_login_start")
 pytestmark = [pytest.mark.django_db]
 
 
-def create_oauth_application(users=None):
+def create_oauth_application(users=None, scope="read write"):
     """
     Create an oauth application and returns a tuple
     (
@@ -58,10 +61,12 @@ def create_oauth_application(users=None):
         oauth params as dict for the authorize request
     )
     """
-    application = ApplicationFactory(redirect_uris=OAUTH_REDIRECT_URL, users=users)
+    application = ApplicationFactory(
+        redirect_uris=OAUTH_REDIRECT_URL, users=users, algorithm="RS256"
+    )
 
     oauth_params = {
-        "scope": "read write",
+        "scope": scope,
         "response_type": "code",
         "client_id": application.client_id,
     }
@@ -128,6 +133,82 @@ class TestOAuthAuthorize:
         mock_create_x_access_log.assert_called_once_with(
             request, 403, oauth2_application=application.name
         )
+
+
+class TestOidcAuthorise:
+    def test_authoriser(self, client):
+        user = UserFactory()
+        application, authorize_params = create_oauth_application(users=[user], scope="openid")
+
+        client.force_login(user)
+
+        response = client.get(OAUTH_AUTHORIZE_URL, data=authorize_params)
+
+        assert response.status_code == 302
+        assert response.url.startswith(OAUTH_REDIRECT_URL)
+
+        code = response.url.split("=")[1]
+
+        response = client.post(
+            OAUTH_TOKEN_URL,
+            {
+                "grant_type": "authorization_code",
+                "code": code,
+                "client_id": application.client_id,
+                "client_secret": application.client_secret,
+            },
+        )
+
+        token_details = response.json()
+
+        assert token_details["scope"] == "openid"
+        assert token_details["token_type"] == "Bearer"
+
+        id_token = jwt.decode(
+            token_details["id_token"].encode("utf8"), options={"verify_signature": False}
+        )
+
+        assert id_token["email"] == user.email
+        assert id_token["user_id"] == str(user.user_id)
+        assert id_token["email_user_id"] == user.email_user_id
+        assert id_token["first_name"] == user.first_name
+        assert id_token["last_name"] == user.last_name
+
+    def test_userinfo_endpoint(self, client):
+        user = UserFactory()
+        application, authorize_params = create_oauth_application(users=[user], scope="openid")
+
+        client.force_login(user)
+
+        response = client.get(OAUTH_AUTHORIZE_URL, data=authorize_params)
+        code = response.url.split("=")[1]
+
+        response = client.post(
+            OAUTH_TOKEN_URL,
+            {
+                "grant_type": "authorization_code",
+                "code": code,
+                "client_id": application.client_id,
+                "client_secret": application.client_secret,
+            },
+        )
+
+        token_details = response.json()
+        access_token = token_details["access_token"]
+
+        response = client.get(
+            reverse("oauth2_provider:user-info"),
+            AUTHORIZATION=f"bearer {access_token}",
+        )
+
+        assert response.json() == {
+            "sub": str(user.email_user_id),
+            "email": user.email,
+            "user_id": str(user.user_id),
+            "email_user_id": user.email_user_id,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+        }
 
 
 class TestSAMLLogin:
@@ -343,7 +424,7 @@ class TestSAMLLogin:
         response = client.get(authorize_url)
         assert response.status_code == 302
 
-        assert response["location"] == "/access-denied/"
+        assert response["location"].startswith(reverse("contact:access-denied"))
 
         # The application the user tried to access is recorded in session under the _last_failed_access_app
         # and is used by the request access form.
