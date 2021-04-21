@@ -25,6 +25,7 @@ env = environ.Env(
     XMLSEC1=(str, shutil.which("xmlsec1")),
 )
 
+# TODO: is this still needed?
 BASE_URL = env("SAML_REDIRECT_RETURN_HOST")
 
 SECRET_KEY = env("SECRET_KEY")

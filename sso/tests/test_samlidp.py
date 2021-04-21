@@ -1,6 +1,9 @@
+import datetime
+
 import pytest
 from django.http import HttpRequest
 from django.urls import reverse
+from saml2.s_utils import deflate_and_base64_encode
 
 from sso.samlidp.models import SamlApplication
 from sso.samlidp.processors import (
@@ -339,3 +342,85 @@ class TestIdpInitiatedLogin:
             b'<input type="hidden" name="RelayState" value="https://testing.com" />'
             in response.content
         )
+
+
+def saml_request(**kwargs):
+    details = {
+        "issue_instant": datetime.datetime.now().isoformat("T", "seconds") + "Z",
+        "issuer": "http://testsp/saml2/metadata/",
+        "entity_id": "http://localhost:8000",
+        "destination": "http://localhost:8000/idp/sso/redirect",
+        "acs_url": "https://testing.com/saml2/acs/",
+        "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
+        "name_id_format": "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
+    }
+
+    details.update(**kwargs)
+
+    saml_request = """<samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+            xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
+            ID="_f50197d87df55f22010d8b1e1f4de4cb56396cd6ff"
+            Version="2.0"
+            IssueInstant="{issue_instant}"
+            Destination="{destination}"
+            AssertionConsumerServiceURL="{acs_url}"
+            ProtocolBinding="{binding}">
+<saml:Issuer>{issuer}</saml:Issuer>
+<samlp:NameIDPolicy Format="{name_id_format}"
+              AllowCreate="true" /></samlp:AuthnRequest>""".format(
+        **details
+    ).encode()
+
+    return deflate_and_base64_encode(saml_request).decode()
+
+
+class TestSpInitiatedLogin:
+    def test_user_without_perms(self, client):
+
+        user = UserFactory()
+        client.force_login(user)
+
+        session_data = {
+            "Binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
+            "SAMLRequest": saml_request(),
+            "RelayState": "",
+        }
+
+        session = client.session
+        session.update(session_data)
+        session.save()
+
+        SamlApplicationFactory(
+            entity_id="http://testsp/saml2/metadata/",
+            _processor="sso.samlidp.processors.ModelProcessor",
+        )
+
+        response = client.get(reverse("djangosaml2idp:saml_login_process"))
+
+        assert response.status_code == 403
+
+    def test_user_has_perms(self, client):
+        saml_app = SamlApplicationFactory(
+            entity_id="http://testsp/saml2/metadata/",
+            _processor="sso.samlidp.processors.ModelProcessor",
+        )
+
+        access_profile = AccessProfileFactory(saml_apps_list=[saml_app])
+
+        user = UserFactory(add_access_profiles=[access_profile])
+        client.force_login(user)
+
+        session_data = {
+            "Binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
+            "SAMLRequest": saml_request(),
+            "RelayState": "",
+        }
+
+        session = client.session
+        session.update(session_data)
+        session.save()
+
+        response = client.get(reverse("djangosaml2idp:saml_login_process"))
+
+        assert response.status_code == 200
+        assert b'<form method="post" action="https://testing.com/saml2/acs/">' in response.content
