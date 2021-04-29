@@ -4,8 +4,6 @@
 #
 #    pip-compile --output-file=requirements-dev.txt requirements-dev.in
 #
--e git+https://github.com/lgarvey/djangosaml2@dev#egg=djangosaml2
-    # via -r requirements.txt
 -e git+https://github.com/lgarvey/djangosaml2idp.git@multiple-sp-same-entityid-solution#egg=djangosaml2idp
     # via -r requirements.txt
 appdirs==1.4.4
@@ -80,6 +78,8 @@ django==3.1.6
     #   djangosaml2
     #   djangosaml2idp
 djangorestframework==3.12.2
+    # via -r requirements.txt
+djangosaml2==v1.1.5
     # via -r requirements.txt
 elastic-apm==6.0.0
     # via -r requirements.txt

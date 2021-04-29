@@ -4,8 +4,6 @@
 #
 #    pip-compile
 #
--e git+https://github.com/lgarvey/djangosaml2@dev#egg=djangosaml2
-    # via -r requirements.in
 -e git+https://github.com/lgarvey/djangosaml2idp.git@multiple-sp-same-entityid-solution#egg=djangosaml2idp
     # via -r requirements.in
 arrow==1.0.3
@@ -56,6 +54,8 @@ django==3.1.6
     #   djangosaml2
     #   djangosaml2idp
 djangorestframework==3.12.2
+    # via -r requirements.in
+djangosaml2==v1.1.5
     # via -r requirements.in
 elastic-apm==6.0.0
     # via -r requirements.in
