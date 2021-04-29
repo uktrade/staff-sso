@@ -76,7 +76,8 @@ MIDDLEWARE = [
     "sso.user.middleware.UpdatedLastAccessedMiddleware",
     "sso.core.middleware.AdminIpRestrictionMiddleware",
     "axes.middleware.AxesMiddleware",
-    "djangosaml2.middleware.SamlSessionMiddleware",
+    # "djangosaml2.middleware.SamlSessionMiddleware",
+    "sso.samlauth.middleware.SamlSessionMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
