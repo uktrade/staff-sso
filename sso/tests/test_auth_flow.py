@@ -158,7 +158,7 @@ class TestSAMLLogin:
         saml_request = base64.b64decode(saml_request_search.group(1)).decode("utf-8")
 
         assert (
-            '<ns2:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>'
+            '<ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>'
             in saml_request
         )
         assert f'Destination="{SAML_SSO_SERVICE}"' in saml_request
