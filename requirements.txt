@@ -8,7 +8,7 @@
     # via -r requirements.in
 arrow==1.0.3
     # via djangosaml2idp
-asgiref==3.3.1
+asgiref==3.3.4
     # via django
 cachetools==4.2.1
     # via
@@ -44,7 +44,7 @@ django-ipware==3.0.2
     # via django-axes
 django-oauth-toolkit==1.3.3
     # via -r requirements.in
-django==3.1.6
+django==3.2.1
     # via
     #   -r requirements.in
     #   django-axes
@@ -158,7 +158,9 @@ six==1.15.0
 sqlparse==0.4.1
     # via django
 typing-extensions==3.7.4.3
-    # via arrow
+    # via
+    #   arrow
+    #   asgiref
 uritemplate==3.0.1
     # via google-api-python-client
 urllib3==1.24.3
