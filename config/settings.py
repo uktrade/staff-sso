@@ -490,6 +490,3 @@ ACTIVITY_STREAM_HAWK_SECRET = env("ACTIVITY_STREAM_HAWK_SECRET")
 
 SAML_IDP_SERVICE_PROVIDER_MODEL = "samlidp.SamlApplication"
 SAML_IDP_SERVICE_PROVIDER_ADMIN_CLASS = "sso.samlidp.admin.SamlApplicationAdmin"
-
-from django.apps import AppConfig
-AppConfig.default = False

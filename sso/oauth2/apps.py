@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class UserSettingsConfig(AppConfig):
-    name = "sso.usersettings"
+    name = "sso.oauth2"
